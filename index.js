@@ -1,10 +1,8 @@
-const fs = require('fs'),
-  { getFreeClientID: getFreeClientID, setToken: setToken } = require('play-dl'),
+const { getFreeClientID: getFreeClientID, setToken: setToken } = require('play-dl'),
   {
     MezonClient: MezonClient
   } = require('mezon-sdk'),
-  client = new MezonClient("594c67737675324859665a5867716d54"),
-  util = require('util'),
+  client = new MezonClient("61534a61565776315475686759365345"),
   mongoose = require('mongoose');
 
 client.config = require('./config.js');
@@ -23,11 +21,11 @@ mongoose
   });
 
 client.authenticate().then(e => {
-  console.log("authenticated.", e);
+  console.log("authenticated", e);
   const moduleMsgCreate = require(`./events/mezon/messageCreate.js`);
   client.onMessage(event => moduleMsgCreate.execute(...event, client));
   //const moduleMsgReactionAdd = require(`./events/mezon/messageReactionAdd.js`);
   //client.onMessageReactionAdd(event => moduleMsgReactionAdd.execute(...event, client))
 }).catch(e => {
-  console.log("error authenticating.", e);
+  console.log("authentication was failed", e);
 });
