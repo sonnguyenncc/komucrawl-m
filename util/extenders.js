@@ -1,4 +1,4 @@
-const { Message, MessageEmbed, Guild, User } = require('discord.js');
+const { ChannelMessage, ClanDesc, ApiUser } = require('mezon-sdk');
 const lang = require('../languages/lang.json');
 const translate = require('@vitalets/google-translate-api');
 const guildData = require('../models/guildData');
@@ -44,21 +44,21 @@ function checkTime(date) {
   return false;
 }
 
-User.prototype.addDB = async function (displayname = {}) {
+ApiUser.prototype.addDB = async function (displayname = {}) {
   const findUser = await userData.findOne({ id: this.id });
 
   if (findUser) {
     findUser.id = this.id;
     findUser.username = this.username;
-    findUser.discriminator = this.discriminator;
+    //findUser.discriminator = this.discriminator;
     findUser.avatar = this.avatar;
     findUser.bot = this.bot;
-    findUser.system = this.system;
+    //findUser.system = this.system;
     findUser.banner = this.banner;
     findUser.email = displayname;
-    findUser.flags = this.flags;
-    findUser.premium_type = this.premium_type;
-    findUser.public_flags = this.public_flags;
+    //findUser.flags = this.flags;
+    //findUser.premium_type = this.premium_type;
+    //findUser.public_flags = this.public_flags;
     await findUser.save();
     return;
   }
@@ -66,15 +66,15 @@ User.prototype.addDB = async function (displayname = {}) {
   const komuUser = await new userData({
     id: this.id,
     username: this.username,
-    discriminator: this.discriminator,
+    //discriminator: this.discriminator,
     avatar: this.avatar,
     bot: this.bot,
-    system: this.system,
+    //system: this.system,
     banner: this.banner,
     email: displayname,
-    flags: this.flags,
-    premium_type: this.premium_type,
-    public_flags: this.public_flags,
+    //flags: this.flags,
+    //premium_type: this.premium_type,
+    //public_flags: this.public_flags,
   });
 
   await komuUser.save();

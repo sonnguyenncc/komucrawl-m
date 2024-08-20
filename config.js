@@ -21,7 +21,7 @@ module.exports = {
   //Database
   database: {
       // The url of your mongodb database. Check mongodb.org
-      MongoURL: "mongodb://localhost:27017/komubot",
+      MongoURL: "mongodb://mbottest:123mbottest@172.16.100.196:27017/mbottest",
       // If you want to cache the database. For big bots
       cached: true,
       delay: 300000 * 4,
