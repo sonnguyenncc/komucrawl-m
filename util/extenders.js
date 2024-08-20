@@ -1,4 +1,5 @@
 const { ChannelMessage, ClanDesc, ApiUser } = require('mezon-sdk');
+
 const lang = require('../languages/lang.json');
 const translate = require('@vitalets/google-translate-api');
 const guildData = require('../models/guildData');
@@ -80,7 +81,7 @@ ApiUser.prototype.addDB = async function (displayname = {}) {
   await komuUser.save();
 };
 
-Message.prototype.deleteDB = async function () {
+ChannelMessage.prototype.deleteDB = async function () {
   await mentionedData.deleteMany({ messageId: this.id });
 };
 
@@ -88,7 +89,7 @@ Message.prototype.deleteDB = async function () {
  * Add a guild in the database
  * @param {number} guildID The ID of the guild
  */
-Message.prototype.addDB = async function () {
+ChannelMessage.prototype.addDB = async function () {
   const data = await new msgData({
     channelId: this.channelId,
     guildId: this.guildId,
@@ -220,7 +221,7 @@ Message.prototype.addDB = async function () {
  * Add a guild in the database
  * @param {number} guildID The ID of the guild
  */
-Guild.prototype.addDB = async function (guildID = {}) {
+ClanDesc.prototype.addDB = async function (guildID = {}) {
   if (!guildID || isNaN(guildID)) {
     guildID = this.id;
   }
@@ -238,7 +239,7 @@ Guild.prototype.addDB = async function (guildID = {}) {
  * Fetchs a guild in the database
  * @param {number} guildID The ID of the guild to fetch
  */
-Guild.prototype.fetchDB = async function (guildID = {}) {
+ClanDesc.prototype.fetchDB = async function (guildID = {}) {
   if (!guildID || isNaN(guildID)) {
     guildID = this.id;
   }
@@ -246,7 +247,7 @@ Guild.prototype.fetchDB = async function (guildID = {}) {
   if (!data) data = await this.addDB();
   return data;
 };
-Message.prototype.translate = function (text, guildDB = {}) {
+ChannelMessage.prototype.translate = function (text, guildDB = {}) {
   if (!text || !lang.translations[text]) {
     throw new Error(
       `Translate: Params error: Unknow text ID or missing text ${text}`
@@ -256,7 +257,7 @@ Message.prototype.translate = function (text, guildDB = {}) {
   return lang.translations[text][guildDB];
 };
 
-Guild.prototype.translate = async function (text = {}) {
+ClanDesc.prototype.translate = async function (text = {}) {
   if (text) {
     if (!lang.translations[text]) {
       throw new Error(`Unknown text ID "${text}"`);
@@ -273,7 +274,7 @@ Guild.prototype.translate = async function (text = {}) {
   }
   return lang.translations[text][target];
 };
-Guild.prototype.translatee = async function (text, target = {}) {
+ClanDesc.prototype.translatee = async function (text, target = {}) {
   if (text) {
     if (!lang.translations[text]) {
       throw new Error(`Unknown text ID "${text}"`);
@@ -284,7 +285,7 @@ Guild.prototype.translatee = async function (text, target = {}) {
   return lang.translations[text][target];
 };
 
-Message.prototype.gg = async function (text) {
+ChannelMessage.prototype.gg = async function (text) {
   if (!text) {
     this.errorOccurred('No text provided', 'en');
     throw new Error('Aucun texte indiqué ');
@@ -299,7 +300,7 @@ Message.prototype.gg = async function (text) {
     .replace('room', 'channel');
 };
 
-Message.prototype.errorMessage = function (text) {
+ChannelMessage.prototype.errorMessage = function (text) {
   if (text) {
     return this.channel.send({
       embeds: [
@@ -320,7 +321,7 @@ Message.prototype.errorMessage = function (text) {
     throw new Error('Error: No text provided');
   }
 };
-Message.prototype.succesMessage = function (text) {
+ChannelMessage.prototype.succesMessage = function (text) {
   if (text) {
     this.channel.send({
       embeds: [
@@ -335,7 +336,7 @@ Message.prototype.succesMessage = function (text) {
     throw new Error('Error: No text provided');
   }
 };
-Message.prototype.usage = async function (guildDB, cmd = {}) {
+ChannelMessage.prototype.usage = async function (guildDB, cmd = {}) {
   let langUsage;
   if (cmd.usages) {
     langUsage = await this.translate('USES', guildDB.lang);
@@ -364,7 +365,7 @@ Message.prototype.usage = async function (guildDB, cmd = {}) {
     ],
   });
 };
-Message.prototype.mainMessage = function (text) {
+ChannelMessage.prototype.mainMessage = function (text) {
   if (text) {
     const embed1 = new MessageEmbed()
       .setAuthor(this.author.tag, this.author.displayAvatarURL())
@@ -399,7 +400,7 @@ Message.prototype.mainMessage = function (text) {
  * Send an error message in the current channel
  * @param {string} error the code of the error
  */
-Message.prototype.errorOccurred = async function (err, guildDB = {}) {
+ChannelMessage.prototype.errorOccurred = async function (err, guildDB = {}) {
   const content = await this.translate('ERROR', guildDB.lang);
   const r = new MessageEmbed()
     .setColor('#F0B02F')

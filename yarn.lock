@@ -4176,10 +4176,10 @@ methods@~1.1.2:
   resolved "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mezon-sdk@2.7.13:
-  version "2.7.13"
-  resolved "https://registry.npmjs.org/mezon-sdk/-/mezon-sdk-2.7.13.tgz"
-  integrity sha512-dzlWdRxe7/ZEqdgdGy3oqrsxrhuCYn56SuZUV7aWeAg8xvf86hSAbYA+9B2MRv8aOFcRQwQbemvsCmkrowNLbg==
+mezon-sdk@2.7.14:
+  version "2.7.14"
+  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.14.tgz#24e41e546f92fa41a2e963fb5e57a52abb7ef845"
+  integrity sha512-weSlyeOv+v9UUPW92ifIeOaA/87+7G1ZZy0plSw+wu+BYFmGimk27WvUkoRJlyB3vmDb/MNhkFceqNz/6vH+Vw==
   dependencies:
     "@types/ws" "^8.5.12"
     jest-cucumber "^3.0.1"

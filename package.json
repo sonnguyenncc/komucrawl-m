@@ -14,7 +14,7 @@
     "image-downloader": "^4.0.3",
     "is-url": "^1.2.4",
     "js-base64": "^3.7.7",
-    "mezon-sdk": "2.7.13",
+    "mezon-sdk": "2.7.14",
     "moment": "^2.29.1",
     "mongoose": "^5.12.8",
     "mongoose-unique-validation": "^0.1.0",
