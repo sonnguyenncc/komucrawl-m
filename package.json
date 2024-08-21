@@ -1,61 +1,19 @@
 {
-  "name": "musicsen",
-  "description": "KOMU is a powerfull open source mezon bot. Feel free to add a ⭐ to support us.",
-  "main": "index.js",
+  "name": "mezon-sdk-example",
+  "version": "1.0.0",
+  "description": "mezon sdk example",
+  "main": "dist/index.js",
   "dependencies": {
-    "@vitalets/google-translate-api": "^5.0.0",
-    "axios": "0.24.0",
-    "base64-arraybuffer": "^1.0.2",
-    "body-parser": "^1.19.0",
-    "dblapi.js": "^2.4.1",
-    "emoji-api": "^1.0.2",
-    "express": "^4.17.2",
-    "ffmpeg-static": "^4.2.8",
-    "image-downloader": "^4.0.3",
-    "is-url": "^1.2.4",
-    "js-base64": "^3.7.7",
-    "mezon-sdk": "2.7.14",
-    "moment": "^2.29.1",
-    "mongoose": "^5.12.8",
-    "mongoose-unique-validation": "^0.1.0",
-    "ms": "^2.1.2",
-    "play-dl": "^1.2.2",
-    "react-number-format": "^4.9.0",
-    "ssl-root-cas": "^1.3.1",
-    "tiktok-scraper": "^1.4.23",
-    "topgg-autoposter": "^1.1.10",
-    "twemoji-parser": "^13.0.0",
-    "uuid": "^8.3.2"
+    "mezon-sdk": "^2.7.17",
+    "net": "^1.0.2",
+    "pg": "^8.12.0",
+    "wake_on_lan": "^1.0.0"
   },
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --fix",
-    "format": "prettier --write .",
-    "prepare": "husky install"
+    "lint": "eslint . --fix"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+httpsgithub.com/KomuBotDeveloppement/komu/komu.git"
-  },
-  "engines": {
-    "node": ">=16"
-  },
-  "keywords": [
-    "Music",
-    "mezon music bot"
-  ],
-  "author": "KOMU's developpers",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/KomuBotDeveloppement/komu/issues"
-  },
-  "homepage": "https://komu.vn",
-  "devDependencies": {
-    "eslint": "^8.7.0",
-    "eslint-config-prettier": "^8.3.0",
-    "husky": "^7.0.0",
-    "prettier": "^2.5.1",
-    "pretty-quick": "^3.1.3"
-  }
+  "author": "",
+  "license": "ISC"
 }
