@@ -358,8 +358,8 @@ client.onchannelmessage = async (msg) => {
       return;
     }
 
-     await pgclient.query("INSERT INTO komu_daily(userid, email, daily, channelid) VALUES ($1, $2, $3, $4) RETURNING *", 
-      [msg.sender_id, msg.username, ref.content, msg.channel_id]).catch(err => console.log(err));
+    await pgclient.query("INSERT INTO komu_daily(userid, email, daily, \"createdAt\", channelid) VALUES ($1, $2, $3, $4, $5) RETURNING *", 
+      [msg.sender_id, msg.username, ref.content,  Date.now(), msg.channel_id]).catch(err => console.log(err));
 
     if (!checkTimeSheet()) {
       await client.sendMessage(msg.clan_id, msg.channel_id, msg.mode, {"t": "✅ Daily saved. (Invalid daily time frame. Please daily at 7h30-9h30, 12h-18h. WFH not daily 20k/time.)"}, undefined, undefined, Array(ref));
