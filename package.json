@@ -4,7 +4,10 @@
   "description": "mezon sdk example",
   "main": "dist/index.js",
   "dependencies": {
-    "mezon-sdk": "^2.7.17",
+    "base64-arraybuffer": "^1.0.2",
+    "broadcast-address": "^1.0.2",
+    "js-base64": "^3.7.7",
+    "mezon-sdk": "^2.7.24",
     "net": "^1.0.2",
     "pg": "^8.12.0",
     "wake_on_lan": "^1.0.0"

@@ -18,13 +18,15 @@ const { MezonClient } = require("mezon-sdk");
 const { Client } = require('pg');
 const net = require('net')
 const wol = require('wake_on_lan');
+var os = require('os');
+const broadcastAddress = require('broadcast-address');
 
 const pgclient = new Client({
-  user: '',
+  user: 'komubot',
   password: '',
   host: '',
-  port: ,
-  database: '',
+  port: 5432,
+  database: 'komubot',
 })
 
 pgclient.connect().then(() => {
@@ -42,7 +44,6 @@ client.authenticate().then(async (e) => {
 });
 
 const messHelp =
-  "```" +
   "Please daily follow this template" +
   "\n" +
   "*daily [projectCode] [date]" +
@@ -51,11 +52,9 @@ const messHelp =
   "\n" +
   "today: what you're going to to today; 2h" +
   "\n" +
-  "block: thing that block you " +
-  "```";
+  "block: thing that block you ";
 
 const dailyHelp =
-  "```" +
   "Daily meeting note, recap your daily work items and log timesheet automatically." +
   "\n" +
   "Please daily follow this template:" +
@@ -86,8 +85,7 @@ const dailyHelp =
   "\n" +
   "- You can log multiple task for a project splitting by +" +
   "\n" +
-  "- If you want to daily for multiple project please use *daily multiple times" +
-  "```";
+  "- If you want to daily for multiple project please use *daily multiple times";
 
   function setTime(date, hours, minute, second, msValue) {
     return date.setHours(hours, minute, second, msValue);
@@ -240,6 +238,7 @@ function sendCMDToPfsense(branch, identity, ipAddress) {
     );
 
     client.on("data", (data) => {
+	  console.log(data);
       client.end();
     });
   } catch (err) {
@@ -308,6 +307,8 @@ client.onuserchannelremoved = async (msg) => {
 }
 
 client.onchannelmessage = async (msg) => {
+  if (msg.code === 1) return;
+  
   const ref = {
     message_id: '',
     message_ref_id: msg.message_id,
@@ -334,7 +335,6 @@ client.onchannelmessage = async (msg) => {
       return;
     }
 
-    const content = text;
     const daily = text.substring(7);
     let checkDaily = false;
     const wordInString = (s, word) =>
