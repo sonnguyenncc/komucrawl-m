@@ -45,6 +45,10 @@ import {
   WOL,
   Dynamic,
 } from './models';
+import { BotGateway } from './guards/events/bot.gateway';
+import { MezonModule } from 'src/mezon/mezon.module';
+import { MezonClient } from 'mezon-sdk';
+import { ClientService } from 'src/mezon/services/client.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -54,6 +58,7 @@ import {
       dest: './files',
     }),
     DiscoveryModule,
+    MezonModule.forFeature(),
     TypeOrmModule.forFeature([
       BwlReaction,
       Bwl,
@@ -98,7 +103,7 @@ import {
       Dynamic,
     ]),
   ],
-  providers: [],
+  providers: [BotGateway],
   controllers: [],
 })
 export class BotModule {}
