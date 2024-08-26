@@ -20,11 +20,22 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/typeorm": "^10.0.2",
+    "base64-arraybuffer": "^1.0.2",
+    "broadcast-address": "^1.0.2",
+    "js-base64": "^3.7.7",
+    "mezon-sdk": "^2.7.24",
+    "net": "^1.0.2",
+    "pg": "^8.12.0",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.20",
+    "wake_on_lan": "^1.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
