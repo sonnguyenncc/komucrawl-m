@@ -5,6 +5,7 @@ import * as Joi from '@hapi/joi';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BotModule } from './bot/bot.module';
+import { MezonModule } from './mezon/mezon.module';
 
 @Module({
   imports: [
@@ -33,6 +34,9 @@ import { BotModule } from './bot/bot.module';
         synchronize: true,
         // logging : true,
       }),
+    }),
+    MezonModule.forRootAsync({
+      imports: [ConfigModule],
     }),
     BotModule,
   ],

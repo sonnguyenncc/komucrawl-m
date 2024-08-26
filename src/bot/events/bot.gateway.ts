@@ -18,14 +18,14 @@ export class BotGateway {
   ];
   constructor(private clientService: ClientService) {
     this.client = clientService.getClient();
-    console.log('ấcdasd');
-    this.client.onchannelmessage = async (mgs) => {
-      console.log(mgs);
-    };
+  }
+
+  initEvent() {
     this.eventAndHandles.forEach((item) => {
       console.log(item);
       this.client[`on${item}`] = this[`handle${item}`];
     });
+    console.log(this.client);
   }
 
   private async handlemessagereaction(msg) {
