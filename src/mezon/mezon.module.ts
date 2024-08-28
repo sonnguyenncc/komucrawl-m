@@ -1,6 +1,6 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { MezonModuleAsyncOptions } from './dtos/MezonModuleAsyncOptions';
-import { ClientService } from './services/client.service';
+import { MezonClientService } from './services/client.service';
 import { ConfigService } from '@nestjs/config';
 import { MezonClientConfig } from './dtos/MezonClientConfig';
 
@@ -10,16 +10,16 @@ export class MezonModule {
   static forRootAsync(options: MezonModuleAsyncOptions): DynamicModule {
     return {
       module: MezonModule,
-      imports: [...options.imports],
+      imports: options.imports,
       providers: [
         {
-          provide: ClientService,
+          provide: MezonClientService,
           useFactory: async (configService: ConfigService) => {
             const clientConfig: MezonClientConfig = {
               token: configService.get<string>('MEZON_TOKEN'),
             };
 
-            const client = new ClientService(clientConfig);
+            const client = new MezonClientService(clientConfig);
 
             await client.initializeClient();
 
@@ -28,7 +28,7 @@ export class MezonModule {
           inject: [ConfigService],
         },
       ],
-      exports: [ClientService],
+      exports: [MezonClientService],
     };
   }
 }

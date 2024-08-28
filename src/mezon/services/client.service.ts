@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { MezonClient } from 'mezon-sdk';
+import { Injectable, Logger } from '@nestjs/common';
+import { MezonClient } from 'mezon-sdk-test';
 import { MezonClientConfig } from '../dtos/MezonClientConfig';
 
 @Injectable()
-export class ClientService {
+export class MezonClientService {
+  private readonly logger = new Logger(MezonClientService.name);
   private client: MezonClient;
 
   constructor(clientConfigs: MezonClientConfig) {
@@ -13,9 +14,10 @@ export class ClientService {
   async initializeClient() {
     try {
       const result = await this.client.authenticate();
-      console.log('authenticated.', result);
+      this.logger.log('authenticated.', result);
     } catch (error) {
-      console.error('error authenticating.', error);
+      this.logger.error('error authenticating.', error);
+      throw error;
     }
   }
 

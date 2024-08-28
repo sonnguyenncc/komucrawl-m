@@ -1,62 +1,76 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MezonClient } from 'mezon-sdk';
-import { ClientService } from 'src/mezon/services/client.service';
+import { ApiMessageReaction, MezonClient, Events } from 'mezon-sdk-test';
+
+import {
+  ChannelCreatedEvent,
+  ChannelDeletedEvent,
+  ChannelUpdatedEvent,
+  UserChannelAddedEvent,
+  UserChannelRemovedEvent,
+  UserClanRemovedEvent,
+} from 'mezon-sdk/dist/cjs/socket';
+import { MezonClientService } from 'src/mezon/services/client.service';
+import { Asterisk } from '../asterisk-commands/asterisk';
+import { DailyCommand } from '../asterisk-commands/commands/daily/daily.command';
 
 @Injectable()
 export class BotGateway {
   private readonly logger = new Logger(BotGateway.name);
   private client: MezonClient;
-  private eventAndHandles = [
-    'messagereaction',
-    'channelcreated',
-    'userclanremoved',
-    'userchanneladded',
-    'channelcreated',
-    'channeldeleted',
-    'channelupdated',
-    'channelmessage',
-  ];
-  constructor(private clientService: ClientService) {
+  private asteriskCommand: Asterisk;
+
+  constructor(private clientService: MezonClientService) {
     this.client = clientService.getClient();
   }
 
   initEvent() {
-    this.eventAndHandles.forEach((item) => {
-      console.log(item);
-      this.client[`on${item}`] = this[`handle${item}`];
-    });
     console.log(this.client);
+    for (const event in Events) {
+      const eventValue = Events[event];
+      this.logger.log(`Init event ${eventValue}`);
+      const key = `handle${eventValue}`;
+      if (key in this) {
+        this.client.on(eventValue, this[key]);
+      }
+    }
+
+    const commands = [DailyCommand];
+
+    this.asteriskCommand = new Asterisk(commands);
   }
 
-  private async handlemessagereaction(msg) {
+  // processMessage(msg: ChannelMessage) {}
+
+  private async handlemessagereaction(msg: ApiMessageReaction) {
     console.log('onmessagereaction', msg);
   }
 
-  private async handlechannelcreated(user, add) {
+  private async handlechannelcreated(user: ChannelCreatedEvent, add) {
     console.log('onchannelcreated', user, add);
   }
 
-  private async handleuserclanremoved(user) {
+  private async handleuserclanremoved(user: UserClanRemovedEvent) {
     console.log('onuserclanremoved', user);
   }
 
-  private async handleuserchanneladded(user) {
+  private async handleuserchanneladded(user: UserChannelAddedEvent) {
     console.log('onuserchanneladded', user);
   }
 
-  private async handlechanneldeleted(channel) {
+  private async handlechanneldeleted(channel: ChannelDeletedEvent) {
     console.log('onchanneldeleted', channel);
   }
 
-  private async handlechannelupdated(channel) {
+  private async handlechannelupdated(channel: ChannelUpdatedEvent) {
     console.log('onchannelupdated', channel);
   }
 
-  private async handleuserchannelremoved(msg) {
+  private async handleuserchannelremoved(msg: UserChannelRemovedEvent) {
     console.log('onuserchannelremoved', msg);
   }
 
   private async handlechannelmessage(msg) {
-    console.log(msg);
+    const content = msg.content.t;
+    this.asteriskCommand.excute(content);
   }
 }
