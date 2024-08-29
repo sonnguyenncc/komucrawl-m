@@ -14,11 +14,14 @@ export class Asterisk implements AsteriskInterface {
 
   execute(messageContent: string, message: ChannelMessage) {
     const [commandName, args] = extractMessage(messageContent);
-    const target = CommandStorage.getCommand(commandName as string);
-    const command = this.moduleRef.get(target);
 
-    if (command) {
-      return command.execute(args, message);
+    const target = CommandStorage.getCommand(commandName as string);
+    if (target) {
+      const command = this.moduleRef.get(target);
+
+      if (command) {
+        return command.execute(args, message);
+      }
     }
   }
 }

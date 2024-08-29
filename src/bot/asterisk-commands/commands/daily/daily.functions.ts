@@ -22,7 +22,7 @@ export const checkTimeSheet = () => {
 export const checkTimeNotWFH = () => {
   const time = new Date();
   const timezone = time.getTimezoneOffset() / -60;
-  
+
   const currentTime = time.getTime();
   const firstTimeWFH = setTime(time, 0 + timezone, 30, 0, 0);
   const lastTimeWFH = setTime(time, 10 + timezone, 0, 0, 0);
