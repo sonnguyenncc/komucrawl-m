@@ -75,7 +75,7 @@ export class BotGateway {
     const content = msg.content.t;
     let replyMessage: ReplyMezonMessage;
 
-    if (content.trim()) {
+    if (typeof content == 'string' && content.trim()) {
       const firstLetter = content.trim()[0];
       switch (firstLetter) {
         case '*':
@@ -84,18 +84,18 @@ export class BotGateway {
         default:
           console.log(msg);
       }
-    }
 
-    if (replyMessage) {
-      await this.client.sendMessage(
-        replyMessage.clan_id,
-        replyMessage.channel_id,
-        replyMessage.mode,
-        replyMessage.msg,
-        replyMessage.mentions,
-        replyMessage.attachments,
-        replyMessage.ref,
-      );
+      if (replyMessage) {
+        await this.client.sendMessage(
+          replyMessage.clan_id,
+          replyMessage.channel_id,
+          replyMessage.mode,
+          replyMessage.msg,
+          replyMessage.mentions,
+          replyMessage.attachments,
+          replyMessage.ref,
+        );
+      }
     }
   };
 }

@@ -55,6 +55,8 @@ import { UserStatusService } from './asterisk-commands/commands/user-status/user
 import { ClientConfigService } from './config/client-config.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
+import * as https from 'https';
+import { TimeSheetService } from './services/timesheet.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -62,6 +64,13 @@ import { HttpModule } from '@nestjs/axios';
   imports: [
     MulterModule.register({
       dest: './files',
+    }),
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5,
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false, // Disable SSL certificate validation
+      }),
     }),
     DiscoveryModule,
     TypeOrmModule.forFeature([
@@ -119,6 +128,7 @@ import { HttpModule } from '@nestjs/axios';
     ClientConfigService,
     ConfigService,
     Asterisk,
+    TimeSheetService,
   ],
   controllers: [],
 })

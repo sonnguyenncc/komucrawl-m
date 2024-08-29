@@ -1,27 +1,55 @@
 import { ChannelMessage } from 'mezon-sdk';
 import { CommandMessage } from '../../abstracts/command.abstract';
 import { Repository } from 'typeorm';
-import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/bot/models';
+import { Daily, User } from 'src/bot/models';
 import { dailyHelp } from './daily.constants';
 import { Command } from 'src/bot/base/commandRegister.decorator';
+import { generateEmail, getUserNameByEmail } from 'src/bot/utils/helper';
+import { TimeSheetService } from 'src/bot/services/timesheet.services';
+import { checkTimeNotWFH, checkTimeSheet } from './daily.functions';
 
 @Command('daily')
 export class DailyCommand extends CommandMessage {
   constructor(
-    // private readonly dailyService: DailyService,
-    // private readonly utilsService: UtilsService,
-    // private komubotrestService: KomubotrestService,
-    // private readonly http: HttpService,
-    // private configService: ClientConfigService,
+    private timeSheetService: TimeSheetService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Daily) private dailyRepository: Repository<Daily>,
   ) {
     super();
   }
 
+  validateMessage(args: string[]) {
+    if (args[0] === 'help') return dailyHelp;
+    const daily = args.join(' ');
+    let checkDaily = false;
+    const wordInString = (s, word) =>
+      new RegExp('\\b' + word + '\\b', 'i').test(s);
+    ['yesterday', 'today', 'block'].forEach((q) => {
+      if (!wordInString(daily, q)) return (checkDaily = true);
+    });
+
+    if (checkDaily) return dailyHelp;
+
+    if (!daily || daily == undefined) {
+      return '```please add your daily text```';
+    }
+
+    if (daily.length < 100) {
+      return '```Please enter at least 100 characters in your daily text```';
+    }
+
+    return false;
+  }
+
   async execute(args: string[], message: ChannelMessage) {
+    const content = message.content.t;
+
+    const hasError = this.validateMessage(args);
+    if (!hasError)
+      return this.replyMessageGenerate({ messageContent: hasError }, message);
+
     const senderId = message.sender_id;
     const findUser = await this.userRepository
       .createQueryBuilder()
@@ -32,9 +60,9 @@ export class DailyCommand extends CommandMessage {
 
     if (!findUser) {
       const newUser = new User();
-      newUser.userId = senderId; // Thay đổi thuộc tính tùy thuộc vào cấu trúc của User entity
+      newUser.userId = senderId;
       newUser.username = message.username;
-      newUser.discriminator = '0'; // Cập nhật thuộc tính khác nếu cần
+      newUser.discriminator = '0';
       newUser.avatar = message.avatar;
       newUser.bot = false;
       newUser.system = false;
@@ -46,17 +74,56 @@ export class DailyCommand extends CommandMessage {
       newUser.botPing = false;
       newUser.scores_workout = 0;
       newUser.not_workout = 0;
-      // Chèn dữ liệu vào bảng
+
       await this.userRepository.save(newUser);
     }
+    const authorUsername = findUser.email;
+    const emailAddress = generateEmail(authorUsername);
 
-    if (args[0] === 'help') {
-      return this.helpRequired(message);
-    } else {
-    }
+    const wfhResult = await this.timeSheetService.findWFHUser();
+
+    const wfhUserEmail = wfhResult.map((item) =>
+      getUserNameByEmail(item.emailAddress),
+    );
+
+    await this.saveDaily(message, args, authorUsername);
+
+    await this.timeSheetService.logTimeSheetFromDaily({
+      emailAddress,
+      content: content,
+    });
+
+    const isValidTimeFrame = checkTimeSheet();
+    const isValidWFH = checkTimeNotWFH();
+    const baseMessage = '✅ Daily saved.';
+    const errorMessageWFH =
+      '```✅ Daily saved. (Invalid daily time frame. Please daily at 7h30-9h30, 12h-17h. WFH not daily 20k/time.)```';
+    const errorMessageNotWFH =
+      '```✅ Daily saved. (Invalid daily time frame. Please daily at 7h30-17h. not daily 20k/time.)```';
+
+    const messageContent = wfhUserEmail.includes(authorUsername)
+      ? isValidTimeFrame
+        ? baseMessage
+        : errorMessageWFH
+      : isValidWFH
+        ? baseMessage
+        : errorMessageNotWFH;
+
+    return this.replyMessageGenerate({ messageContent }, message);
   }
 
-  helpRequired(message: ChannelMessage) {
-    return this.replyMessageGenerate({ messageContent: dailyHelp }, message);
+  saveDaily(message: ChannelMessage, args: string[], email: string) {
+    return this.dailyRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Daily)
+      .values({
+        userid: message.sender_id,
+        email: email,
+        daily: args.join(' '),
+        createdAt: Date.now(),
+        channelid: message.channel_id,
+      })
+      .execute();
   }
 }
