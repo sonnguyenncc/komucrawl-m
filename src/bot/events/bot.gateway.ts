@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   ApiMessageReaction,
   MezonClient,
-  ChannelMessage,
   Events,
-} from 'mezon-sdk-test';
+  ChannelMessage,
+} from 'mezon-sdk';
+
 import {
   ChannelCreatedEvent,
   ChannelDeletedEvent,
@@ -15,33 +16,29 @@ import {
 } from 'mezon-sdk/dist/cjs/socket';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { Asterisk } from '../asterisk-commands/asterisk';
-import { DailyCommand } from '../asterisk-commands/commands/daily/daily.command';
-import { HelloCommand } from '../asterisk-commands/commands/hello/hello.command';
+import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 
 @Injectable()
 export class BotGateway {
   private readonly logger = new Logger(BotGateway.name);
   private client: MezonClient;
-  private asteriskCommand: Asterisk;
 
-  constructor(private clientService: MezonClientService) {
+  constructor(
+    private clientService: MezonClientService,
+    private asteriskCommand: Asterisk,
+  ) {
     this.client = clientService.getClient();
   }
 
   initEvent() {
-    console.log(this.client);
     for (const event in Events) {
       const eventValue = Events[event];
       this.logger.log(`Init event ${eventValue}`);
       const key = `handle${eventValue}`;
       if (key in this) {
-        this.client.on(eventValue, this[key]);
+        this.client.on(eventValue, this[key], this);
       }
     }
-
-    const commands = [DailyCommand, HelloCommand];
-
-    this.asteriskCommand = new Asterisk(commands);
   }
 
   // processMessage(msg: ChannelMessage) {}
@@ -74,7 +71,32 @@ export class BotGateway {
     console.log('onuserchannelremoved', msg);
   }
 
-  private handlechannelmessage = async (msg) => {
-    this.asteriskCommand.process(msg, this.client);
+  handlechannelmessage = async (msg: ChannelMessage) => {
+    const content = msg.content.t;
+    let replyMessage: ReplyMezonMessage;
+
+    if (content.trim()) {
+      const firstLetter = content.trim()[0];
+      switch (firstLetter) {
+        case '*':
+          replyMessage = await this.asteriskCommand.execute(content, msg);
+          break;
+        default:
+          console.log(msg);
+      }
+    }
+
+    if (replyMessage) {
+      console.log(replyMessage);
+      await this.client.sendMessage(
+        replyMessage.clan_id,
+        replyMessage.channel_id,
+        replyMessage.mode,
+        replyMessage.msg,
+        replyMessage.mentions,
+        replyMessage.attachments,
+        replyMessage.ref,
+      );
+    }
   };
 }

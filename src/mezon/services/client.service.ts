@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MezonClient } from 'mezon-sdk-test';
+import { MezonClient } from 'mezon-sdk';
 import { MezonClientConfig } from '../dtos/MezonClientConfig';
 
 @Injectable()

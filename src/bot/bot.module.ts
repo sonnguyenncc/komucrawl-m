@@ -46,6 +46,8 @@ import {
   Dynamic,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
+import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
+import { Asterisk } from './asterisk-commands/asterisk';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -99,7 +101,7 @@ import { BotGateway } from './events/bot.gateway';
       Dynamic,
     ]),
   ],
-  providers: [BotGateway],
+  providers: [BotGateway, DailyCommand, Asterisk],
   controllers: [],
 })
 export class BotModule {}

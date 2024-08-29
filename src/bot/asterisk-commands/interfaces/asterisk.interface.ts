@@ -1,3 +1,9 @@
+import { ChannelMessage } from 'mezon-sdk';
+import { ReplyMezonMessage } from '../dto/replyMessage.dto';
+
 export interface AsteriskInterface {
-  process: (message, args, client, ref) => void;
+  execute: (
+    messageContent: string,
+    message: ChannelMessage,
+  ) => ReplyMezonMessage | null;
 }
