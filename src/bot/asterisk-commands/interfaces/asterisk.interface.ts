@@ -1,3 +1,3 @@
 export interface AsteriskInterface {
-  excute: (message: string) => void;
+  process: (message, args, client, ref) => void;
 }

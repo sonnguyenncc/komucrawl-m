@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ApiMessageReaction, MezonClient, Events } from 'mezon-sdk-test';
-
+import {
+  ApiMessageReaction,
+  MezonClient,
+  ChannelMessage,
+  Events,
+} from 'mezon-sdk-test';
 import {
   ChannelCreatedEvent,
   ChannelDeletedEvent,
@@ -12,6 +16,7 @@ import {
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { DailyCommand } from '../asterisk-commands/commands/daily/daily.command';
+import { HelloCommand } from '../asterisk-commands/commands/hello/hello.command';
 
 @Injectable()
 export class BotGateway {
@@ -34,7 +39,7 @@ export class BotGateway {
       }
     }
 
-    const commands = [DailyCommand];
+    const commands = [DailyCommand, HelloCommand];
 
     this.asteriskCommand = new Asterisk(commands);
   }
@@ -69,8 +74,7 @@ export class BotGateway {
     console.log('onuserchannelremoved', msg);
   }
 
-  private async handlechannelmessage(msg) {
-    const content = msg.content.t;
-    this.asteriskCommand.excute(content);
-  }
+  private handlechannelmessage = async (msg) => {
+    this.asteriskCommand.process(msg, this.client);
+  };
 }
