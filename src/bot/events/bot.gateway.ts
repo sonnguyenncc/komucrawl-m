@@ -87,7 +87,6 @@ export class BotGateway {
     }
 
     if (replyMessage) {
-      console.log(replyMessage);
       await this.client.sendMessage(
         replyMessage.clan_id,
         replyMessage.channel_id,
