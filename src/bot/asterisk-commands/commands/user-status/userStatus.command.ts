@@ -2,17 +2,16 @@ import { ChannelMessage } from 'mezon-sdk';
 import { Command } from 'src/bot/base/commandRegister.decorator';
 import { CommandMessage } from '../../abstracts/command.abstract';
 import { UserStatusService } from './userStatus.service';
-import { lastValueFrom } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { EUserStatusCommand } from './userStatus.constants';
+import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 
 @Command('userstatus')
 export class UserStatusCommand extends CommandMessage {
   constructor(
     private userStatusService: UserStatusService,
-    private readonly http: HttpService,
     private readonly clientConfig: ClientConfigService,
+    private readonly axiosClientService: AxiosClientService
   ) {
     super();
   }
@@ -29,14 +28,8 @@ export class UserStatusCommand extends CommandMessage {
         if (user.length === 0) {
           messageContent = EUserStatusCommand.WRONG_EMAIL;
         } else {
-          const response = await lastValueFrom(
-            this.http.get(
-              `${this.clientConfig.user_status.api_url_userstatus}?emailAddress=${userEmail}@ncc.asia`,
-              {
-                httpsAgent: this.clientConfig.https,
-              },
-            ),
-          );
+          const url = `${this.clientConfig.user_status.api_url_userstatus}?emailAddress=${userEmail}@ncc.asia`;
+          const response = await this.axiosClientService.get(url)
 
           const getUserStatus = response.data;
           if (!getUserStatus) return;

@@ -57,6 +57,7 @@ import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import * as https from 'https';
 import { TimeSheetService } from './services/timesheet.services';
+import { AxiosClientService } from './services/axiosClient.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -129,6 +130,7 @@ import { TimeSheetService } from './services/timesheet.services';
     ConfigService,
     Asterisk,
     TimeSheetService,
+    AxiosClientService
   ],
   controllers: [],
 })
