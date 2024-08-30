@@ -21,23 +21,19 @@ const sendCMDToPfsense = (
     hn1: '172.16.10.1',
   };
   const host = hosts[branch] || '172.16.10.1';
-  try {
-    const client = new net.Socket();
-    client.connect(
-      {
-        host: host,
-        port: 6996,
-      },
-      () => {
-        client.write(`${ipAddress} ${identity}`);
-      },
-    );
-    client.on('data', (data) => {
-      client.end();
-    });
-  } catch (err) {
-    console.log(err);
-  }
+  const client = new net.Socket();
+  client.connect(
+    {
+      host: host,
+      port: 6996,
+    },
+    () => {
+      client.write(`${ipAddress} ${identity}`);
+    },
+  );
+  client.on('data', (data) => {
+    client.end();
+  });
 };
 
 const discoverDevice = async (macOrIp, ipAddress) => {
@@ -61,13 +57,8 @@ const getAvailableBroadcastAddresses = () => {
   const interfacesNames = Object.keys(os.networkInterfaces());
   const addresses = [];
   for (const name of interfacesNames) {
-    try {
-      const addr = broadcastAddress(name);
-      addresses.push(addr);
-    } catch (e) {
-      // ingnore
-      console.log(e);
-    }
+    const addr = broadcastAddress(name);
+    addresses.push(addr);
   }
   return addresses;
 };

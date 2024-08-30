@@ -11,35 +11,33 @@ export class UserStatusCommand extends CommandMessage {
   constructor(
     private userStatusService: UserStatusService,
     private readonly clientConfig: ClientConfigService,
-    private readonly axiosClientService: AxiosClientService
+    private readonly axiosClientService: AxiosClientService,
   ) {
     super();
   }
 
   async execute(args: string[], message: ChannelMessage) {
     let messageContent: EUserStatusCommand;
-    try {
-      if (args[0] === 'help' || !args[0]) {
-        messageContent = EUserStatusCommand.HELP;
+    if (args[0] === 'help' || !args[0]) {
+      messageContent = EUserStatusCommand.HELP;
+    } else {
+      const userEmail = args[0];
+      const user = await this.userStatusService.getUserByEmail(userEmail);
+
+      if (user.length === 0) {
+        messageContent = EUserStatusCommand.WRONG_EMAIL;
       } else {
-        const userEmail = args[0];
-        const user = await this.userStatusService.getUserByEmail(userEmail);
+        const url = `${this.clientConfig.user_status.api_url_userstatus}?emailAddress=${userEmail}@ncc.asia`;
+        const response = await this.axiosClientService.get(url);
 
-        if (user.length === 0) {
-          messageContent = EUserStatusCommand.WRONG_EMAIL;
-        } else {
-          const url = `${this.clientConfig.user_status.api_url_userstatus}?emailAddress=${userEmail}@ncc.asia`;
-          const response = await this.axiosClientService.get(url)
+        const getUserStatus = response.data;
+        if (!getUserStatus) return;
 
-          const getUserStatus = response.data;
-          if (!getUserStatus) return;
-
-          messageContent = getUserStatus.result
-            ? getUserStatus.result.message
-            : EUserStatusCommand.WORK_AT_HOME;
-        }
+        messageContent = getUserStatus.result
+          ? getUserStatus.result.message
+          : EUserStatusCommand.WORK_AT_HOME;
       }
-      return this.replyMessageGenerate({ messageContent }, message);
-    } catch (error) {}
+    }
+    return this.replyMessageGenerate({ messageContent }, message);
   }
 }

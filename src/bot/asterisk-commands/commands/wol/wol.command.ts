@@ -18,37 +18,33 @@ export class WolCommand extends CommandMessage {
 
   async execute(args: string[], message: ChannelMessage) {
     let messageContent: EWolCommand;
-    try {
-      const authorId = message.sender_id;
-      const timeStamp = Date.now();
-      if (!args[0]) {
-        const myWOL = await this.wolRepository.findOneBy({ author: authorId });
-        if (myWOL) {
-          const agrs = myWOL.wol.split(' ');
-          messageContent = await handleWoL(message, agrs);
-        } else {
-          messageContent = EWolCommand.HAVE_NOT_WOL;
-        }
-      } else if (args[0] === 'help') {
-        messageContent = EWolCommand.HELP;
+    const authorId = message.sender_id;
+    const timeStamp = Date.now();
+    if (!args[0]) {
+      const myWOL = await this.wolRepository.findOneBy({ author: authorId });
+      if (myWOL) {
+        const agrs = myWOL.wol.split(' ');
+        messageContent = await handleWoL(message, agrs);
       } else {
-        const wol = args.join(' ');
-        const checkUser = await this.wolRepository.findOneBy({
-          author: authorId,
-        });
-        if (!checkUser) {
-          await this.wolRepository.save({
-            author: authorId,
-            wol: wol,
-            createdAt: timeStamp,
-          });
-        } else {
-          await this.wolRepository.update({ author: authorId }, { wol: wol });
-        }
-        messageContent = await handleWoL(message, args);
+        messageContent = EWolCommand.HAVE_NOT_WOL;
       }
-    } catch (err) {
-      console.log(err);
+    } else if (args[0] === 'help') {
+      messageContent = EWolCommand.HELP;
+    } else {
+      const wol = args.join(' ');
+      const checkUser = await this.wolRepository.findOneBy({
+        author: authorId,
+      });
+      if (!checkUser) {
+        await this.wolRepository.save({
+          author: authorId,
+          wol: wol,
+          createdAt: timeStamp,
+        });
+      } else {
+        await this.wolRepository.update({ author: authorId }, { wol: wol });
+      }
+      messageContent = await handleWoL(message, args);
     }
     return this.replyMessageGenerate({ messageContent }, message);
   }
