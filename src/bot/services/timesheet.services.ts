@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { ApiUrl } from '../constants/api_url';
@@ -10,7 +9,7 @@ import * as https from 'https';
 @Injectable()
 export class TimeSheetService {
   private apiClient: AxiosInstance;
-  constructor(private readonly http: HttpService) {
+  constructor() {
     // Create a custom HTTPS agent to disable SSL certificate validation
     const httpsAgent = new https.Agent({
       rejectUnauthorized: false,

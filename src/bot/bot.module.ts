@@ -48,8 +48,6 @@ import {
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
 import { Asterisk } from './asterisk-commands/asterisk';
-import { HttpModule } from '@nestjs/axios';
-import * as https from 'https';
 import { TimeSheetService } from './services/timesheet.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
@@ -58,13 +56,6 @@ import { TimeSheetService } from './services/timesheet.services';
   imports: [
     MulterModule.register({
       dest: './files',
-    }),
-    HttpModule.register({
-      timeout: 5000,
-      maxRedirects: 5,
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false, // Disable SSL certificate validation
-      }),
     }),
     DiscoveryModule,
     TypeOrmModule.forFeature([

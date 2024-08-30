@@ -46,9 +46,13 @@ export class DailyCommand extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     const content = message.content.t;
 
-    const hasError = this.validateMessage(args);
-    if (!hasError)
-      return this.replyMessageGenerate({ messageContent: hasError }, message);
+    const messageValidate = this.validateMessage(args);
+
+    if (messageValidate)
+      return this.replyMessageGenerate(
+        { messageContent: messageValidate },
+        message,
+      );
 
     const senderId = message.sender_id;
     const findUser = await this.userRepository

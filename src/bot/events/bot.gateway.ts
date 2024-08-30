@@ -82,7 +82,7 @@ export class BotGateway {
           replyMessage = await this.asteriskCommand.execute(content, msg);
           break;
         default:
-          console.log(msg);
+          console.log('');
       }
 
       if (replyMessage) {
