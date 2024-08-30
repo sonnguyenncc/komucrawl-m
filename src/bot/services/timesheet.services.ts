@@ -1,35 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
 import { ApiUrl } from '../constants/api_url';
 import { normalizeString } from '../utils/helper';
 import parseDuration from 'parse-duration';
 import * as chrono from 'chrono-node';
-import * as https from 'https';
+import { AxiosClientService } from './axiosClient.services';
 
 @Injectable()
 export class TimeSheetService {
-  private apiClient: AxiosInstance;
-  constructor() {
-    // Create a custom HTTPS agent to disable SSL certificate validation
-    const httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
-    });
-
-    // Create an Axios instance with predefined configuration
-    this.apiClient = axios.create({
-      httpsAgent,
-      headers: {
-        'X-Secret-Key': process.env.WFH_API_KEY_SECRET,
-        'Content-Type': 'application/json',
-      },
-    });
-  }
+  constructor(private readonly axiosClientService: AxiosClientService) {}
 
   async findWFHUser() {
     const url = `${ApiUrl.WFHApi.api_url}?date=${new Date().toDateString()}`;
-    const response = await this.apiClient.get(url);
+    const response = await this.axiosClientService.get(url);
     if (response.status == 200) {
-      const wfhResult = await response.data;
+      const wfhResult = response.data;
       return wfhResult?.['result'] ? wfhResult['result'] : [];
     }
 
@@ -101,7 +85,7 @@ export class TimeSheetService {
         ? `${process.env.TIMESHEET_API}MyTimesheets/CreateByKomu`
         : `${process.env.TIMESHEET_API}MyTimesheets/CreateFullByKomu`;
     console.log(url, timesheetPayload);
-    const response = await this.apiClient.post(url, timesheetPayload);
+    const response = await this.axiosClientService.post(url, timesheetPayload);
     return response;
   };
 

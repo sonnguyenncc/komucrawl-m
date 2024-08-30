@@ -48,7 +48,15 @@ import {
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
 import { Asterisk } from './asterisk-commands/asterisk';
+import { WolCommand } from './asterisk-commands/commands/wol/wol.command';
+import { UserInfoCommand } from './asterisk-commands/commands/user-info/userInfo.command';
+import { UserStatusCommand } from './asterisk-commands/commands/user-status/userStatus.command';
+import { UserStatusService } from './asterisk-commands/commands/user-status/userStatus.service';
+import { ClientConfigService } from './config/client-config.service';
+import { ConfigService } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { TimeSheetService } from './services/timesheet.services';
+import { AxiosClientService } from './services/axiosClient.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -101,8 +109,21 @@ import { TimeSheetService } from './services/timesheet.services';
       WOL,
       Dynamic,
     ]),
+    HttpModule,
   ],
-  providers: [BotGateway, DailyCommand, Asterisk, TimeSheetService],
+  providers: [
+    BotGateway,
+    DailyCommand,
+    WolCommand,
+    UserInfoCommand,
+    UserStatusCommand,
+    UserStatusService,
+    ClientConfigService,
+    ConfigService,
+    Asterisk,
+    TimeSheetService,
+    AxiosClientService,
+  ],
   controllers: [],
 })
 export class BotModule {}
