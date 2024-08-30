@@ -72,30 +72,40 @@ export class BotGateway {
   }
 
   handlechannelmessage = async (msg: ChannelMessage) => {
-    const content = msg.content.t;
-    let replyMessage: ReplyMezonMessage;
+    try {
+      const content = msg.content.t;
+      let replyMessage: ReplyMezonMessage;
 
-    if (typeof content == 'string' && content.trim()) {
-      const firstLetter = content.trim()[0];
-      switch (firstLetter) {
-        case '*':
-          replyMessage = await this.asteriskCommand.execute(content, msg);
-          break;
-        default:
-          console.log('');
-      }
+      if (typeof content == 'string' && content.trim()) {
+        const firstLetter = content.trim()[0];
+        switch (firstLetter) {
+          case '*':
+            replyMessage = await this.asteriskCommand.execute(content, msg);
+            break;
+          default:
+            console.log(msg);
+        }
 
-      if (replyMessage) {
-        await this.client.sendMessage(
-          replyMessage.clan_id,
-          replyMessage.channel_id,
-          replyMessage.mode,
-          replyMessage.msg,
-          replyMessage.mentions,
-          replyMessage.attachments,
-          replyMessage.ref,
-        );
+        if (replyMessage) {
+          const replyMessageArray = Array.isArray(replyMessage)
+            ? replyMessage
+            : [replyMessage];
+          for (const mess of replyMessageArray) {
+            await this.client.sendMessage(
+              mess.clan_id,
+              mess.channel_id,
+              mess.mode,
+              mess.is_public,
+              mess.msg,
+              mess.mentions,
+              mess.attachments,
+              mess.ref,
+            );
+          }
+        }
       }
+    } catch (e) {
+      console.log(e);
     }
   };
 }

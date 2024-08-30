@@ -9,7 +9,14 @@ export abstract class CommandMessage {
     message: ChannelMessage,
   ): ReplyMezonMessage {
     const replayMessage: ReplyMezonMessage = {} as ReplyMezonMessage;
-    ['clan_id', 'channel_id', 'mode', 'mentions', 'attachments'].forEach(
+    [
+      'clan_id',
+      'channel_id',
+      'mode',
+      'mentions',
+      'attachments',
+      'is_public',
+    ].forEach(
       (field) =>
         (replayMessage[field] = this.fieldGenerate(
           field,
@@ -17,7 +24,7 @@ export abstract class CommandMessage {
           message,
         )),
     );
-
+    replayMessage['is_public'] = !!replayMessage['is_public'];
     replayMessage['msg'] =
       'messageContent' in replayConent
         ? { t: replayConent['messageContent'] }

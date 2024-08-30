@@ -5,5 +5,5 @@ export interface AsteriskInterface {
   execute: (
     messageContent: string,
     message: ChannelMessage,
-  ) => ReplyMezonMessage | null;
+  ) => ReplyMezonMessage | null | ReplyMezonMessage[];
 }

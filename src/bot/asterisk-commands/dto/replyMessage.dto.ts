@@ -8,6 +8,7 @@ import {
 export interface ReplyMezonMessage {
   clan_id: string;
   channel_id: string;
+  is_public: boolean;
   mode: number;
   msg: ChannelMessageContent;
   mentions?: Array<ApiMessageMention>;
