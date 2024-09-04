@@ -18,16 +18,15 @@ export class AxiosClientService {
         'Content-Type': 'application/json',
       },
     });
-    this.axiosInstance;
   }
 
   public getInstance(): AxiosInstance {
     return this.axiosInstance;
   }
 
-  async get(url: string, params?: any) {
+  async get(url: string, ...args: any[]) {
     try {
-      return await this.axiosInstance.get(url, { params });
+      return await this.axiosInstance.get(url, ...args);
     } catch (error) {
       throw error;
     }

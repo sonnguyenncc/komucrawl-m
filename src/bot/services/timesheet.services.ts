@@ -116,4 +116,48 @@ export class TimeSheetService {
       .map((chunk) => this.parseTimeSheetTask(chunk));
     return items;
   };
+
+  async getUserOffWork(date?) {
+    let userOffFullday = [];
+    let userOffMorning = [];
+    let userOffAfternoon = [];
+
+    const url = date
+      ? `${process.env.TIMESHEET_API}Public/GetAllUserLeaveDay?date=${date.toDateString()}`
+      : `${process.env.TIMESHEET_API}Public/GetAllUserLeaveDay`;
+
+    const response = await this.axiosClientService.get(url);
+
+    if ((response as any).data && (response as any).data.result) {
+      userOffFullday = (response as any).data.result
+        .filter((user) => user.message.includes('Off Fullday'))
+        .map((item) => item.emailAddress.replace('@ncc.asia', ''));
+      userOffMorning = (response as any).data.result
+        .filter((user) => user.message.includes('Off Morning'))
+        .map((item) => item.emailAddress.replace('@ncc.asia', ''));
+      userOffAfternoon = (response as any).data.result
+        .filter((user) => user.message.includes('Off Afternoon'))
+        .map((item) => item.emailAddress.replace('@ncc.asia', ''));
+    }
+
+    const notSendUser =
+      this.getStatusDay() === 'Morning'
+        ? [...userOffFullday, ...userOffMorning]
+        : [...userOffFullday, ...userOffAfternoon];
+
+    return { notSendUser, userOffFullday, userOffMorning, userOffAfternoon };
+  }
+
+  getStatusDay() {
+    let statusDay;
+    const date = new Date();
+    const timezone = date.getTimezoneOffset() / -60;
+    const hour = date.getHours();
+    if (hour < 5 + timezone) {
+      statusDay = 'Morning';
+    } else if (hour < 11 + timezone) {
+      statusDay = 'Afternoon';
+    }
+    return statusDay;
+  }
 }
