@@ -64,6 +64,8 @@ import { UtilsService } from './services/utils.services';
 import { MeetingService } from './asterisk-commands/commands/meeting/meeting.services';
 import { MeetingCommand } from './asterisk-commands/commands/meeting/meeting.command';
 import { HelpCommand } from './asterisk-commands/commands/help/help.command';
+import { ExtendersService } from './services/extenders.services';
+import { AvatarCommand } from './asterisk-commands/commands/avatar/avatar.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -130,9 +132,11 @@ import { HelpCommand } from './asterisk-commands/commands/help/help.command';
     MeetingCommand,
     MeetingService,
     HelpCommand,
+    AvatarCommand,
     UserStatusService,
     ClientConfigService,
     ConfigService,
+    ExtendersService,
     Asterisk,
     TimeSheetService,
     UtilsService,

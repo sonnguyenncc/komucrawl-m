@@ -17,6 +17,7 @@ import {
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
+import { ExtendersService } from '../services/extenders.services';
 
 @Injectable()
 export class BotGateway {
@@ -26,6 +27,7 @@ export class BotGateway {
   constructor(
     private clientService: MezonClientService,
     private asteriskCommand: Asterisk,
+    private extendersService: ExtendersService,
   ) {
     this.client = clientService.getClient();
   }
@@ -73,6 +75,9 @@ export class BotGateway {
 
   handlechannelmessage = async (msg: ChannelMessage) => {
     try {
+      if (msg.sender_id) {
+        await this.extendersService.addDBUser(msg);
+      }
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
 
@@ -83,7 +88,7 @@ export class BotGateway {
             replyMessage = await this.asteriskCommand.execute(content, msg);
             break;
           default:
-            console.log(msg);
+            // console.log(msg);
         }
 
         if (replyMessage) {

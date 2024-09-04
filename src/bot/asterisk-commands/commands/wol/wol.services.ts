@@ -94,7 +94,6 @@ export class WolCommandService {
     try {
       const device = (await this.discoverDevice(identity, ipAddress)) as any;
       if (!device || !device.mac) {
-        console.log(device);
         throw new Error(EWolCommand.ERROR_DEVICE);
       }
       const wakeFunction = device.ip
