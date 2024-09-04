@@ -4,14 +4,15 @@ import { Command } from 'src/bot/base/commandRegister.decorator';
 import { WOL } from 'src/bot/models';
 import { Repository } from 'typeorm';
 import { CommandMessage } from '../../abstracts/command.abstract';
-import { handleWoL } from './wol.functions';
 import { EWolCommand } from './wol.constants';
+import { WolCommandService } from './wol.services';
 
 @Command('wol')
 export class WolCommand extends CommandMessage {
   constructor(
     @InjectRepository(WOL)
     private readonly wolRepository: Repository<WOL>,
+    private readonly wolCommandService: WolCommandService,
   ) {
     super();
   }
@@ -24,7 +25,7 @@ export class WolCommand extends CommandMessage {
       const myWOL = await this.wolRepository.findOneBy({ author: authorId });
       if (myWOL) {
         const agrs = myWOL.wol.split(' ');
-        messageContent = await handleWoL(message, agrs);
+        messageContent = await this.wolCommandService.handleWoL(agrs);
       } else {
         messageContent = EWolCommand.HAVE_NOT_WOL;
       }
@@ -44,7 +45,7 @@ export class WolCommand extends CommandMessage {
       } else {
         await this.wolRepository.update({ author: authorId }, { wol: wol });
       }
-      messageContent = await handleWoL(message, args);
+      messageContent = await this.wolCommandService.handleWoL(args);
     }
     return this.replyMessageGenerate({ messageContent }, message);
   }
