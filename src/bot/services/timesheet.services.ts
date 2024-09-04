@@ -84,8 +84,13 @@ export class TimeSheetService {
       !hour || !projectCode
         ? `${process.env.TIMESHEET_API}MyTimesheets/CreateByKomu`
         : `${process.env.TIMESHEET_API}MyTimesheets/CreateFullByKomu`;
-    console.log(url, timesheetPayload);
-    const response = await this.axiosClientService.post(url, timesheetPayload);
+
+    const response = await this.axiosClientService.post(url, timesheetPayload, {
+      headers: {
+        'X-Secret-Key': process.env.DAILY_TO_TIMESHEET,
+      },
+    });
+
     return response;
   };
 

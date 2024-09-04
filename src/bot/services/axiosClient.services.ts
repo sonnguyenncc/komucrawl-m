@@ -15,7 +15,6 @@ export class AxiosClientService {
     this.axiosInstance = axios.create({
       httpsAgent,
       headers: {
-        'X-Secret-Key': process.env.WFH_API_KEY_SECRET,
         'Content-Type': 'application/json',
       },
     });
@@ -34,9 +33,9 @@ export class AxiosClientService {
     }
   }
 
-  async post(url: string, data?: any) {
+  async post(url: string, ...args: any[]) {
     try {
-      return await this.axiosInstance.post(url, data);
+      return await this.axiosInstance.post(url, ...args);
     } catch (error) {
       throw error;
     }
