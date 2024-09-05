@@ -14,6 +14,7 @@ import { BwlReaction } from "./bwlReact.entity";
 import { Msg } from "./msg.entity";
 import { TX8 } from "./tx8.entity";
 import { WorkFromHome } from "./wfh.entity";
+import { EUserType } from "../constants/configs";
 
 @Entity(TABLE.USER)
 export class User {
@@ -67,6 +68,9 @@ export class User {
 
   @Column({ type: "text", nullable: true })
   email: string;
+
+  @Column({ nullable: true })
+  user_type: EUserType;
 
   @Column({ nullable: true })
   flags: number;
