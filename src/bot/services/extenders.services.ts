@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../models/user.entity';
 import { ChannelMessage } from 'mezon-sdk';
+import { EUserType } from '../constants/configs';
 
 @Injectable()
 export class ExtendersService {
@@ -24,6 +25,7 @@ export class ExtendersService {
       findUser.bot = false;
       findUser.system = false;
       findUser.email = message.username;
+      findUser.user_type = EUserType.MEZON;
       findUser.flags = 0;
       findUser.last_message_id = message.message_id;
       findUser.scores_quiz = 0;
@@ -50,6 +52,7 @@ export class ExtendersService {
       botPing: false,
       scores_workout: 0,
       not_workout: 0,
+      user_type: EUserType.MEZON,
       createdAt: Date.now(),
     };
 
