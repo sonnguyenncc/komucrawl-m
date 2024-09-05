@@ -15,9 +15,8 @@ import {
   UserClanRemovedEvent,
 } from 'mezon-sdk/dist/cjs/socket';
 import { MezonClientService } from 'src/mezon/services/client.service';
-import { Asterisk } from '../asterisk-commands/asterisk';
-import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { ExtendersService } from '../services/extenders.services';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class BotGateway {
@@ -26,8 +25,9 @@ export class BotGateway {
 
   constructor(
     private clientService: MezonClientService,
-    private asteriskCommand: Asterisk,
+
     private extendersService: ExtendersService,
+    private eventEmitter: EventEmitter2,
   ) {
     this.client = clientService.getClient();
   }
@@ -78,38 +78,8 @@ export class BotGateway {
       if (msg.sender_id) {
         await this.extendersService.addDBUser(msg);
       }
-      const content = msg.content.t;
-      let replyMessage: ReplyMezonMessage;
 
-      if (typeof content == 'string' && content.trim()) {
-        const firstLetter = content.trim()[0];
-        switch (firstLetter) {
-          case '*':
-            replyMessage = await this.asteriskCommand.execute(content, msg);
-            break;
-          default:
-            return;
-          // console.log(msg);
-        }
-
-        if (replyMessage) {
-          const replyMessageArray = Array.isArray(replyMessage)
-            ? replyMessage
-            : [replyMessage];
-          for (const mess of replyMessageArray) {
-            await this.client.sendMessage(
-              mess.clan_id,
-              mess.channel_id,
-              mess.mode,
-              mess.is_public,
-              mess.msg,
-              mess.mentions,
-              mess.attachments,
-              mess.ref,
-            );
-          }
-        }
-      }
+      this.eventEmitter.emit(Events.ChannelMessage, msg);
     } catch (e) {
       console.log(e);
     }

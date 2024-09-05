@@ -60,3 +60,24 @@ export function getDateDay(time) {
 export function setTime(date, hours, minute, second, msValue) {
   return date.setHours(hours, minute, second, msValue);
 }
+
+export function checkTimeMention(date: Date): boolean {
+  const day = date.getDay();
+  if (day === 6 || day === 0) {
+    return false;
+  }
+
+  const timezone = date.getTimezoneOffset() / -60;
+
+  const firstTimeMorning = new Date().setHours(1 + timezone, 30, 0, 0);
+  const lastTimeMorning = new Date().setHours(4 + timezone, 59, 59, 999);
+  const firstTimeAfternoon = new Date().setHours(6 + timezone, 0, 0, 0);
+  const lastTimeAfternoon = new Date().setHours(10 + timezone, 29, 59, 999);
+
+  const dateInMs = date.getTime();
+
+  return (
+    (dateInMs >= firstTimeMorning && dateInMs <= lastTimeMorning) ||
+    (dateInMs >= firstTimeAfternoon && dateInMs <= lastTimeAfternoon)
+  );
+}
