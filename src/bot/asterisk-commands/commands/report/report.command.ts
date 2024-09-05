@@ -31,22 +31,16 @@ export class ReportCommand extends CommandMessage {
               message,
             );
           }
-          const mess = await this.reportDailyService.reportDaily(
-            dateTime,
-            message,
-            args,
-          );
+          const mess = await this.reportDailyService.reportDaily(dateTime);
           if (mess) {
             return this.replyMessageGenerate({ messageContent: mess }, message);
           }
         } else {
-          const mess = await this.reportDailyService.reportDaily(
-            null,
-            message,
-            args,
-          );
+          const mess = await this.reportDailyService.reportDaily(null);
           if (mess) {
-            return this.replyMessageGenerate({ messageContent: mess }, message);
+            return mess.map((m) =>
+              this.replyMessageGenerate({ messageContent: m }, message),
+            );
           }
         }
         break;

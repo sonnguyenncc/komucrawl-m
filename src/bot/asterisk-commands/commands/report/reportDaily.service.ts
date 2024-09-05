@@ -22,7 +22,7 @@ export class ReportDailyService {
     const users = arr.find((item) => item.email === email);
     return users ? users.count : 1;
   }
-  async reportDaily(date, message, args) {
+  async reportDaily(date) {
     const { notDaily, userNotDaily } = await this.getUserNotDaily(date);
 
     let mess;
@@ -37,6 +37,7 @@ export class ReportDailyService {
       mess = '```' + dateString + 'Tất Cả Đều Đã Daily' + '```';
       return mess;
     } else {
+      const messes = [];
       for (let i = 0; i <= Math.ceil(userNotDaily.length / 50); i += 1) {
         if (userNotDaily.slice(i * 50, (i + 1) * 50).length === 0) break;
         mess = userNotDaily
@@ -56,9 +57,10 @@ export class ReportDailyService {
             }
           })
           .join('\n');
+        messes.push(`${dateString}
+      ${dailyString} \n ${mess}`);
       }
-      return `${dateString}
-      ${dailyString} \n ${mess}`;
+      return messes;
     }
   }
 
@@ -128,7 +130,7 @@ export class ReportDailyService {
       .andWhere(`"deactive" IS NOT TRUE`)
       .select('*')
       .execute();
-    console.log(userNotWFH);
+
     const userEmail = userNotWFH.map((item) => item.email);
 
     const [dailyEmailMorning, dailyEmailAfternoon, dailyEmailFullday] =
