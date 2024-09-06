@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { Events, ChannelMessage, MezonClient } from 'mezon-sdk';
+import {
+  Events,
+  ChannelMessage,
+  MezonClient,
+  ChannelStreamMode,
+} from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { Asterisk } from '../asterisk-commands/asterisk';
@@ -8,6 +13,10 @@ import { Repository } from 'typeorm';
 import { Channel, Mentioned, Msg, User } from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { checkTimeMention } from '../utils/helper';
+import { BOT_ID } from '../constants/configs';
+import { AxiosClientService } from '../services/axiosClient.services';
+import { ApiUrl } from '../constants/api_url';
+import { replyMessageGenerate } from '../utils/generateReplyMessage';
 
 @Injectable()
 export class EventListenerChannelMessage {
@@ -21,33 +30,34 @@ export class EventListenerChannelMessage {
     private channelRepository: Repository<Channel>,
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly axiosClientService: AxiosClientService,
   ) {
     this.client = clientService.getClient();
   }
 
   @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
-    await this.userRepository
-      .createQueryBuilder()
-      .update(User)
-      .set({ last_message_id: message.message_id })
-      .where('"userId" = :userId', { userId: message.sender_id })
-      .andWhere(`deactive IS NOT True`)
-      .execute();
-
-    await this.mentionedRepository
-      .createQueryBuilder()
-      .update(Mentioned)
-      .set({ confirm: true, reactionTimestamp: Date.now() })
-      .where(`"channelId" = :channelId`, { channelId: message.channel_id })
-      .andWhere(`"mentionUserId" = :mentionUserId`, {
-        mentionUserId: message.sender_id,
-      })
-      .andWhere(`"confirm" = :confirm`, { confirm: false })
-      .andWhere(`"reactionTimestamp" IS NULL`)
-      .execute();
+    await Promise.all([
+      this.userRepository
+        .createQueryBuilder()
+        .update(User)
+        .set({ last_message_id: message.message_id })
+        .where('"userId" = :userId', { userId: message.sender_id })
+        .andWhere(`deactive IS NOT True`)
+        .execute(),
+      this.mentionedRepository
+        .createQueryBuilder()
+        .update(Mentioned)
+        .set({ confirm: true, reactionTimestamp: Date.now() })
+        .where(`"channelId" = :channelId`, { channelId: message.channel_id })
+        .andWhere(`"mentionUserId" = :mentionUserId`, {
+          mentionUserId: message.sender_id,
+        })
+        .andWhere(`"confirm" = :confirm`, { confirm: false })
+        .andWhere(`"reactionTimestamp" IS NULL`)
+        .execute(),
+    ]);
     if (message.mode === 4) return;
-
     // const checkCategories: string[] = [
     //   'PROJECTS',
     //   'PROJECTS-EXT',
@@ -117,6 +127,44 @@ export class EventListenerChannelMessage {
           );
         }
       }
+    }
+  }
+
+  @OnEvent(Events.ChannelMessage)
+  async handleAIforbot(msg: ChannelMessage) {
+    console.log(msg);
+    const mentions = msg.mentions;
+    const message = msg.content.t;
+    const refs = msg.references;
+    if (
+      (msg.mode === ChannelStreamMode.STREAM_MODE_DM ||
+        mentions.some((obj) => obj.user_id === BOT_ID) ||
+        refs.some((obj) => obj.message_sender_id === BOT_ID)) &&
+      typeof message == 'string' &&
+      msg.sender_id !== BOT_ID
+    ) {
+      const url = ApiUrl.AIApi;
+      const response = await this.axiosClientService.post(url, {
+        text: message,
+      });
+      let AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
+      if (response.status == 200) {
+        AIReplyMessage = response.data.Response;
+      }
+      const replyMessage = replyMessageGenerate(
+        { messageContent: AIReplyMessage, mentions: [] },
+        msg,
+      );
+      await this.client.sendMessage(
+        replyMessage.clan_id,
+        replyMessage.channel_id,
+        replyMessage.mode,
+        replyMessage.is_public,
+        replyMessage.msg,
+        replyMessage.mentions,
+        replyMessage.attachments,
+        replyMessage.ref,
+      );
     }
   }
 }

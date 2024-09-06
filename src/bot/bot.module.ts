@@ -69,6 +69,7 @@ import { ReportCommand } from './asterisk-commands/commands/report/report.comman
 import { ExtendersService } from './services/extenders.services';
 import { AvatarCommand } from './asterisk-commands/commands/avatar/avatar.command';
 import { EventListenerChannelMessage } from './listeners/channelmessage.handle';
+import { EventListenerMessageReaction } from './listeners/messagereaction.handle';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -147,6 +148,7 @@ import { EventListenerChannelMessage } from './listeners/channelmessage.handle';
     AxiosClientService,
     ReportDailyService,
     EventListenerChannelMessage,
+    EventListenerMessageReaction,
   ],
   controllers: [],
 })
