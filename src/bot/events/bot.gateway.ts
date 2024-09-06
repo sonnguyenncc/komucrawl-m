@@ -46,7 +46,7 @@ export class BotGateway {
   // processMessage(msg: ChannelMessage) {}
 
   handlemessagereaction = async (msg: ApiMessageReaction) => {
-    this.eventEmitter.emit(Events.MessageReaction, msg);
+    // this.eventEmitter.emit(Events.MessageReaction, msg);
   };
 
   private async handlechannelcreated(user: ChannelCreatedEvent, add) {
