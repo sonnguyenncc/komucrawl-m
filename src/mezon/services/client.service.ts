@@ -24,4 +24,19 @@ export class MezonClientService {
   getClient() {
     return this.client;
   }
+
+  async sendMessage(replyMessage) {
+    return this.client.sendMessage(
+      replyMessage.clan_id,
+      '0',
+      replyMessage.channel_id,
+      replyMessage.mode,
+      replyMessage.is_public,
+      true,
+      replyMessage.msg,
+      replyMessage.mentions,
+      replyMessage.attachments,
+      replyMessage.ref,
+    );
+  }
 }

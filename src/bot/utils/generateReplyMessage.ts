@@ -6,31 +6,30 @@ export function replyMessageGenerate(
   message: ChannelMessage,
 ): ReplyMezonMessage {
   const replayMessage: ReplyMezonMessage = {} as ReplyMezonMessage;
+  const defaultValue = {
+    mentions: [],
+    attachments: [],
+  };
   [
     'clan_id',
     'channel_id',
     'mode',
-    'mentions',
-    'attachments',
     'is_public',
+    ...Object.keys(defaultValue),
   ].forEach(
     (field) =>
-      (replayMessage[field] = fieldGenerate(field, replayConent, message)),
+      (replayMessage[field] = fieldGenerate(
+        field,
+        replayConent,
+        message,
+        defaultValue,
+      )),
   );
-  replayMessage['is_public'] = !!replayMessage['is_public'];
 
-  let messageContent = {
-    t: 'messageContent' in replayConent ? replayConent['messageContent'] : '',
-  };
-
-  // option for bot's message
-  ['lk', 'hg', 'mk', 'ej', 'vk', 'contentThread'].forEach((key) => {
-    if (key in replayConent) {
-      messageContent[key] = replayConent[key];
-    }
-  });
-
-  replayMessage['msg'] = { ...messageContent };
+  replayMessage['msg'] =
+    'messageContent' in replayConent
+      ? { t: replayConent['messageContent'] }
+      : { t: '' };
   replayMessage['ref'] = refGenerate(message);
 
   return replayMessage;
@@ -40,8 +39,13 @@ export function fieldGenerate(
   field: string,
   replayConent,
   message: ChannelMessage,
+  defaultValue: { [x: string]: any },
 ) {
-  return field in replayConent ? replayConent[field] : message[field];
+  return field in replayConent
+    ? replayConent[field]
+    : field in defaultValue
+      ? defaultValue[field]
+      : message[field];
 }
 
 export function refGenerate(msg: ChannelMessage): Array<ApiMessageRef> {

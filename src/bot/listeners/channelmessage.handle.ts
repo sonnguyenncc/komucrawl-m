@@ -33,9 +33,7 @@ export class EventListenerChannelMessage {
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly axiosClientService: AxiosClientService,
     private clientConfigService: ClientConfigService,
-  ) {
-    this.client = clientService.getClient();
-  }
+  ) {}
 
   @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
@@ -118,18 +116,7 @@ export class EventListenerChannelMessage {
           ? replyMessage
           : [replyMessage];
         for (const mess of replyMessageArray) {
-          await this.client.sendMessage(
-            mess.clan_id,
-            '0',
-            mess.channel_id,
-            mess.mode,
-            mess.is_public,
-            true,
-            mess.msg,
-            mess.mentions,
-            mess.attachments,
-            mess.ref,
-          );
+          await this.clientService.sendMessage(mess);
         }
       }
     }
@@ -148,30 +135,56 @@ export class EventListenerChannelMessage {
       msg.sender_id !== BOT_ID
     ) {
       const url = ApiUrl.AIApi;
-      const response = await this.axiosClientService.post(url, {
-        text: message,
-      });
-      let AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
-      if (response.status == 200) {
-        AIReplyMessage = response.data.Response;
+      let AIReplyMessage;
+      AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
+
+      try {
+        const response = await this.axiosClientService.post(
+          url,
+          {
+            text: message,
+          },
+          { timeout: 5000 },
+        );
+        if (response.status == 200) {
+          AIReplyMessage = response.data.Response;
+        } else {
+          throw Error('swtich AI API');
+        }
+      } catch (e) {
+        const baseUrl = 'https://api.aimlapi.com/v1';
+        const apiKey = 'e82d1ce68dba4cc0abed473cd850bfed';
+        const systemPrompt =
+          'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé';
+
+        const headers = {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        };
+        const response = await this.axiosClientService.post(
+          `${baseUrl}/chat/completions`,
+          {
+            model: 'mistralai/Mistral-7B-Instruct-v0.2',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: message },
+            ],
+            temperature: 0.7,
+            max_tokens: 256,
+          },
+          { headers },
+        );
+
+        const completion = response.data;
+        AIReplyMessage = completion.choices[0].message.content;
       }
+
       const replyMessage = replyMessageGenerate(
         { messageContent: AIReplyMessage, mentions: [] },
         msg,
       );
 
-      await this.client.sendMessage(
-        replyMessage.clan_id,
-        '0',
-        replyMessage.channel_id,
-        replyMessage.mode,
-        replyMessage.is_public,
-        true,
-        replyMessage.msg,
-        replyMessage.mentions,
-        replyMessage.attachments,
-        replyMessage.ref,
-      );
+      await this.clientService.sendMessage(replyMessage);
     }
   }
 }
