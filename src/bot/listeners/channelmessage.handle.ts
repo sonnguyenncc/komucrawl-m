@@ -17,6 +17,7 @@ import { BOT_ID } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { ApiUrl } from '../constants/api_url';
 import { replyMessageGenerate } from '../utils/generateReplyMessage';
+import { ClientConfigService } from '../config/client-config.service';
 
 @Injectable()
 export class EventListenerChannelMessage {
@@ -31,6 +32,7 @@ export class EventListenerChannelMessage {
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly axiosClientService: AxiosClientService,
+    private clientConfigService: ClientConfigService,
   ) {
     this.client = clientService.getClient();
   }
@@ -78,6 +80,7 @@ export class EventListenerChannelMessage {
 
     if (message.mentions && message.mentions.length && validCategory) {
       message.mentions.forEach(async (user) => {
+        if (user.user_id === this.clientConfigService.botKomuId) return;
         const data = {
           messageId: message.message_id,
           authorId: message.sender_id,
@@ -134,7 +137,6 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleAIforbot(msg: ChannelMessage) {
-    console.log(msg);
     const mentions = msg.mentions;
     const message = msg.content.t;
     const refs = msg.references;

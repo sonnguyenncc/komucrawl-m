@@ -6,3 +6,8 @@ export enum EUserType {
   DISCORD = 'DISCORD',
   MEZON = 'MEZON',
 }
+
+export enum EMessageMode {
+  CHANNEL_MESSAGE = 2,
+  DM_MESSAGE = 4,
+}

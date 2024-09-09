@@ -79,11 +79,17 @@ export class OrderCommand extends CommandMessage {
         const mess = chunk
           .map((list) => `<${list.username}> order ${list.menu.toUpperCase()}`)
           .join('\n');
-
+        const messageContent = `Chốt đơn!!! Tổng là ${listOrder.length} người\n`;
         return this.replyMessageGenerate(
           {
-            messageContent:
-              `Chốt đơn!!! Tổng là ${listOrder.length} người \n` + mess,
+            messageContent: '```' + messageContent + mess + '```',
+            mk: [
+              {
+                type: 't',
+                s: 0,
+                e: (messageContent + mess).length + 6,
+              },
+            ],
           },
           message,
         );
