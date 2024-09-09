@@ -26,10 +26,19 @@ export function replyMessageGenerate(
       )),
   );
 
-  replayMessage['msg'] =
-    'messageContent' in replayConent
-      ? { t: replayConent['messageContent'] }
-      : { t: '' };
+  let messageContent = {
+    t: 'messageContent' in replayConent ? replayConent['messageContent'] : '',
+  };
+
+  // option for bot's message
+  ['lk', 'hg', 'mk', 'ej', 'vk', 'contentThread'].forEach((key) => {
+    if (key in replayConent) {
+      messageContent[key] = replayConent[key];
+    }
+  });
+
+  replayMessage['msg'] = { ...messageContent };
+
   replayMessage['ref'] = refGenerate(message);
 
   return replayMessage;

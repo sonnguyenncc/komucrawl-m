@@ -112,6 +112,7 @@ export class OrderCommand extends CommandMessage {
       {
         messageContent:
           '✅ Bạn đã đặt ' + '`' + `${resultString}` + '`' + ' !!!',
+        mk: [{ type: 's', s: 13, e: 15 + resultString.length }],
       },
       message,
     );

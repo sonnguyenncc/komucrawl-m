@@ -74,6 +74,8 @@ import { MentionSchedulerService } from './scheduler/mention-scheduler.services'
 import { ScheduleModule } from '@nestjs/schedule';
 import { ToggleActiveCommand } from './asterisk-commands/commands/toggleactivation/toggleactivation.command';
 import { ToggleActiveService } from './asterisk-commands/commands/toggleactivation/toggleactivation.serivces';
+import { PenaltyCommand } from './asterisk-commands/commands/penalty/penalty.command';
+import { PenaltyService } from './asterisk-commands/commands/penalty/penalty.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -143,6 +145,8 @@ import { ToggleActiveService } from './asterisk-commands/commands/toggleactivati
     HelpCommand,
     ReportCommand,
     AvatarCommand,
+    PenaltyCommand,
+    PenaltyService,
     UserStatusService,
     ClientConfigService,
     ConfigService,

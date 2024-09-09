@@ -5,6 +5,8 @@ import { UserStatusService } from '../user-status/userStatus.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/bot/models';
 import { Repository } from 'typeorm';
+import { EUserType } from 'src/bot/constants/configs';
+import { EUserError } from 'src/bot/constants/error';
 
 @Command('avatar')
 export class AvatarCommand extends CommandMessage {
@@ -28,10 +30,19 @@ export class AvatarCommand extends CommandMessage {
     }
 
     const findUser = await this.userRepository.findOne({
-      where: args.length ? { username: queryUser } : { userId: queryUser },
+      where: args.length
+        ? { username: queryUser, user_type: EUserType.MEZON }
+        : { userId: queryUser, user_type: EUserType.MEZON },
     });
 
-    if (!findUser) return;
+    if (!findUser && args.length)
+      return this.replyMessageGenerate(
+        {
+          messageContent: EUserError.INVALID_USER,
+          mk: [{ type: 't', s: 0, e: EUserError.INVALID_USER.length }],
+        },
+        message,
+      );
     messageContent = findUser.avatar + '';
     return this.replyMessageGenerate(
       {
