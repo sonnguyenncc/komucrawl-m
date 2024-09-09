@@ -142,8 +142,10 @@ export class MentionSchedulerService {
     // send message to channel machleo
     await this.client.sendMessage(
       this.clientConfig.clandNccId,
+      '0',
       this.clientConfig.machleoChannelId,
       EMessageMode.CHANNEL_MESSAGE,
+      true,
       true,
       { t: content },
       [
