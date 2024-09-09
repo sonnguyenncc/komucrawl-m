@@ -117,9 +117,11 @@ export class EventListenerChannelMessage {
         for (const mess of replyMessageArray) {
           await this.client.sendMessage(
             mess.clan_id,
+            '0',
             mess.channel_id,
             mess.mode,
             mess.is_public,
+            true,
             mess.msg,
             mess.mentions,
             mess.attachments,
@@ -155,11 +157,14 @@ export class EventListenerChannelMessage {
         { messageContent: AIReplyMessage, mentions: [] },
         msg,
       );
+
       await this.client.sendMessage(
         replyMessage.clan_id,
+        '0',
         replyMessage.channel_id,
         replyMessage.mode,
         replyMessage.is_public,
+        true,
         replyMessage.msg,
         replyMessage.mentions,
         replyMessage.attachments,
