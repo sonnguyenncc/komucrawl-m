@@ -153,9 +153,9 @@ export class EventListenerChannelMessage {
         }
       } catch (e) {
         const baseUrl = 'https://api.aimlapi.com/v1';
-        const apiKey = 'e82d1ce68dba4cc0abed473cd850bfed';
+        const apiKey = process.env.FREE_API_KEY;
         const systemPrompt =
-          'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé';
+          'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé. Hiện tại trợ lý ảo của công ty đang ra ngoài có chút việc nên bạn sẽ giúp bạn ấy trả lời các câu hỏi khi bạn ấy vắng mặt';
 
         const headers = {
           Authorization: `Bearer ${apiKey}`,
