@@ -70,6 +70,10 @@ import { ExtendersService } from './services/extenders.services';
 import { AvatarCommand } from './asterisk-commands/commands/avatar/avatar.command';
 import { EventListenerChannelMessage } from './listeners/channelmessage.handle';
 import { EventListenerMessageReaction } from './listeners/messagereaction.handle';
+import { MentionSchedulerService } from './scheduler/mention-scheduler.services';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ToggleActiveCommand } from './asterisk-commands/commands/toggleactivation/toggleactivation.command';
+import { ToggleActiveService } from './asterisk-commands/commands/toggleactivation/toggleactivation.serivces';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -123,6 +127,7 @@ import { EventListenerMessageReaction } from './listeners/messagereaction.handle
       Dynamic,
     ]),
     HttpModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [
     BotGateway,
@@ -146,6 +151,9 @@ import { EventListenerMessageReaction } from './listeners/messagereaction.handle
     TimeSheetService,
     UtilsService,
     AxiosClientService,
+    MentionSchedulerService,
+    ToggleActiveCommand,
+    ToggleActiveService,
     ReportDailyService,
     EventListenerChannelMessage,
     EventListenerMessageReaction,

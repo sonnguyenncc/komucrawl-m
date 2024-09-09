@@ -24,6 +24,12 @@ export class User {
   @Column({ type: "text", nullable: true })
   username: string;
 
+  @Column({ type: "text", nullable: true })
+  display_name: string;
+  
+  @Column({ type: "text", nullable: true })
+  clan_nick: string;
+
   @OneToMany(() => Msg, (state) => state.author)
   msg: Msg[];
 

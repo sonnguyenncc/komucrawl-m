@@ -22,6 +22,9 @@ export class HelpCommand extends CommandMessage {
       '\n' +
       allCommandKeys.join(', ') +
       '```';
-    return this.replyMessageGenerate({ messageContent }, message);
+    return this.replyMessageGenerate(
+      { messageContent, mk: [{ type: 't', s: 0, e: messageContent.length }] },
+      message,
+    );
   }
 }

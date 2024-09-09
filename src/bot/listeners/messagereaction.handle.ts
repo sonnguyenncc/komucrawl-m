@@ -97,7 +97,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     //   if (resolveMention) {
 
     // this.client.sendMessage()
-    console.log(messageReaction);
     const data: ApiCreateChannelDescRequest = {
       clan_id: '0',
       channel_id: '0',
@@ -107,7 +106,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     };
     try {
       const result = await this.client.createChannelDesc(data);
-      console.log(result);
     } catch (e) {
       console.log(e);
     }

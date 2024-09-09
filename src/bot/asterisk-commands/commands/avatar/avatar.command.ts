@@ -33,6 +33,16 @@ export class AvatarCommand extends CommandMessage {
 
     if (!findUser) return;
     messageContent = findUser.avatar + '';
-    return this.replyMessageGenerate({ messageContent }, message);
+    return this.replyMessageGenerate(
+      {
+        attachments: [
+          {
+            url: findUser.avatar + '',
+            filetype: 'image/jpeg',
+          },
+        ],
+      },
+      message,
+    );
   }
 }

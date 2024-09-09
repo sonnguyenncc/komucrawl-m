@@ -291,6 +291,10 @@ export class ClientConfigService {
     this.jiraWebhookChannelId = `${configService.get<string>(
       'JIRA_WEBOOOK_CHANNEL_ID',
     )}`;
+
+    this.botKomuId = `${configService.get<string>('BOT_KOMU_ID')}`;
+
+    this.clandNccId = `${configService.get<string>('KOMUBOTREST_CLAN_NCC_ID')}`;
   }
 
   https: https.Agent;
@@ -500,4 +504,8 @@ export class ClientConfigService {
 
   // KOMUBOTREST_THONGBAO_BITBUCKET_WEBOOOK_CHANNEL_ID
   bitbucketWebhookChannelId: string;
+
+  botKomuId: string;
+
+  clandNccId: string;
 }

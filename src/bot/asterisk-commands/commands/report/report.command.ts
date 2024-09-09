@@ -27,20 +27,37 @@ export class ReportCommand extends CommandMessage {
             )
           ) {
             return this.replyMessageGenerate(
-              { messageContent: messHelpDaily },
+              {
+                messageContent: messHelpDaily,
+                mk: [{ type: 't', s: 0, e: messHelpDaily.length }],
+              },
               message,
             );
           }
           const mess = await this.reportDailyService.reportDaily(dateTime);
           if (mess) {
-            return this.replyMessageGenerate({ messageContent: mess }, message);
+            return mess.map((m) => {
+              return this.replyMessageGenerate(
+                {
+                  messageContent: '```' + m + '```',
+                  mk: [{ type: 't', s: 0, e: m.length + 6 }],
+                },
+                message,
+              );
+            });
           }
         } else {
           const mess = await this.reportDailyService.reportDaily(null);
           if (mess) {
-            return mess.map((m) =>
-              this.replyMessageGenerate({ messageContent: m }, message),
-            );
+            return mess.map((m) => {
+              return this.replyMessageGenerate(
+                {
+                  messageContent: '```' + m + '```',
+                  mk: [{ type: 't', s: 0, e: m.length + 6 }],
+                },
+                message,
+              );
+            });
           }
         }
         break;

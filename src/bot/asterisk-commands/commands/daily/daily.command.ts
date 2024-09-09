@@ -50,7 +50,10 @@ export class DailyCommand extends CommandMessage {
 
     if (messageValidate)
       return this.replyMessageGenerate(
-        { messageContent: messageValidate },
+        {
+          messageContent: messageValidate,
+          mk: [{ type: 't', s: 0, e: messageValidate.length }],
+        },
         message,
       );
 
@@ -113,7 +116,16 @@ export class DailyCommand extends CommandMessage {
         ? baseMessage
         : errorMessageNotWFH;
 
-    return this.replyMessageGenerate({ messageContent }, message);
+    return this.replyMessageGenerate(
+      {
+        messageContent,
+        mk:
+          messageContent === baseMessage
+            ? [{ type: 't', s: 0, e: messageContent.length }]
+            : [],
+      },
+      message,
+    );
   }
 
   saveDaily(message: ChannelMessage, args: string[], email: string) {

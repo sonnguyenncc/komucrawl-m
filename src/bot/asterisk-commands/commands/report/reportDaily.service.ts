@@ -34,7 +34,7 @@ export class ReportDailyService {
     if (!userNotDaily) {
       return;
     } else if (Array.isArray(userNotDaily) && userNotDaily.length === 0) {
-      mess = '```' + dateString + 'Tất Cả Đều Đã Daily' + '```';
+      mess = [dateString + 'Tất Cả Đều Đã Daily'];
       return mess;
     } else {
       const messes = [];
@@ -57,8 +57,7 @@ export class ReportDailyService {
             }
           })
           .join('\n');
-        messes.push(`${dateString}
-      ${dailyString} \n ${mess}`);
+        messes.push(`${dailyString} \n ${mess}`);
       }
       return messes;
     }
