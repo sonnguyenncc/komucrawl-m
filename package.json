@@ -37,12 +37,8 @@
     "https": "^1.0.0",
     "js-base64": "^3.7.7",
     "local-devices": "^4.0.0",
-<<<<<<< Updated upstream
     "mezon-sdk": "^2.7.34",
-=======
-    "mezon-sdk": "^2.7.32",
     "moment": "^2.30.1",
->>>>>>> Stashed changes
     "net": "^1.0.2",
     "parse-duration": "^1.1.0",
     "pg": "^8.12.0",
