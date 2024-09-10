@@ -99,7 +99,7 @@ export class EventListenerChannelMessage {
   async handleCommand(msg: ChannelMessage) {
     const content = msg.content.t;
     let replyMessage: ReplyMezonMessage;
-
+    console.log(msg);
     if (typeof content == 'string' && content.trim()) {
       const firstLetter = content.trim()[0];
       switch (firstLetter) {
@@ -129,8 +129,8 @@ export class EventListenerChannelMessage {
     const refs = msg.references;
     if (
       (msg.mode === ChannelStreamMode.STREAM_MODE_DM ||
-        mentions.some((obj) => obj.user_id === BOT_ID) ||
-        refs.some((obj) => obj.message_sender_id === BOT_ID)) &&
+        mentions?.some((obj) => obj.user_id === BOT_ID) ||
+        refs?.some((obj) => obj.message_sender_id === BOT_ID)) &&
       typeof message == 'string' &&
       msg.sender_id !== BOT_ID
     ) {
@@ -169,8 +169,6 @@ export class EventListenerChannelMessage {
               { role: 'system', content: systemPrompt },
               { role: 'user', content: message },
             ],
-            temperature: 0.7,
-            max_tokens: 256,
           },
           { headers },
         );
