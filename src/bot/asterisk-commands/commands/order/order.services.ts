@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EUserType } from 'src/bot/constants/configs';
 import { Order, User } from 'src/bot/models';
 import { Repository } from 'typeorm';
 
@@ -112,6 +113,7 @@ export class OrderCommandService {
       .createQueryBuilder()
       .where(`"userId" = :userId`, { userId: author })
       .andWhere(`"deactive" IS NOT true`)
+      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .select('*')
       .getRawOne();
   }
