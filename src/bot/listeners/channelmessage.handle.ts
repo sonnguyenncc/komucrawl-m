@@ -124,9 +124,9 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleAIforbot(msg: ChannelMessage) {
-    const mentions = msg.mentions;
+    const mentions = Array.isArray(msg.mentions) ? msg.mentions : [];
     const message = msg.content.t;
-    const refs = msg.references;
+    const refs = Array.isArray(msg.references) ? msg.references : [];
     if (
       (msg.mode === ChannelStreamMode.STREAM_MODE_DM ||
         mentions?.some((obj) => obj.user_id === BOT_ID) ||
