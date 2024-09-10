@@ -97,92 +97,99 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleCommand(msg: ChannelMessage) {
-    const content = msg.content.t;
-    let replyMessage: ReplyMezonMessage;
-    console.log(msg);
-    if (typeof content == 'string' && content.trim()) {
-      const firstLetter = content.trim()[0];
-      switch (firstLetter) {
-        case '*':
-          replyMessage = await this.asteriskCommand.execute(content, msg);
-          break;
-        default:
-          return;
-        // console.log(msg);
-      }
+    try {
+      const content = msg.content.t;
+      let replyMessage: ReplyMezonMessage;
+      if (typeof content == 'string' && content.trim()) {
+        const firstLetter = content.trim()[0];
+        switch (firstLetter) {
+          case '*':
+            replyMessage = await this.asteriskCommand.execute(content, msg);
+            break;
+          default:
+            return;
+          // console.log(msg);
+        }
 
-      if (replyMessage) {
-        const replyMessageArray = Array.isArray(replyMessage)
-          ? replyMessage
-          : [replyMessage];
-        for (const mess of replyMessageArray) {
-          await this.clientService.sendMessage(mess);
+        if (replyMessage) {
+          const replyMessageArray = Array.isArray(replyMessage)
+            ? replyMessage
+            : [replyMessage];
+          for (const mess of replyMessageArray) {
+            await this.clientService.sendMessage(mess);
+          }
         }
       }
+    } catch (e) {
+      console.log(e);
     }
   }
 
   @OnEvent(Events.ChannelMessage)
   async handleAIforbot(msg: ChannelMessage) {
-    const mentions = Array.isArray(msg.mentions) ? msg.mentions : [];
-    const message = msg.content.t;
-    const refs = Array.isArray(msg.references) ? msg.references : [];
-    if (
-      (msg.mode === ChannelStreamMode.STREAM_MODE_DM ||
-        mentions?.some((obj) => obj.user_id === BOT_ID) ||
-        refs?.some((obj) => obj.message_sender_id === BOT_ID)) &&
-      typeof message == 'string' &&
-      msg.sender_id !== BOT_ID
-    ) {
-      const url = ApiUrl.AIApi;
-      let AIReplyMessage;
-      AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
+    try {
+      const mentions = Array.isArray(msg.mentions) ? msg.mentions : [];
+      const message = msg.content.t;
+      const refs = Array.isArray(msg.references) ? msg.references : [];
+      if (
+        (msg.mode === ChannelStreamMode.STREAM_MODE_DM ||
+          mentions?.some((obj) => obj.user_id === BOT_ID) ||
+          refs?.some((obj) => obj.message_sender_id === BOT_ID)) &&
+        typeof message == 'string' &&
+        msg.sender_id !== BOT_ID
+      ) {
+        const url = ApiUrl.AIApi;
+        let AIReplyMessage;
+        AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
 
-      try {
-        const response = await this.axiosClientService.post(
-          url,
-          {
-            text: message,
-          },
-          { timeout: 5000 },
-        );
-        if (response.status == 200) {
-          AIReplyMessage = response.data.Response;
-        } else {
-          throw Error('swtich AI API');
+        try {
+          const response = await this.axiosClientService.post(
+            url,
+            {
+              text: message,
+            },
+            { timeout: 5000 },
+          );
+          if (response.status == 200) {
+            AIReplyMessage = response.data.Response;
+          } else {
+            throw Error('swtich AI API');
+          }
+        } catch (e) {
+          const baseUrl = 'https://api.aimlapi.com/v1';
+          const apiKey = process.env.FREE_API_KEY;
+          const systemPrompt =
+            'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé. Hiện tại trợ lý ảo của công ty đang ra ngoài có chút việc nên bạn sẽ giúp bạn ấy trả lời các câu hỏi khi bạn ấy vắng mặt';
+
+          const headers = {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          };
+          const response = await this.axiosClientService.post(
+            `${baseUrl}/chat/completions`,
+            {
+              model: 'mistralai/Mistral-7B-Instruct-v0.2',
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: message },
+              ],
+            },
+            { headers },
+          );
+
+          const completion = response.data;
+          AIReplyMessage = completion.choices[0].message.content;
         }
-      } catch (e) {
-        const baseUrl = 'https://api.aimlapi.com/v1';
-        const apiKey = process.env.FREE_API_KEY;
-        const systemPrompt =
-          'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé. Hiện tại trợ lý ảo của công ty đang ra ngoài có chút việc nên bạn sẽ giúp bạn ấy trả lời các câu hỏi khi bạn ấy vắng mặt';
 
-        const headers = {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        };
-        const response = await this.axiosClientService.post(
-          `${baseUrl}/chat/completions`,
-          {
-            model: 'mistralai/Mistral-7B-Instruct-v0.2',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: message },
-            ],
-          },
-          { headers },
+        const replyMessage = replyMessageGenerate(
+          { messageContent: AIReplyMessage, mentions: [] },
+          msg,
         );
 
-        const completion = response.data;
-        AIReplyMessage = completion.choices[0].message.content;
+        await this.clientService.sendMessage(replyMessage);
       }
-
-      const replyMessage = replyMessageGenerate(
-        { messageContent: AIReplyMessage, mentions: [] },
-        msg,
-      );
-
-      await this.clientService.sendMessage(replyMessage);
+    } catch (e) {
+      console.log(e);
     }
   }
 }
