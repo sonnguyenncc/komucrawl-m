@@ -98,8 +98,16 @@ export class EventListenerChannelMessage {
   @OnEvent(Events.ChannelMessage)
   async handleCommand(msg: ChannelMessage) {
     try {
+      console.log(msg);
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
+      // const client = this.clientService.getClient();
+      // if (msg.sender_id != BOT_ID) {
+      //   client.sendMessageUser(
+      //     msg.sender_id,
+      //     `Bot rep lại tin nhắn ${content}`,
+      //   );
+      // }
       if (typeof content == 'string' && content.trim()) {
         const firstLetter = content.trim()[0];
         switch (firstLetter) {
