@@ -44,6 +44,7 @@ import {
   ImportantSMS,
   WOL,
   Dynamic,
+  ChannelMezon,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -68,14 +69,22 @@ import { ReportDailyService } from './asterisk-commands/commands/report/reportDa
 import { ReportCommand } from './asterisk-commands/commands/report/report.command';
 import { ExtendersService } from './services/extenders.services';
 import { AvatarCommand } from './asterisk-commands/commands/avatar/avatar.command';
-import { EventListenerChannelMessage } from './listeners/channelmessage.handle';
-import { EventListenerMessageReaction } from './listeners/messagereaction.handle';
 import { MentionSchedulerService } from './scheduler/mention-scheduler.services';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ToggleActiveCommand } from './asterisk-commands/commands/toggleactivation/toggleactivation.command';
 import { ToggleActiveService } from './asterisk-commands/commands/toggleactivation/toggleactivation.serivces';
 import { PenaltyCommand } from './asterisk-commands/commands/penalty/penalty.command';
 import { PenaltyService } from './asterisk-commands/commands/penalty/penalty.services';
+import { WFHSchedulerService } from './scheduler/wfh-scheduler.service';
+import {
+  EventListenerChannelCreated,
+  EventListenerChannelDeleted,
+  EventListenerChannelMessage,
+  EventListenerChannelUpdated,
+  EventListenerMessageReaction,
+  EventListenerUserChannelAdded,
+  EventListenerUserChannelRemoved,
+} from './listeners';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -86,6 +95,7 @@ import { PenaltyService } from './asterisk-commands/commands/penalty/penalty.ser
     }),
     DiscoveryModule,
     TypeOrmModule.forFeature([
+      ChannelMezon,
       BwlReaction,
       Bwl,
       Daily,
@@ -161,6 +171,12 @@ import { PenaltyService } from './asterisk-commands/commands/penalty/penalty.ser
     ReportDailyService,
     EventListenerChannelMessage,
     EventListenerMessageReaction,
+    EventListenerChannelCreated,
+    EventListenerChannelUpdated,
+    EventListenerChannelDeleted,
+    EventListenerUserChannelAdded,
+    EventListenerUserChannelRemoved,
+    WFHSchedulerService,
   ],
   controllers: [],
 })

@@ -25,7 +25,6 @@ export class BotGateway {
 
   constructor(
     private clientService: MezonClientService,
-
     private extendersService: ExtendersService,
     private eventEmitter: EventEmitter2,
   ) {
@@ -49,29 +48,29 @@ export class BotGateway {
     // this.eventEmitter.emit(Events.MessageReaction, msg);
   };
 
-  private async handlechannelcreated(user: ChannelCreatedEvent, add) {
-    console.log('onchannelcreated', user, add);
-  }
+  handlechannelcreated = async (channel: ChannelCreatedEvent) => {
+    this.eventEmitter.emit(Events.ChannelCreated, channel);
+  };
 
   private async handleuserclanremoved(user: UserClanRemovedEvent) {
     console.log('onuserclanremoved', user);
   }
 
-  private async handleuserchanneladded(user: UserChannelAddedEvent) {
-    console.log('onuserchanneladded', user);
-  }
+  handleuserchanneladded = async (user: UserChannelAddedEvent) => {
+    this.eventEmitter.emit(Events.UserChannelAdded, user);
+  };
 
-  private async handlechanneldeleted(channel: ChannelDeletedEvent) {
-    console.log('onchanneldeleted', channel);
-  }
+  handlechanneldeleted = async (channel: ChannelDeletedEvent) => {
+    this.eventEmitter.emit(Events.ChannelDeleted, channel);
+  };
 
-  private async handlechannelupdated(channel: ChannelUpdatedEvent) {
-    console.log('onchannelupdated', channel);
-  }
+  handlechannelupdated = async (channel: ChannelUpdatedEvent) => {
+    this.eventEmitter.emit(Events.ChannelUpdated, channel);
+  };
 
-  private async handleuserchannelremoved(msg: UserChannelRemovedEvent) {
-    console.log('onuserchannelremoved', msg);
-  }
+  handleuserchannelremoved = async (msg: UserChannelRemovedEvent) => {
+    this.eventEmitter.emit(Events.UserChannelRemoved, msg);
+  };
 
   handlechannelmessage = async (msg: ChannelMessage) => {
     try {

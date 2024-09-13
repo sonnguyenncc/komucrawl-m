@@ -38,3 +38,4 @@ export { EventEntity } from './event.entity';
 export { ImportantSMS } from './importantSMS.entity';
 export { WOL } from './wol.entity';
 export { Dynamic } from './dynamic.entity';
+export { ChannelMezon } from './mezonChannel.entity';

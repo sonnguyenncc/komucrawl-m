@@ -98,7 +98,6 @@ export class EventListenerChannelMessage {
   @OnEvent(Events.ChannelMessage)
   async handleCommand(msg: ChannelMessage) {
     try {
-      console.log(msg);
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
       // const client = this.clientService.getClient();

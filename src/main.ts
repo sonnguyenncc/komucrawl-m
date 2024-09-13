@@ -4,7 +4,7 @@ dotenv.config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BotGateway } from './bot/events/bot.gateway';
-import { MentionSchedulerService } from './bot/scheduler/mention-scheduler.services';
+// import { MentionSchedulerService } from './bot/scheduler/mention-scheduler.services';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
