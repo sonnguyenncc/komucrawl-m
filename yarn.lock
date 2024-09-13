@@ -5548,10 +5548,10 @@ methods@^1.1.2, methods@~1.1.2:
   resolved "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mezon-sdk@^2.7.39:
-  version "2.7.39"
-  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.39.tgz#fc9b491b9f47de1a3ae98eda870e51e8b79e75a1"
-  integrity sha512-h/L0z5AL6Ks5jzl38WQLxQKW0eZIRlyJ+U7YMYfNblBkA2HlkkRxb+zo8HgS/e9uphvxeBY5EWzXs9bVYhmTzA==
+mezon-sdk@^2.7.43:
+  version "2.7.43"
+  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.43.tgz#57b865e1aa9ef5499e22d0ce257c2d77f186d8d4"
+  integrity sha512-R6XMecx72BOG3Qkbav2cs6+VLHynDdLsApXVeerlcZKR4FtgMt8FXYqra32FATweZGGyk9vgboExOMRNnvEZdg==
   dependencies:
     "@types/ws" "^8.5.12"
     jest-cucumber "^3.0.1"
@@ -6332,9 +6332,9 @@ psl@^1.1.33:
   integrity sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==
 
 pump@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/pump/-/pump-3.0.0.tgz#b4a2116815bde2f4e1ea602354e8c75565107a64"
-  integrity sha512-LwZy+p3SFs1Pytd/jYct4wpv49HiYCqd9Rlc5ZVdk0V+8Yzv6jR5Blk3TRmPL1ft69TxP0IMZGJ+WPFU2BFhww==
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/pump/-/pump-3.0.2.tgz#836f3edd6bc2ee599256c924ffe0d88573ddcbf8"
+  integrity sha512-tUPXtzlGM8FE3P0ZL6DVs/3P58k9nk8/jZeQCurTJylQA8qFYzHFfhBJkuqyE0FifOsQ0uKWekiZ5g8wtr28cw==
   dependencies:
     end-of-stream "^1.1.0"
     once "^1.3.1"
@@ -7058,13 +7058,6 @@ string_decoder@^1.1.1, string_decoder@~1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
   integrity sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==
-  dependencies:
-    safe-buffer "~5.1.0"
-
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
-  integrity sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==
   dependencies:
     safe-buffer "~5.1.0"
 

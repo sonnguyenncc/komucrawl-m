@@ -37,61 +37,75 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
-    await Promise.all([
-      this.userRepository
-        .createQueryBuilder()
-        .update(User)
-        .set({ last_message_id: message.message_id })
-        .where('"userId" = :userId', { userId: message.sender_id })
-        .andWhere(`deactive IS NOT True`)
-        .execute(),
-      this.mentionedRepository
-        .createQueryBuilder()
-        .update(Mentioned)
-        .set({ confirm: true, reactionTimestamp: Date.now() })
-        .where(`"channelId" = :channelId`, { channelId: message.channel_id })
-        .andWhere(`"mentionUserId" = :mentionUserId`, {
-          mentionUserId: message.sender_id,
-        })
-        .andWhere(`"confirm" = :confirm`, { confirm: false })
-        .andWhere(`"reactionTimestamp" IS NULL`)
-        .execute(),
-    ]);
-    if (message.mode === 4) return;
-    // const checkCategories: string[] = [
-    //   'PROJECTS',
-    //   'PROJECTS-EXT',
-    //   'PRODUCTS',
-    //   'LOREN',
-    //   'HRM&IT',
-    //   'SAODO',
-    //   'MANAGEMENT',
-    // ];
+    try {
+      if (
+        // message.is_public ||
+        message.sender_id === this.clientConfigService.botKomuId
+      )
+        return;
+      await Promise.all([
+        this.userRepository
+          .createQueryBuilder()
+          .update(User)
+          .set({ last_message_id: message.message_id })
+          .where('"userId" = :userId', { userId: message.sender_id })
+          .andWhere(`deactive IS NOT True`)
+          .execute(),
+        this.mentionedRepository
+          .createQueryBuilder()
+          .update(Mentioned)
+          .set({ confirm: true, reactionTimestamp: Date.now() })
+          .where(`"channelId" = :channelId`, { channelId: message.channel_id })
+          .andWhere(`"mentionUserId" = :mentionUserId`, {
+            mentionUserId: message.sender_id,
+          })
+          .andWhere(`"confirm" = :confirm`, { confirm: false })
+          .andWhere(`"reactionTimestamp" IS NULL`)
+          .execute(),
+      ]);
+      if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
+        return;
+      // const checkCategories: string[] = [
+      //   'PROJECTS',
+      //   'PROJECTS-EXT',
+      //   'PRODUCTS',
+      //   'LOREN',
+      //   'HRM&IT',
+      //   'SAODO',
+      //   'MANAGEMENT',
+      // ];
 
-    const validCategory: boolean = true;
-    // if (channel.name.slice(0, 4).toUpperCase() === 'PRJ-') {
-    //   validCategory = true;
-    // } else {
-    //   validCategory = checkCategories.includes(channel.name.toUpperCase());
-    // }
-    if (!checkTimeMention(new Date())) return;
+      const validCategory: boolean = true;
+      // if (channel.name.slice(0, 4).toUpperCase() === 'PRJ-') {
+      //   validCategory = true;
+      // } else {
+      //   validCategory = checkCategories.includes(channel.name.toUpperCase());
+      // }
+      // if (!checkTimeMention(new Date())) return;
 
-    if (message.mentions && message.mentions.length && validCategory) {
-      message.mentions.forEach(async (user) => {
-        if (user.user_id === this.clientConfigService.botKomuId) return;
-        const data = {
-          messageId: message.message_id,
-          authorId: message.sender_id,
-          channelId: message.channel_id,
-          mentionUserId: user.user_id,
-          createdTimestamp: new Date(message.create_time).getTime(),
-          noti: false,
-          confirm: false,
-          punish: false,
-          reactionTimestamp: null,
-        };
-        await this.mentionedRepository.insert(data);
-      });
+      if (message.mentions && message.mentions.length && validCategory) {
+        message.mentions.forEach(async (user) => {
+          if (
+            user?.user_id === this.clientConfigService.botKomuId ||
+            user?.role_id
+          )
+            return;
+          const data = {
+            messageId: message.message_id,
+            authorId: message.sender_id,
+            channelId: message.channel_id,
+            mentionUserId: user.user_id,
+            createdTimestamp: new Date(message.create_time).getTime(),
+            noti: false,
+            confirm: false,
+            punish: false,
+            reactionTimestamp: null,
+          };
+          await this.mentionedRepository.insert(data);
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
