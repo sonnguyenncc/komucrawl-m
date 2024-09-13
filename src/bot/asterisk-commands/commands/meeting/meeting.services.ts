@@ -78,13 +78,13 @@ export class MeetingService {
 
     let mess;
     if (!list || list.length === 0) {
-      return '`✅` No scheduled meeting.';
+      return '```✅ No scheduled meeting.```';
     }
     list = list.filter(
       (item) => item.repeat !== 'once' || item.createdTimestamp > Date.now(),
     );
     if (list.length === 0) {
-      return '`✅` No scheduled meeting.';
+      return '```✅ No scheduled meeting.```';
     }
 
     for (let i = 0; i <= Math.ceil(list.length / 50); i += 1) {
@@ -108,10 +108,7 @@ export class MeetingService {
           })
           .join('\n') +
         '```';
-      await message.reply({
-        content: mess,
-        // ephemeral: true,
-      });
+      return mess;
     }
   }
 }
