@@ -77,10 +77,9 @@ export class BotGateway {
       if (msg.sender_id) {
         await this.extendersService.addDBUser(msg);
       }
-
-      this.eventEmitter.emit(Events.ChannelMessage, msg);
     } catch (e) {
       console.log(e);
     }
+    this.eventEmitter.emit(Events.ChannelMessage, msg);
   };
 }
