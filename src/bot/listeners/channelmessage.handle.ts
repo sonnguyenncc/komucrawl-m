@@ -65,7 +65,8 @@ export class EventListenerChannelMessage {
       ]);
       if (
         message.mode === 4 ||
-        (typeof message.content.t === 'string' &&
+        ('t' in message.content &&
+          typeof message.content.t === 'string' &&
           message.content.t.split(' ').includes('@here'))
       )
         return;
