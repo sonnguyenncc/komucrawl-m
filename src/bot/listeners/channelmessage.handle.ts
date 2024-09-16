@@ -63,7 +63,11 @@ export class EventListenerChannelMessage {
           .andWhere(`"reactionTimestamp" IS NULL`)
           .execute(),
       ]);
-      if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
+      if (
+        message.mode === 4 ||
+        (typeof message.content.t === 'string' &&
+          message.content.t.split(' ').includes('@here'))
+      )
         return;
       // const checkCategories: string[] = [
       //   'PROJECTS',
