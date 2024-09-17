@@ -295,6 +295,7 @@ export class ClientConfigService {
     this.botKomuId = `${configService.get<string>('BOT_KOMU_ID')}`;
 
     this.clandNccId = `${configService.get<string>('KOMUBOTREST_CLAN_NCC_ID')}`;
+    this.ncc8ChannelId = `${configService.get<string>('MEZON_NCC8_CHANNEL_ID')}`;
   }
 
   https: https.Agent;
@@ -508,4 +509,5 @@ export class ClientConfigService {
   botKomuId: string;
 
   clandNccId: string;
+  ncc8ChannelId: string;
 }
