@@ -85,6 +85,7 @@ import {
   EventListenerUserChannelAdded,
   EventListenerUserChannelRemoved,
 } from './listeners';
+import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -168,6 +169,7 @@ import {
     MentionSchedulerService,
     ToggleActiveCommand,
     ToggleActiveService,
+    Ncc8Command,
     ReportDailyService,
     EventListenerChannelMessage,
     EventListenerMessageReaction,
