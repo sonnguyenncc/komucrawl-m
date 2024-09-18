@@ -109,7 +109,7 @@ export class MeetingSchedulerService {
         await this.client.sendMessage(
           this.clientConfig.clandNccId,
           '0',
-          this.clientConfig.machleoChannelId,
+          dataMeeing.channelId,
           EMessageMode.CHANNEL_MESSAGE,
           true,
           true,
@@ -220,11 +220,18 @@ export class MeetingSchedulerService {
   }
 
   async updateMeetingRepository(data, createdTimestamp?) {
+    const updateData: any = {
+      reminder: true,
+    };
+    
+    if (createdTimestamp) {
+      updateData.createdTimestamp = createdTimestamp;
+    }
     try {
       await this.meetingRepository
         .createQueryBuilder()
         .update(Meeting)
-        .set({ reminder: true, createdTimestamp: createdTimestamp ?? '' })
+        .set(updateData)
         .where('"id" = :id', { id: data.id })
         .execute();
     } catch (error) {
