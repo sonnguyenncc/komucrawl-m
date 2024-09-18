@@ -11,7 +11,7 @@ import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { UtilsService } from 'src/bot/services/utils.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { EMarkdownType, MezonClient } from 'mezon-sdk';
-import { EMessageMode } from '../constants/configs';
+import { EMessageMode, EUserType } from '../constants/configs';
 
 @Injectable()
 export class MentionSchedulerService {
@@ -108,7 +108,7 @@ export class MentionSchedulerService {
   async getUserData(userId: string) {
     try {
       const userData = await this.userRepository.findOne({
-        where: { userId },
+        where: { userId, user_type: EUserType.MEZON },
       });
       return {
         userData,

@@ -10,6 +10,7 @@ import { User } from '../models/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Daily } from '../models/daily.entity';
+import { EUserType } from '../constants/configs';
 
 @Injectable()
 export class TimeSheetService {
@@ -261,10 +262,7 @@ export class TimeSheetService {
         .andWhere('("createdAt" < :today OR "createdAt" is NULL)', {
           today: Date.now() - 86400 * 1000,
         })
-        .andWhere('("roles_discord" @> :intern OR "roles_discord" @> :staff)', {
-          intern: ['INTERN'],
-          staff: ['STAFF'],
-        })
+        .andWhere('user_type = :userType', { userType: EUserType.MEZON })
         .andWhere(`"deactive" IS NOT TRUE`)
         .select('*')
         .execute();
@@ -388,6 +386,7 @@ export class TimeSheetService {
               .andWhere('("createdAt" < :today OR "createdAt" is NULL)', {
                 today: Date.now() - dayToMilliseconds,
               })
+              .andWhere('user_type = :userType', { userType: EUserType.MEZON })
               .andWhere(`"deactive" IS NOT TRUE`)
               .select('*')
               .getRawOne(),

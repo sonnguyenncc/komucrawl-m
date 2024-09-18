@@ -5,6 +5,7 @@ import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../models';
 import { SendMessageToUserDTO } from '../dto/sendMessageToUser';
+import { EUserType } from '../constants/configs';
 
 @Injectable()
 export class KomubotrestService {
@@ -31,6 +32,7 @@ export class KomubotrestService {
           }).andWhere(`"deactive" IS NOT true`);
         }),
       )
+      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .getOne();
   }
 
