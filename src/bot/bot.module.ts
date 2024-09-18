@@ -86,6 +86,12 @@ import {
   EventListenerUserChannelRemoved,
 } from './listeners';
 import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
+import { SendMessageSchedulerService } from './scheduler/send-message-scheduler.services';
+import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.command';
+import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services';
+import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
+import { KomubotrestService } from './komubot-rest/komubot-rest.service';
+import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -171,6 +177,7 @@ import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
     ToggleActiveService,
     Ncc8Command,
     ReportDailyService,
+    HolidayCommand,
     EventListenerChannelMessage,
     EventListenerMessageReaction,
     EventListenerChannelCreated,
@@ -179,7 +186,11 @@ import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
     WFHSchedulerService,
+    MeetingSchedulerService,
+    SendMessageSchedulerService,
+    KomubotrestService,
+    RegisterCommand,
   ],
-  controllers: [],
+  controllers: [KomubotrestController],
 })
 export class BotModule {}

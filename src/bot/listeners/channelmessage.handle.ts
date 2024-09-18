@@ -39,7 +39,7 @@ export class EventListenerChannelMessage {
   async handleMentioned(message: ChannelMessage) {
     try {
       if (
-        // message.is_public ||
+        message.is_public ||
         message.sender_id === this.clientConfigService.botKomuId
       )
         return;

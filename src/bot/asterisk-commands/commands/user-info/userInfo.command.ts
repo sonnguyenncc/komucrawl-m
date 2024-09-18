@@ -40,7 +40,7 @@ export class UserInfoCommand extends CommandMessage {
       .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .getOne();
 
-    if (!findUser && args.length)
+    if (!findUser)
       return this.replyMessageGenerate(
         {
           messageContent: EUserError.INVALID_USER,
@@ -66,7 +66,7 @@ export class UserInfoCommand extends CommandMessage {
 
     const projectData = pmData?.data?.result?.[0];
     const projectInfo = project
-      ? `${projectData.projectName} (${projectData.projectCode}) - PM ${projectData.pm?.fullName || 'Unknown'}`
+      ? `${projectData?.projectName} (${projectData?.projectCode}) - PM ${projectData?.pm?.fullName || 'Unknown'}`
       : '';
 
     const accountCreatedAt = moment(
@@ -83,7 +83,7 @@ export class UserInfoCommand extends CommandMessage {
       `• Id: ${findUser.userId}\n` +
       `• Account creation: ${accountCreatedAt.format('HH:mm DD-MM-YYYY')} (${accountCreatedAt.fromNow()})\n` +
       `• Phone: ${phoneNumber}\n` +
-      `• Project: ${projectInfo}` +
+      `• Project: ${projectData ? projectInfo : '(no information)'}` +
       '```';
 
     return this.replyMessageGenerate(

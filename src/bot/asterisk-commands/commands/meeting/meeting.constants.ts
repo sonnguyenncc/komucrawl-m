@@ -6,8 +6,6 @@ export const messHelp =
   '\n' +
   '*meeting now' +
   '\n' +
-  '*meeting meet' +
-  '\n' +
   '*meeting task dd/MM/YYYY HH:mm repeat timerepeat' +
   '\n' +
   '*meeting task dd/MM/YYYY HH:mm once' +

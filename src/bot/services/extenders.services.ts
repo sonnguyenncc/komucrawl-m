@@ -25,8 +25,8 @@ export class ExtendersService {
       findUser.bot = false;
       findUser.system = false;
       findUser.email = message.username;
-      findUser.display_name = message.display_name;
-      findUser.clan_nick = message.clan_nick;
+      findUser.display_name = message.display_name ?? '';
+      findUser.clan_nick = message.clan_nick ?? '';
       findUser.user_type = EUserType.MEZON;
       findUser.flags = 0;
       findUser.last_message_id = message.message_id;
@@ -47,8 +47,8 @@ export class ExtendersService {
       bot: false,
       system: false,
       email: message.username,
-      display_name: message.display_name,
-      clan_nick: message.clan_nick,
+      display_name: message.display_name ?? '',
+      clan_nick: message.clan_nick ?? '',
       flags: 0,
       last_message_id: message.message_id,
       scores_quiz: 0,
