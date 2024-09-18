@@ -168,7 +168,7 @@ export class SendMessageSchedulerService {
         this.client.sendMessage(
           this.clientConfigService.clandNccId,
           '0',
-          this.clientConfigService.machleoChannelId,
+          this.clientConfigService.mezonNhaCuaChungChannelId,
           EMessageMode.CHANNEL_MESSAGE,
           true,
           true,
