@@ -73,7 +73,7 @@ export class MeetingService {
   }
 
   async handleMeetingNoArgs(message) {
-    const calendarChannel = message.channelId;
+    const calendarChannel = message.channel_id;
     let list = await this.getListCalender(calendarChannel);
 
     let mess;

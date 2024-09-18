@@ -57,7 +57,7 @@ export class ReportDailyService {
             }
           })
           .join('\n');
-        messes.push(`${dailyString} \n ${mess}`);
+        messes.push(`${dailyString} \n${mess}`);
       }
       return messes;
     }
