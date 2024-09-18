@@ -14,7 +14,7 @@ export class ExtendersService {
 
   async addDBUser(message: ChannelMessage) {
     const findUser = await this.userRepository.findOne({
-      where: { userId: message.sender_id },
+      where: { userId: message.sender_id, user_type: EUserType.MEZON },
     });
 
     if (findUser) {
