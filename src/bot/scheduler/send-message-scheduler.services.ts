@@ -10,7 +10,7 @@ import { CronJob } from 'cron';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { MezonClient } from 'mezon-sdk';
-import { EMessageMode } from '../constants/configs';
+import { EMessageMode, EUserType } from '../constants/configs';
 import { TimeSheetService } from '../services/timesheet.services';
 
 @Injectable()
@@ -96,6 +96,7 @@ export class SendMessageSchedulerService {
             .createQueryBuilder()
             .where(`"email" = :email`, { email: list })
             .andWhere(`"deactive" IS NOT TRUE`)
+            .andWhere('user_type = :userType', { userType: EUserType.MEZON })
             .select('*')
             .execute();
 
@@ -141,6 +142,7 @@ export class SendMessageSchedulerService {
             email: item.email.slice(0, -9),
           })
           .andWhere('"deactive" IS NOT True')
+          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
           .select('users.*')
           .execute();
         const resultBirthday = await this.birthdayRepository.find();
@@ -216,6 +218,7 @@ export class SendMessageSchedulerService {
               { userOffFullday: userOffFullday },
             )
             .andWhere('"deactive" IS NOT TRUE')
+            .andWhere('user_type = :userType', { userType: EUserType.MEZON })
             .select('*')
             .getRawOne();
 
@@ -266,6 +269,7 @@ export class SendMessageSchedulerService {
               userOffFullday: userOffFullday,
             },
           )
+          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
           .andWhere(`"deactive" IS NOT TRUE`)
           .select('*')
           .getRawOne();
@@ -305,6 +309,7 @@ export class SendMessageSchedulerService {
                   userType: 'MEZON',
                 },
               )
+              .andWhere('user_type = :userType', { userType: EUserType.MEZON })
               .select('*')
               .getRawOne();
 
