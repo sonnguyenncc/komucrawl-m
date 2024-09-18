@@ -72,6 +72,10 @@ export class BotGateway {
     this.eventEmitter.emit(Events.UserChannelRemoved, msg);
   };
 
+  handleroleassigned = async (msg) => {
+    console.log(msg);
+  };
+
   handlechannelmessage = async (msg: ChannelMessage) => {
     try {
       if (msg.sender_id) {

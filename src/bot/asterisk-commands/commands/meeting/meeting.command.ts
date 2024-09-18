@@ -40,7 +40,7 @@ export class MeetingCommand extends CommandMessage {
 
       const listChannelVoiceUsers = (
         await this.client.listChannelVoiceUsers(
-          this.clientConfigService.clandNccId,
+          message.clan_id,
           '',
           ChannelType.CHANNEL_TYPE_VOICE,
         )

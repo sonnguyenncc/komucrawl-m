@@ -65,25 +65,6 @@ export class DailyCommand extends CommandMessage {
       .select('*')
       .getRawOne();
 
-    if (!findUser) {
-      const newUser = new User();
-      newUser.userId = senderId;
-      newUser.username = message.username;
-      newUser.discriminator = '0';
-      newUser.avatar = message.avatar;
-      newUser.bot = false;
-      newUser.system = false;
-      newUser.email = message.username;
-      newUser.flags = 0;
-      newUser.last_message_id = message.message_id;
-      newUser.scores_quiz = 0;
-      newUser.deactive = false;
-      newUser.botPing = false;
-      newUser.scores_workout = 0;
-      newUser.not_workout = 0;
-
-      await this.userRepository.save(newUser);
-    }
     const authorUsername = findUser.email;
     const emailAddress = generateEmail(authorUsername);
 

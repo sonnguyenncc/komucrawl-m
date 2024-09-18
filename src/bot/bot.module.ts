@@ -45,6 +45,7 @@ import {
   WOL,
   Dynamic,
   ChannelMezon,
+  QuizMsg,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -85,6 +86,7 @@ import {
   EventListenerUserChannelAdded,
   EventListenerUserChannelRemoved,
 } from './listeners';
+import { QuizService } from './services/quiz.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -137,6 +139,7 @@ import {
       ImportantSMS,
       WOL,
       Dynamic,
+      QuizMsg,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -176,6 +179,7 @@ import {
     EventListenerChannelDeleted,
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
+    QuizService,
     WFHSchedulerService,
   ],
   controllers: [],
