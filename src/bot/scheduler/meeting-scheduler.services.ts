@@ -1,12 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
-import { CronJob } from 'cron';
-import { SchedulerRegistry, CronExpression } from '@nestjs/schedule';
+import { Repository } from 'typeorm';
+import { CronExpression, Cron } from '@nestjs/schedule';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
-import { isFirstDayOfMonth, isLastDayOfMonth, isSameDay } from 'date-fns';
+import { isFirstDayOfMonth, isLastDayOfMonth } from 'date-fns';
 import { Meeting } from '../models/meeting.entity';
-import { VoiceChannels } from '../models/voiceChannel.entity';
 import { UtilsService } from '../services/utils.services';
 import { ChannelMezon } from '../models/mezonChannel.entity';
 import { ChannelType, MezonClient } from 'mezon-sdk';
@@ -20,7 +18,6 @@ export class MeetingSchedulerService {
     private utilsService: UtilsService,
     @InjectRepository(Meeting)
     private meetingRepository: Repository<Meeting>,
-    private schedulerRegistry: SchedulerRegistry,
     private configClient: ClientConfigService,
     @InjectRepository(ChannelMezon)
     private channelRepository: Repository<ChannelMezon>,
@@ -31,34 +28,6 @@ export class MeetingSchedulerService {
   }
 
   private readonly logger = new Logger(MeetingSchedulerService.name);
-
-  addCronJob(name: string, time: string, callback: () => void): void {
-    const job = new CronJob(
-      time,
-      () => {
-        this.logger.warn(`time (${time}) for job ${name} to run!`);
-        callback();
-      },
-      null,
-      true,
-      'Asia/Ho_Chi_Minh',
-    );
-
-    this.schedulerRegistry.addCronJob(name, job);
-    job.start();
-
-    this.logger.warn(`job ${name} added for each minute at ${time} seconds!`);
-  }
-
-  // Start cron job
-  startCronJobs(): void {
-    this.addCronJob('tagMeeting', CronExpression.EVERY_MINUTE, () =>
-      this.tagMeeting(),
-    );
-    this.addCronJob('updateReminderMeeting', CronExpression.EVERY_MINUTE, () =>
-      this.updateReminderMeeting(),
-    );
-  }
 
   async getListVoiceChannelAvalable() {
     let listChannelVoiceUsers = [];
@@ -89,7 +58,11 @@ export class MeetingSchedulerService {
     return listVoiceChannelAvalable;
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
   async tagMeeting() {
+    this.logger.warn(
+      `time ${CronExpression.EVERY_MINUTE} for job tagMeeting to run!`,
+    );
     if (await this.utilsService.checkHoliday()) return;
 
     const listVoiceChannelAvalable = await this.getListVoiceChannelAvalable();
@@ -394,7 +367,11 @@ export class MeetingSchedulerService {
     }
   }
 
+  @Cron(CronExpression.EVERY_MINUTE)
   async updateReminderMeeting() {
+    this.logger.warn(
+      `time ${CronExpression.EVERY_MINUTE} for job updateReminderMeeting to run!`,
+    );
     if (await this.utilsService.checkHoliday()) return;
     const repeatMeet = await this.meetingRepository.find({
       where: {
