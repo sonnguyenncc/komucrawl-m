@@ -22,9 +22,6 @@ async function bootstrap() {
   const sendMessageSchedulerService = app.get(SendMessageSchedulerService);
   await sendMessageSchedulerService.startCronJobs();
 
-  //MeetingSchedulerService
-  const meetingSchedulerService = app.get(MeetingSchedulerService);
-  await meetingSchedulerService.startCronJobs();
   await app.listen(8000);
 }
 bootstrap();
