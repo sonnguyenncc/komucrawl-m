@@ -47,15 +47,18 @@ export class Ncc8Command extends CommandMessage {
         if (!channel) return;
 
         const res = await this.axiosClientService.get(
-          `http://172.16.100.114:3000/ncc8/episode/${args[1]}`,
+          `${process.env.NCC8_API}/ncc8/episode/${args[1]}`,
         );
         if (!res) return;
 
-        // check channel is not streaming 
+        // check channel is not streaming
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
-          // this.ffmpegService.transcodeMp3ToRtmp(res?.data?.url, channel?.streaming_url)
-          this.ffmpegService.transcodeMp3ToRtmp("/home/minhnv/Downloads/test.mp3", channel?.streaming_url)
+          // /home/mjnk9xw/Downloads/test.mp3
+          this.ffmpegService.transcodeMp3ToRtmp(
+            res?.data?.url,
+            channel?.streaming_url,
+          );
         }
 
         return this.replyMessageGenerate(
