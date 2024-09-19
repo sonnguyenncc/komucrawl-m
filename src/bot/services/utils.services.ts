@@ -79,10 +79,12 @@ export class UtilsService {
 
   checkTimeMeeting() {
     const dateTimeNow = new Date();
-    const day = dateTimeNow.getDay();
+    dateTimeNow.setHours(dateTimeNow.getHours() + 7);
+    let day = dateTimeNow.getDay();
     const hourDateNow = dateTimeNow.getHours();
-    const dateNow = dateTimeNow.toLocaleDateString('en-US');
+    const dateNow = dateTimeNow.toLocaleDateString("en-US");
     const minuteDateNow = dateTimeNow.getMinutes();
+    dateTimeNow.setHours(0, 0, 0, 0);
 
     return {
       day,
