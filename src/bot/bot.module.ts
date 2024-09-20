@@ -57,6 +57,7 @@ import { ClientConfigService } from './config/client-config.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { TimeSheetService } from './services/timesheet.services';
+import { FFmpegService } from './services/ffmpeg.service';
 import { AxiosClientService } from './services/axiosClient.services';
 import { OrderCommand } from './asterisk-commands/commands/order/order.command';
 import { WolCommandService } from './asterisk-commands/commands/wol/wol.services';
@@ -170,6 +171,7 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
     ExtendersService,
     Asterisk,
     TimeSheetService,
+    FFmpegService,
     UtilsService,
     AxiosClientService,
     MentionSchedulerService,

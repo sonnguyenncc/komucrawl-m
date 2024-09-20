@@ -4,6 +4,11 @@ import { CommandMessage } from '../../abstracts/command.abstract';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
+import { FFmpegService } from 'src/bot/services/ffmpeg.service';
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 @Command('ncc8')
 export class Ncc8Command extends CommandMessage {
@@ -12,6 +17,7 @@ export class Ncc8Command extends CommandMessage {
     private clientConfigService: ClientConfigService,
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
+    private ffmpegService: FFmpegService,
   ) {
     super();
     this.client = this.clientService.getClient();
@@ -36,32 +42,34 @@ export class Ncc8Command extends CommandMessage {
 
       const textContent = `Go to `;
       try {
-        const res = await this.axiosClientService.get(
-          `http://172.16.100.114:3000/ncc8/episode/${args[1]}`,
-        );
-
         // call api in sdk
-        // const data = await this.client.registerStreamingChannel({
-        //   clan_id: message.clan_id,
-        //   channel_id: this.clientConfigService.ncc8ChannelId,
-        // });
+        const channel = await this.client.registerStreamingChannel({
+          clan_id: message.clan_id,
+          channel_id: this.clientConfigService.ncc8ChannelId,
+        });
 
-        // const res = await this.axiosClientService.get(
-        //   'https://dev-mezon.nccsoft.vn:7305/v2/streaming-channels'
-        // );
+        if (!channel) return;
 
-        // console.log(
-        //   'data',
-        //   message.clan_id,
-        //   this.clientConfigService.ncc8ChannelId,
-        //   data,
-        // );
-
+        const res = await this.axiosClientService.get(
+          `${process.env.NCC8_API}/ncc8/episode/${args[1]}`,
+        );
         if (!res) return;
+
+        // check channel is not streaming
+        // ffmpeg mp3 to streaming url
+        if (channel?.streaming_url !== '') {
+          // /home/mjnk9xw/Downloads/test.mp3
+          this.ffmpegService.transcodeMp3ToRtmp(
+            res?.data?.url,
+            channel?.streaming_url,
+          );
+        }
+
+        await sleep(1000);
 
         return this.replyMessageGenerate(
           {
-            messageContent: textContent + `# ${res?.data?.url}` ?? '',
+            messageContent: textContent,
             hg: [
               {
                 channelid: this.clientConfigService.ncc8ChannelId,
