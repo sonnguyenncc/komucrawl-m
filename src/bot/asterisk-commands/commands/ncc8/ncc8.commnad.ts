@@ -6,6 +6,10 @@ import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { FFmpegService } from 'src/bot/services/ffmpeg.service';
 
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 @Command('ncc8')
 export class Ncc8Command extends CommandMessage {
   private client: MezonClient;
@@ -60,6 +64,8 @@ export class Ncc8Command extends CommandMessage {
             channel?.streaming_url,
           );
         }
+
+        await sleep(1000);
 
         return this.replyMessageGenerate(
           {
