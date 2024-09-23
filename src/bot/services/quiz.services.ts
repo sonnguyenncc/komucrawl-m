@@ -109,7 +109,7 @@ export class QuizService {
       : question.title;
     const mess = `${title}\n ${question.options
       .map((otp, index) => `${index + 1} - ${otp}`)
-      .join('\n')}`;
+      .join('\n ')}`;
     return mess;
   }
   async addScores(userId) {
