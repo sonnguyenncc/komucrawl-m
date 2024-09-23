@@ -244,7 +244,7 @@ export class EventListenerChannelMessage {
 
       if (userQuiz) {
         let mess = '';
-
+        const messOptions = {};
         if (userQuiz['answer']) {
           mess = `Bạn đã trả lời câu hỏi này rồi`;
         } else {
@@ -264,14 +264,29 @@ export class EventListenerChannelMessage {
                 );
                 if (!newUser) return;
                 mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
+                await this.quizService.saveQuestionCorrect(
+                  userQuiz['userId'],
+                  userQuiz['quizId'],
+                  Number(answer),
+                );
               } else {
                 mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
+                await this.quizService.saveQuestionInCorrect(
+                  userQuiz['userId'],
+                  userQuiz['quizId'],
+                  Number(answer),
+                );
               }
-              await this.quizService.saveQuestionCorrect(
-                userQuiz['userId'],
-                userQuiz['quizId'],
-                Number(answer),
-              );
+
+              mess = `${mess}\nClick on the following link if you want to complain `;
+              const link = `https://quiz.nccsoft.vn/question/update/${userQuiz['quizId']}`;
+              messOptions['lk'] = [
+                {
+                  s: mess.length,
+                  e: mess.length + link.length,
+                },
+              ];
+              mess = mess + link;
             }
           }
         }
@@ -279,7 +294,7 @@ export class EventListenerChannelMessage {
         return await this.client.sendMessageUser(
           userQuiz.userId,
           mess,
-          {},
+          messOptions,
           [],
           refGenerate(msg),
         );

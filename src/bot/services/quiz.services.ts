@@ -167,21 +167,21 @@ export class QuizService {
     }
   }
 
-  //   async saveQuestionInCorrect(userId, questionid, answerkey) {
-  //     try {
-  //       await this.userQuizRepository
-  //         .createQueryBuilder()
-  //         .update(UserQuiz)
-  //         .set({ correct: false, answer: answerkey, updateAt: Date.now() })
-  //         .where(`"userId" = :userId`, { userId: userId })
-  //         .andWhere(`"quizId" = :quizId`, {
-  //           quizId: questionid,
-  //         })
-  //         .execute();
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }
+  async saveQuestionInCorrect(userId, questionid, answerkey) {
+    try {
+      await this.userQuizRepository
+        .createQueryBuilder()
+        .update(UserQuiz)
+        .set({ correct: false, answer: answerkey, updateAt: Date.now() })
+        .where(`"userId" = :userId`, { userId: userId })
+        .andWhere(`"quizId" = :quizId`, {
+          quizId: questionid,
+        })
+        .execute();
+    } catch (error) {
+      console.log(error);
+    }
+  }
   saveQuestion(userId, questionid, message_id) {
     return this.userQuizRepository.insert({
       userId,
