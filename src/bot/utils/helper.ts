@@ -81,3 +81,9 @@ export function checkTimeMention(date: Date): boolean {
     (dateInMs >= firstTimeAfternoon && dateInMs <= lastTimeAfternoon)
   );
 }
+
+export function checkAnswerFormat(answer: string, maxAnswer: number) {
+  const num = Number(answer);
+  console.log(!isNaN(num) && num <= maxAnswer);
+  return !isNaN(num) && num <= maxAnswer;
+}

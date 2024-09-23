@@ -95,6 +95,7 @@ import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services'
 import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
 import { KomubotrestService } from './komubot-rest/komubot-rest.service';
 import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
+import { KomuService } from './services/komu.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -196,6 +197,7 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
     SendMessageSchedulerService,
     KomubotrestService,
     RegisterCommand,
+    KomuService,
   ],
   controllers: [KomubotrestController],
 })
