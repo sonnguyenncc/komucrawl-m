@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApiMessageReaction, ChannelType, Events } from 'mezon-sdk';
-import { Mentioned } from '../models';
+import { Mentioned, MentionedPmConfirm, User, WorkFromHome } from '../models';
 import { Repository } from 'typeorm';
 import { BaseHandleEvent } from './base.handle';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ApiCreateChannelDescRequest } from 'mezon-sdk/dist/cjs/interfaces/client';
-import { BOT_ID } from '../constants/configs';
+import { BOT_ID, EMessageMode, EUserType } from '../constants/configs';
+import { ClientConfigService } from '../config/client-config.service';
+import { AxiosClientService } from '../services/axiosClient.services';
+import { MentionSchedulerService } from '../scheduler/mention-scheduler.services';
 
 @Injectable()
 export class EventListenerMessageReaction extends BaseHandleEvent {
@@ -15,6 +18,14 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     clientService: MezonClientService,
     @InjectRepository(Mentioned)
     private mentionedRepository: Repository<Mentioned>,
+    @InjectRepository(WorkFromHome)
+    private wfhRepository: Repository<WorkFromHome>,
+    private clientConfig: ClientConfigService,
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(MentionedPmConfirm)
+    private mentionPmConfirm: Repository<MentionedPmConfirm>,
+    private axiosClientService: AxiosClientService,
+    private mentionSchedulerService: MentionSchedulerService,
   ) {
     super(clientService);
   }
@@ -97,18 +108,18 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     //   if (resolveMention) {
 
     // this.client.sendMessage()
-    const data: ApiCreateChannelDescRequest = {
-      clan_id: '0',
-      channel_id: '0',
-      category_id: '0',
-      type: ChannelType.CHANNEL_TYPE_DM,
-      user_ids: [messageReaction.sender_id, BOT_ID],
-    };
-    try {
-      const result = await this.client.createChannelDesc(data);
-    } catch (e) {
-      console.log(e);
-    }
+    // const data: ApiCreateChannelDescRequest = {
+    //   clan_id: '0',
+    //   channel_id: '0',
+    //   category_id: '0',
+    //   type: ChannelType.CHANNEL_TYPE_DM,
+    //   user_ids: [messageReaction.sender_id, BOT_ID],
+    // };
+    // try {
+    //   const result = await this.client.createChannelDesc(data);
+    // } catch (e) {
+    //   console.log(e);
+    // }
 
     await this.mentionedRepository
       .createQueryBuilder()
@@ -121,9 +132,15 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
         mentionUserId: messageReaction.sender_id,
       })
       .andWhere(`"reactionTimestamp" IS NULL`)
+      // .andWhere('"authorId" != :authorId', {
+      //   authorId: this.clientConfig.botKomuId,
+      // })
       .execute();
 
-    //   }
+    // TODO: apply react confirm 
+    // await this.handleReactionMentonMessage(messageReaction);
+    // await this.handlePmConfirmWfh(messageReaction);
+
 
     // const dataBwl = await this.bwlReactionRepository.findOne({
     //   relations: ["bwl", "author", "channel"],
@@ -176,5 +193,260 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     //     createdTimestamp: createdTimestamp,
     //   });
     // } catch (error) {}
+  }
+
+  async handleReactionMentonMessage(messageReaction: ApiMessageReaction) {
+    try {
+      const data = await this.mentionedRepository
+        .createQueryBuilder('mention')
+        .where('mention.messageId = :messageId', {
+          messageId: messageReaction.message_id,
+        })
+        .andWhere('mention.authorId = :authorId', {
+          authorId: this.clientConfig.botKomuId,
+        })
+        .andWhere('mention.channelId = :channelId', {
+          channelId: this.clientConfig.machleoChannelId,
+        })
+        .andWhere('mention.mentionUserId = :mentionUserId', {
+          mentionUserId: messageReaction.sender_id,
+        })
+        .andWhere('mention.reactionTimestamp IS NULL')
+        .getOne();
+      console.log('data', data);
+
+      if (!data || !['checked', 'x'].includes(messageReaction.emoji)) return;
+      this.mentionedRepository.update(
+        { messageId: messageReaction.message_id },
+        { reactionTimestamp: new Date().getTime() },
+      );
+      if (messageReaction.emoji === 'checked') {
+        await this.wfhRepository
+          .createQueryBuilder()
+          .update(WorkFromHome)
+          .set({
+            pmconfirm: false,
+            data: 'komu_wfh_accept',
+            status: 'ACCEPT',
+          })
+          .where(`"userId" = :userId`, { userId: data.mentionUserId })
+          .execute();
+        await this.client.sendMessageUser(
+          data.mentionUserId,
+          'You just accepted the machleo punishment. Thanks!!!',
+        );
+      } else {
+        const wfhdata = await this.wfhRepository.findOne({
+          where: {
+            createdAt: data.createdTimestamp,
+          },
+        });
+        if (!wfhdata) {
+          await this.client.sendMessageUser(data.mentionUserId, 'No WFH found');
+          return;
+        }
+        const msec = (new Date() as any) - (new Date(wfhdata.createdAt) as any);
+        if (msec > 3600000) {
+          await this.client.sendMessageUser(
+            data.mentionUserId,
+            'WFH complain is expired. You have an hour to request.',
+          );
+          return;
+        }
+
+        if (wfhdata.complain) {
+          await this.client.sendMessageUser(
+            data.mentionUserId,
+            'You have already complained.',
+          );
+          return;
+        }
+
+        const userdb = await this.userRepository
+          .createQueryBuilder()
+          .where(`"userId" = :userId`, { userId: data.mentionUserId })
+          .andWhere('"deactive" IS NOT True')
+          .andWhere(`"user_type" = :user_type`, { user_type: EUserType.MEZON })
+          .select('*')
+          .getRawOne();
+        if (!userdb) {
+          await this.client.sendMessageUser(
+            data.mentionUserId,
+            'User is not valid',
+          );
+          return;
+        }
+        const url = encodeURI(
+          `${this.clientConfig.wiki.api_url}${userdb.email}@ncc.asia`,
+        );
+        const response = await this.axiosClientService.get(url, {
+          httpsAgent: this.clientConfig.https,
+          headers: {
+            'X-Secret-Key': this.clientConfig.wikiApiKeySecret,
+          },
+        });
+        if (
+          response.data == null ||
+          response.data == undefined ||
+          response.data.result == null ||
+          response.data.result == undefined ||
+          response.data.result.projectDtos == undefined ||
+          response.data.result.projectDtos.length == 0
+        ) {
+          let msg = `There is no PM to confirm for **${userdb.email}**. Please contact to your PM`;
+          return await this.client.sendMessageUser(data.mentionUserId, msg);
+        }
+
+        const pmdb = await this.userRepository
+          .createQueryBuilder()
+          .where(`("username" = :username or "email" = :email)`, {
+            username: response.data.result.projectDtos[0].pmUsername,
+            email: response.data.result.projectDtos[0].pmUsername,
+          })
+          .andWhere(`"deactive" IS NOT true`)
+          .andWhere(`"user_type" = :user_type`, { user_type: EUserType.MEZON })
+          .select('*')
+          .getRawOne();
+
+        // to test
+        // const pmdb = await this.userRepository
+        //   .createQueryBuilder()
+        //   .where(`"userId" = :userId`, { userId: '1827994776956309504' })
+        //   .andWhere('"deactive" IS NOT True')
+        //   .andWhere(`"user_type" = :user_type`, { user_type: EUserType.MEZON })
+        //   .select('*')
+        //   .getRawOne();
+
+        if (!pmdb) {
+          return await this.client.sendMessageUser(
+            data.mentionUserId,
+            `Cannot fetch data for PM ${response.data.result.projectDtos[0].pmUsername}`,
+          );
+        }
+        const contentMessage =
+          '```' +
+          `[CONFIRM WFH] [ID:${wfhdata.id}]` +
+          `\n` +
+          `<@${userdb.username}> just sent WFH complain. Please check?\n`;
+        const confirmText = 'React ❌ to Reject or ✅ to Confirm```';
+        const dataMess = await this.client.sendMessageUser(
+          pmdb.userId,
+          contentMessage + confirmText,
+          {
+            mk: [
+              {
+                type: 't',
+                s: 0,
+                e: contentMessage.length + confirmText.length,
+              },
+            ],
+          },
+        );
+
+        await this.wfhRepository.update({ id: wfhdata.id }, { complain: true });
+        await this.client.sendMessageUser(
+          userdb.userId,
+          `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
+        );
+      }
+    } catch (error) {
+      console.log('handleReactionMentonMessage', error);
+    }
+  }
+
+  async handlePmConfirmWfh(messageReaction: ApiMessageReaction) {
+    try {
+      const data = await this.mentionPmConfirm.findOne({
+        where: { messageId: messageReaction.message_id, confirm: false },
+      });
+      if (!data || !['checked', 'x'].includes(messageReaction.emoji)) return;
+      this.mentionPmConfirm.update(
+        { messageId: messageReaction.message_id },
+        {
+          confirm: true,
+          confirmAt: new Date().getTime(),
+          value: messageReaction.emoji === 'checked' ? 'CONFIRM' : 'REJECT',
+        },
+      );
+      const dataWfh = await this.wfhRepository.findOne({
+        where: { id: data.wfhId },
+      });
+      const dataMention = await this.mentionedRepository.findOne({
+        where: { createdTimestamp: dataWfh.createdAt },
+      });
+
+      const userId = dataMention.mentionUserId;
+      const pmId = messageReaction.sender_id;
+      const typeConfirm =
+        messageReaction.emoji === 'checked' ? 'Confirmed' : 'Rejected';
+
+      const dataBot = await this.userRepository.findOne({
+        where: {
+          userId: this.clientConfig.botKomuId,
+        },
+      });
+
+      const pmUsername = (await this.mentionSchedulerService.getUserData(pmId))
+        .userName;
+      const username = (await this.mentionSchedulerService.getUserData(userId))
+        .userName;
+
+      const text = `${pmUsername} just ${typeConfirm} WFH complain from `;
+      const messageContent = text + `${username}`;
+
+      await this.client.sendMessage(
+        this.clientConfig.clandNccId,
+        '0',
+        this.clientConfig.machleoChannelId,
+        EMessageMode.CHANNEL_MESSAGE,
+        true,
+        true,
+        {
+          t: messageContent,
+        },
+        [
+          { user_id: pmId, s: 0, e: pmUsername.length },
+          {
+            user_id: userId,
+            s: text.length,
+            e: text.length + username.length,
+          },
+        ],
+        [],
+        [
+          {
+            message_ref_id: dataMention.messageId,
+            message_sender_id: this.clientConfig.botKomuId,
+            content: dataWfh.wfhMsg,
+            ref_type: 0,
+            message_sender_username: dataBot.username,
+            mesages_sender_avatar: dataBot.avatar,
+            message_sender_clan_nick: dataBot.clan_nick,
+            message_sender_display_name: dataBot.display_name,
+            has_attachment: false,
+          },
+        ],
+      );
+
+      await this.wfhRepository
+        .createQueryBuilder()
+        .update(WorkFromHome)
+        .set({
+          pmconfirm: typeConfirm === 'Confirmed',
+          data: messageContent,
+          status: 'APPROVED',
+        })
+        .where(`"id" = :id`, {
+          id: data.wfhId,
+        })
+        .execute();
+
+      await this.client.sendMessageUser(
+        pmId,
+        `You just ${typeConfirm} WFH complain for ${username}`,
+      );
+    } catch (error) {
+      console.log('handlePmConfirmWfh', error);
+    }
   }
 }

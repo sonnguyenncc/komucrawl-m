@@ -10,7 +10,16 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { Repository } from 'typeorm';
-import { Channel, Mentioned, Msg, Quiz, User, UserQuiz } from '../models';
+import { checkTimeMention } from '../utils/helper';
+import {
+  Channel,
+  Mentioned,
+  MentionedPmConfirm,
+  Msg,
+  Quiz,
+  User,
+  UserQuiz,
+} from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BOT_ID, EMessageMode } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
@@ -35,6 +44,8 @@ export class EventListenerChannelMessage {
     private channelRepository: Repository<Channel>,
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(MentionedPmConfirm)
+    private mentionPmConfirm: Repository<MentionedPmConfirm>,
     @InjectRepository(UserQuiz)
     private userQuizRepository: Repository<UserQuiz>,
     @InjectRepository(Quiz)
@@ -92,9 +103,13 @@ export class EventListenerChannelMessage {
       // } else {
       //   validCategory = checkCategories.includes(channel.name.toUpperCase());
       // }
-      // if (!checkTimeMention(new Date())) return;
 
-      if (message.mentions && message.mentions.length && validCategory) {
+      if (!checkTimeMention(new Date())) return;
+      if (
+        Array.isArray(message.mentions) &&
+        message.mentions.length &&
+        validCategory
+      ) {
         message.mentions.forEach(async (user) => {
           if (
             user?.user_id === this.clientConfigService.botKomuId ||
@@ -159,6 +174,7 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleAIforbot(msg: ChannelMessage) {
+    if (msg.channel_id === this.clientConfigService.machleoChannelId) return;
     try {
       const mentions = Array.isArray(msg.mentions) ? msg.mentions : [];
       const message = msg.content.t;
@@ -223,6 +239,25 @@ export class EventListenerChannelMessage {
       }
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  @OnEvent(Events.ChannelMessage)
+  async insertPmConfirmWFT(message: ChannelMessage) {
+    if (!message.content || typeof message.content.t !== 'string') return;
+    if (
+      message.content.t.includes('[CONFIRM WFH]') &&
+      message.mode === EMessageMode.DM_MESSAGE &&
+      message.sender_id === this.clientConfigService.botKomuId
+    ) {
+      const wfhId = +message.content.t.match(/ID:(\d+)/)[1];
+      const dataMentionPmConfirm = {
+        messageId: message.message_id,
+        wfhId,
+        confirm: false,
+        value: '',
+      };
+      await this.mentionPmConfirm.insert(dataMentionPmConfirm);
     }
   }
 

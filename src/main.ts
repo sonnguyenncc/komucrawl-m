@@ -15,8 +15,8 @@ async function bootstrap() {
   bot.initEvent();
 
   // start cronjob machleo
-  // const mentionSchedulerService = app.get(MentionSchedulerService);
-  // await mentionSchedulerService.startCronJobs();
+  const mentionSchedulerService = app.get(MentionSchedulerService);
+  await mentionSchedulerService.startCronJobs();
 
   // start cronjob message note
   const sendMessageSchedulerService = app.get(SendMessageSchedulerService);

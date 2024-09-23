@@ -39,4 +39,5 @@ export { ImportantSMS } from './importantSMS.entity';
 export { WOL } from './wol.entity';
 export { Dynamic } from './dynamic.entity';
 export { ChannelMezon } from './mezonChannel.entity';
+export { MentionedPmConfirm } from './metionPmConfirm.entity';
 export { QuizMsg } from './quizMsg.entity';

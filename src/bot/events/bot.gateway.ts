@@ -44,7 +44,7 @@ export class BotGateway {
   // processMessage(msg: ChannelMessage) {}
 
   handlemessagereaction = async (msg: ApiMessageReaction) => {
-    // this.eventEmitter.emit(Events.MessageReaction, msg);
+    this.eventEmitter.emit(Events.MessageReaction, msg);
   };
 
   handlechannelcreated = async (channel: ChannelCreatedEvent) => {
@@ -63,10 +63,6 @@ export class BotGateway {
     console.log('role event assign', msg);
   }
 
-  private async handlegivecoffee(msg) {
-    console.log('give coffee event', msg);
-  }
-
   handleuserchanneladded = async (user: UserChannelAddedEvent) => {
     this.eventEmitter.emit(Events.UserChannelAdded, user);
   };
@@ -82,6 +78,10 @@ export class BotGateway {
   handleuserchannelremoved = async (msg: UserChannelRemovedEvent) => {
     this.eventEmitter.emit(Events.UserChannelRemoved, msg);
   };
+
+  handlegivecoffee =  async (data) => {
+    this.eventEmitter.emit(Events.GiveCoffee, data);
+  }
 
   handleroleassigned = async (msg) => {
     console.log(msg);

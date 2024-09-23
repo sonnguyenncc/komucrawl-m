@@ -25,6 +25,7 @@ export const TABLE = {
   ORDER: 'komu_order',
   MSG: 'komu_msg',
   MENTIONED: 'komu_mentioned',
+  MENTIONED_PM_CONFIRM: 'komu_mentionedPmConfirm',
   MEETING: 'komu_meeting',
   LEAVE: 'komu_leave',
   KEEP: 'komu_keep',
