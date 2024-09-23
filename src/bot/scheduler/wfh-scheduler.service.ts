@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, Interval } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { TimeSheetService } from '../services/timesheet.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ChannelType, MezonClient } from 'mezon-sdk';
@@ -24,8 +24,7 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  // @Cron('*/5 9-11,13-17 * * 1-5')
-  @Interval(10000)
+  @Cron('*/5 9-11,13-17 * * 1-5')
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
@@ -55,7 +54,7 @@ export class WFHSchedulerService {
         useridJoining = userIds.map((user) => user.userId);
       }
       const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
-      console.log(thirtyMinutesAgo);
+
       const userLastSend = await this.userRepository
         .createQueryBuilder('user')
         .leftJoin(
@@ -112,87 +111,10 @@ export class WFHSchedulerService {
         )
         .select('*')
         .execute();
-      console.log(userSend.map((user) => user.username));
+
       await Promise.all(
-        userSend.map(
-          (user) =>
-            user.username == 'son.nguyenhoai' &&
-            this.quizeService.sendQuizToSingleUser(user),
-        ),
+        userSend.map((user) => this.quizeService.sendQuizToSingleUser(user)),
       );
-
-      // console.log(userWFHIds);
-      // const userWfhWithSomeCodition = await this.quizMsgRepository
-      //   .createQueryBuilder()
-      //   .where(
-      //     userOff && userOff.length > 0
-      //       ? '"username" NOT IN (:...userOff)'
-      //       : 'true',
-      //     {
-      //       userOff: userOff,
-      //     },
-      //   )
-      //   .andWhere(
-      //     useridJoining && useridJoining.length > 0
-      //       ? '"email" NOT IN (:...useridJoining)'
-      //       : 'true',
-      //     {
-      //       useridJoining: useridJoining,
-      //     },
-      //   )
-      //   .andWhere('"deactive" IS NOT True')
-      //   .andWhere('("roles_discord" @> :intern OR "roles_discord" @> :staff)', {
-      //     intern: ['INTERN'],
-      //     staff: ['STAFF'],
-      //   })
-      //   .andWhere('"last_message_id" IS Not Null')
-      //   .andWhere('"last_bot_message_id" IS Not Null')
-      //   .select('*')
-      //   .execute();
-      // const thirtyMinutes = 1800000;
-
-      // const messageBotUserEmail = arrayMessageBotUser.map(
-      //   (item) => item.username,
-      // );
-
-      // if (messageBotUserEmail.length === 0) return;
-      // const message_timestampUser = await this.userRepository
-      //   .createQueryBuilder('user')
-      //   .innerJoin('komu_msg', 'm', 'user.last_message_id = m.id')
-      //   .where('"email" IN (:...messageBotUserEmail)', {
-      //     messageBotUserEmail: messageBotUserEmail,
-      //   })
-      //   .select('*')
-      //   .execute();
-
-      // const coditionGetMessageTimeStamp = (user) => {
-      //   let result = false;
-      //   if (!user.createdTimestamp) {
-      //     result = true;
-      //   } else {
-      //     if (Date.now() - user.createdTimestamp >= thirtyMinutes) {
-      //       result = true;
-      //     }
-      //   }
-      //   return result;
-      // };
-      // const arrayUser = message_timestampUser.filter((user) =>
-      //   coditionGetMessageTimeStamp(user),
-      // );
-      // try {
-      //   await Promise.all(
-      //     arrayUser.map((userWfh) =>
-      //       this.sendQuizToSingleUserService.sendQuizToSingleUser(
-      //         client,
-      //         userWfh,
-      //         true,
-      //         null,
-      //       ),
-      //     ),
-      //   );
-      // } catch (error) {
-      //   console.log(error);
-      // }
     } catch (error) {
       console.log(error);
     }
