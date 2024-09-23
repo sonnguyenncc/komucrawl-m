@@ -20,7 +20,7 @@ import {
   replyMessageGenerate,
 } from '../utils/generateReplyMessage';
 import { ClientConfigService } from '../config/client-config.service';
-import { checkAnswerFormat } from '../utils/helper';
+import { checkAnswerFormat, checkTimeMention } from '../utils/helper';
 import { QuizService } from '../services/quiz.services';
 
 @Injectable()
