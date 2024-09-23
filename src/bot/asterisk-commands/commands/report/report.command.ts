@@ -3,10 +3,16 @@ import { CommandMessage } from '../../abstracts/command.abstract';
 import { ChannelMessage } from 'mezon-sdk';
 import { messHelpDaily } from './report.constants';
 import { ReportDailyService } from './reportDaily.service';
+import { ReportHolidayService } from './reportHoliday.service';
+import { ReportOrderService } from './reportOrder.service';
 
 @Command('report')
 export class ReportCommand extends CommandMessage {
-  constructor(private reportDailyService: ReportDailyService) {
+  constructor(
+    private reportDailyService: ReportDailyService,
+    private reportHolidayService: ReportHolidayService,
+    private reportOrderService: ReportOrderService,
+  ) {
     super();
   }
 
@@ -61,6 +67,32 @@ export class ReportCommand extends CommandMessage {
           }
         }
         break;
+      case 'holiday':
+        const textContentHoliday =
+          await this.reportHolidayService.reportHoliday();
+        console.log('textContent', textContentHoliday);
+        return this.replyMessageGenerate(
+          {
+            messageContent: '```' + textContentHoliday + '```',
+            mk: [{ type: 't', s: 0, e: textContentHoliday.length + 6 }],
+          },
+          message,
+        );
+      case 'order':
+        const textContentOrder =
+          await this.reportOrderService.reportOrder(message);
+        if (textContentOrder) {
+          return textContentOrder.map((m) => {
+            return this.replyMessageGenerate(
+              {
+                messageContent: '```' + m + '```',
+                mk: [{ type: 't', s: 0, e: m.length + 6 }],
+              },
+              message,
+            );
+          });
+        }
+
       default:
         break;
     }

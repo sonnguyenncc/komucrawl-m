@@ -79,10 +79,16 @@ export class UtilsService {
 
   checkTimeMeeting() {
     const dateTimeNow = new Date();
-    dateTimeNow.setHours(dateTimeNow.getHours() + 7);
+    const timeZoneOffset = dateTimeNow.getTimezoneOffset();
+    // check UTC
+    if (timeZoneOffset !== -420) {
+      dateTimeNow.setHours(
+        dateTimeNow.getHours() + (420 + timeZoneOffset) / 60, // set UTC+7
+      );
+    }
     let day = dateTimeNow.getDay();
     const hourDateNow = dateTimeNow.getHours();
-    const dateNow = dateTimeNow.toLocaleDateString("en-US");
+    const dateNow = dateTimeNow.toLocaleDateString('en-US');
     const minuteDateNow = dateTimeNow.getMinutes();
     dateTimeNow.setHours(0, 0, 0, 0);
 

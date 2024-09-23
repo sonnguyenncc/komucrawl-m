@@ -45,6 +45,7 @@ import {
   WOL,
   Dynamic,
   ChannelMezon,
+  MentionedPmConfirm,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -93,6 +94,9 @@ import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services'
 import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
 import { KomubotrestService } from './komubot-rest/komubot-rest.service';
 import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
+import { EventGiveCoffee } from './listeners/givecoffee.handle';
+import { ReportHolidayService } from './asterisk-commands/commands/report/reportHoliday.service';
+import { ReportOrderService } from './asterisk-commands/commands/report/reportOrder.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -103,6 +107,7 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
     }),
     DiscoveryModule,
     TypeOrmModule.forFeature([
+      MentionedPmConfirm,
       ChannelMezon,
       BwlReaction,
       Bwl,
@@ -187,10 +192,13 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
     EventListenerChannelDeleted,
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
+    EventGiveCoffee,
     WFHSchedulerService,
     MeetingSchedulerService,
     SendMessageSchedulerService,
     KomubotrestService,
+    ReportHolidayService,
+    ReportOrderService,
     RegisterCommand,
   ],
   controllers: [KomubotrestController],

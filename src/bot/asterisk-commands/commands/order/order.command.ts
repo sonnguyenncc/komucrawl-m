@@ -73,27 +73,17 @@ export class OrderCommand extends CommandMessage {
           message,
         );
       }
-
+      const listMessage = [];
       for (let i = 0; i < listOrder.length; i += 50) {
         const chunk = listOrder.slice(i, i + 50);
         const mess = chunk
           .map((list) => `<${list.username}> order ${list.menu.toUpperCase()}`)
           .join('\n');
-        const messageContent = `Chốt đơn!!! Tổng là ${listOrder.length} người\n`;
-        return this.replyMessageGenerate(
-          {
-            messageContent: '```' + messageContent + mess + '```',
-            mk: [
-              {
-                type: 't',
-                s: 0,
-                e: (messageContent + mess).length + 6,
-              },
-            ],
-          },
-          message,
-        );
+
+        listMessage.push(mess);
       }
+      const messageContent = `Chốt đơn!!! Tổng là ${listOrder.length} người\n`;
+
       const reportOrder =
         await this.orderCommandService.updateFinishOrder(channelId);
       await Promise.all(
@@ -101,6 +91,23 @@ export class OrderCommand extends CommandMessage {
           this.orderCommandService.upDateUserCancel(item),
         ),
       );
+
+      if (listMessage.length)
+        return listMessage.map((mess) =>
+          this.replyMessageGenerate(
+            {
+              messageContent: '```' + messageContent + mess + '```',
+              mk: [
+                {
+                  type: 't',
+                  s: 0,
+                  e: (messageContent + mess).length + 6,
+                },
+              ],
+            },
+            message,
+          ),
+        );
     }
 
     const resultString = args.join(' ');

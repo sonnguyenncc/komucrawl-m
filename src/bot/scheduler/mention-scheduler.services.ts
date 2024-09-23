@@ -67,13 +67,13 @@ export class MentionSchedulerService {
       } `;
       await this.client.sendMessageUser(
         user.mentionUserId,
-        textContent + `#` + ` nhé!`,
+        textContent + `#` + ` nhé!`, // '#' at message is channel, auto fill at FE
         {
           hg: [
             {
               channelid: user.channelId,
-              s: textContent.length,
-              e: textContent.length + 1,
+              s: textContent.length, // replace to '#' in text
+              e: textContent.length + 1, // replace to '#' in text
             },
           ],
         },
@@ -85,8 +85,8 @@ export class MentionSchedulerService {
   }
 
   async processNotiUsers(mentionedUsers) {
-    const millisecondsOfTwentyfiveMinutes = 1500000;
-    const millisecondsOfThirtyMinutes = 1800000;
+    const millisecondsOfTwentyfiveMinutes = 60000;
+    const millisecondsOfThirtyMinutes = 120000;
     const dateNow = Date.now();
 
     const notiUser = mentionedUsers.filter((item) => {
@@ -132,41 +132,45 @@ export class MentionSchedulerService {
       const content = `${userName} không trả lời tin nhắn mention của ${authorName} lúc ${timestamp} tại ${thread ? 'thread' : 'channel'} `;
       const textConfirm = '`React ❌ to Complain or ✅ to Accept`';
 
-      const data = await this.wfhRepository.save({
-        user: userData,
-        wfhMsg: content,
-        complain: false,
-        pmconfirm: false,
-        status: 'ACTIVE',
-        type: 'mention',
-        createdAt: Date.now(),
-      });
+      const messageReply = {
+        t: content + '#!\n' + textConfirm, // '#' at message is channel, auto fill at FE
+        mk: [
+          {
+            type: EMarkdownType.SINGLE,
+            s: content.length + 3,
+            e: content.length + 3 + textConfirm.length,
+          },
+        ],
+        hg: [
+          {
+            channelid: user.channelId,
+            s: content.length, // replace to '#' in text
+            e: content.length + 1, // replace to '#' in text
+          },
+        ],
+      };
+
+      // TODO: apply react confirm
+      // const createdAt = Date.now();
+      // const data = await this.wfhRepository.save({
+      //   user: userData,
+      //   wfhMsg: JSON.stringify(messageReply),
+      //   complain: false,
+      //   pmconfirm: false,
+      //   status: 'ACTIVE',
+      //   type: 'mention',
+      //   createdAt: createdAt,
+      // });
 
       // send message to channel machleo
-      await this.client.sendMessage(
+      const botMessage = await this.client.sendMessage(
         this.clientConfig.clandNccId,
         '0',
         this.clientConfig.machleoChannelId,
         EMessageMode.CHANNEL_MESSAGE,
         true,
         true,
-        {
-          t: content + '#!\n' + textConfirm,
-          mk: [
-            {
-              type: EMarkdownType.SINGLE,
-              s: content.length + 3,
-              e: content.length + 3 + textConfirm.length,
-            },
-          ],
-          hg: [
-            {
-              channelid: user.channelId,
-              s: content.length,
-              e: content.length + 1,
-            },
-          ],
-        },
+        messageReply,
         [
           { user_id: user.mentionUserId, s: 0, e: userName.length },
           {
@@ -177,10 +181,24 @@ export class MentionSchedulerService {
         ],
       );
 
+      // TODO: apply react confirm
+      // const dataBot = {
+      //   messageId: botMessage.message_id,
+      //   authorId: this.clientConfig.botKomuId,
+      //   channelId: botMessage.channel_id,
+      //   mentionUserId: user.mentionUserId,
+      //   createdTimestamp: createdAt,
+      //   noti: true,
+      //   confirm: true,
+      //   punish: false,
+      //   reactionTimestamp: null,
+      // };
+      // await this.mentionRepository.insert(dataBot);
+
       // update user punish
       await this.mentionRepository.update(
         { id: user.id },
-        { confirm: true, punish: true },
+        { confirm: true, punish: false }, // TODO: apply react confirm
       );
     } catch (error) {
       console.log(error);

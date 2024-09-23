@@ -142,7 +142,7 @@ export class SendMessageSchedulerService {
             email: item.email.slice(0, -9),
           })
           .andWhere('"deactive" IS NOT True')
-          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+          .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
           .select('users.*')
           .execute();
         const resultBirthday = await this.birthdayRepository.find();
@@ -209,8 +209,8 @@ export class SendMessageSchedulerService {
         listsUser.data.map(async (user) => {
           const checkUser = await this.userRepository
             .createQueryBuilder()
-            .where('email = :email', { email: user.komuUserName })
-            .orWhere('username = :username', { username: user.komuUserName })
+            .where('"email" = :email', { email: user.komuUserName })
+            .orWhere('"username" = :username', { username: user.komuUserName })
             .andWhere(
               userOffFullday && userOffFullday.length > 0
                 ? '"email" NOT IN (:...userOffFullday)'
@@ -218,7 +218,7 @@ export class SendMessageSchedulerService {
               { userOffFullday: userOffFullday },
             )
             .andWhere('"deactive" IS NOT TRUE')
-            .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
             .select('*')
             .getRawOne();
 
@@ -255,10 +255,10 @@ export class SendMessageSchedulerService {
       userListNotCheckOut.map(async (user) => {
         const checkUser = await this.userRepository
           .createQueryBuilder()
-          .where('email = :email', {
+          .where('"email" = :email', {
             email: user.komuUserName,
           })
-          .orWhere('username = :username', {
+          .orWhere('"username" = :username', {
             username: user.komuUserName,
           })
           .andWhere(
@@ -269,7 +269,7 @@ export class SendMessageSchedulerService {
               userOffFullday: userOffFullday,
             },
           )
-          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+          .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
           .andWhere(`"deactive" IS NOT TRUE`)
           .select('*')
           .getRawOne();

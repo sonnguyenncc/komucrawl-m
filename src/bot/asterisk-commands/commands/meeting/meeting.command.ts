@@ -76,11 +76,11 @@ export class MeetingCommand extends CommandMessage {
             ? `${message.clan_nick || message.display_name || message.username} is in ${currentUserVoiceChannel.length} voice channels!\n`
             : '';
         const hg = currentUserVoiceChannel.map((item) => {
-          messageContent += `Everyone please join the voice channel #\n`;
+          messageContent += `Everyone please join the voice channel #\n`; // '#' at message is channel, auto fill at FE
           return {
             channelid: item.channel_id,
-            s: messageContent.length - 2,
-            e: messageContent.length - 1,
+            s: messageContent.length - 2, // replace to '#' in text
+            e: messageContent.length - 1, // replace to '#' in text
           };
         });
         return this.replyMessageGenerate(
@@ -107,13 +107,13 @@ export class MeetingCommand extends CommandMessage {
       const messageContent = `Our meeting room is `;
       return this.replyMessageGenerate(
         {
-          messageContent: messageContent + '#',
+          messageContent: messageContent + '#', // '#' at message is channel, auto fill at FE
           hg: [
             {
               channelid:
                 listVoiceChannelAvalable[randomIndexVoiceChannel].channel_id,
-              s: messageContent.length,
-              e: messageContent.length + 1,
+              s: messageContent.length, // replace to '#' in text
+              e: messageContent.length + 1, // replace to '#' in text
             },
           ],
         },
