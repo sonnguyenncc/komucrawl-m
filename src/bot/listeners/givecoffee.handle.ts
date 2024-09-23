@@ -30,7 +30,7 @@ export class EventGiveCoffee extends BaseHandleEvent {
       if (!userName || !authorName) return;
 
       const firstText = `${authorName} just sent a coffee to `;
-      const messageContent = firstText + `${userName} at # channel!`; // '#' at message is channel, auto fill at FE
+      const messageContent = firstText + `${userName}`;
       await this.client.sendMessage(
         data.clan_id,
         '0',
@@ -40,13 +40,6 @@ export class EventGiveCoffee extends BaseHandleEvent {
         true,
         {
           t: messageContent,
-          hg: [
-            {
-              channelid: data.channel_id,
-              s: messageContent.length - 10, // replace to '#' in text
-              e: messageContent.length - 9, // replace to '#' in text
-            },
-          ],
         },
         [
           { user_id: data.sender_id, s: 0, e: authorName.length },
