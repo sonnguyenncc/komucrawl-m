@@ -121,7 +121,7 @@ export class QuizService {
         .andWhere('user_type = :userType', { userType: EUserType.MEZON })
         .select('*')
         .execute();
-      console.log(user);
+
       if (user[0].scores_quiz) {
         await this.userRepository
           .createQueryBuilder()
