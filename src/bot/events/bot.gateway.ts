@@ -41,7 +41,6 @@ export class BotGateway {
       }
     }
   }
-
   // processMessage(msg: ChannelMessage) {}
 
   handlemessagereaction = async (msg: ApiMessageReaction) => {
@@ -54,6 +53,14 @@ export class BotGateway {
 
   private async handleuserclanremoved(user: UserClanRemovedEvent) {
     console.log('onuserclanremoved', user);
+  }
+
+  private async handlerole(msg) {
+    console.log('role event', msg);
+  }
+
+  private async handleroleassign(msg) {
+    console.log('role event assign', msg);
   }
 
   handleuserchanneladded = async (user: UserChannelAddedEvent) => {
@@ -75,6 +82,10 @@ export class BotGateway {
   handlegivecoffee =  async (data) => {
     this.eventEmitter.emit(Events.GiveCoffee, data);
   }
+
+  handleroleassigned = async (msg) => {
+    console.log(msg);
+  };
 
   handlechannelmessage = async (msg: ChannelMessage) => {
     try {

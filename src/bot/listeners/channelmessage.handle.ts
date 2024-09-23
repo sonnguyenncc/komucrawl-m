@@ -10,14 +10,27 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { Repository } from 'typeorm';
-import { Channel, Mentioned, MentionedPmConfirm, Msg, User } from '../models';
-import { InjectRepository } from '@nestjs/typeorm';
 import { checkTimeMention } from '../utils/helper';
-import { BOT_ID, EMessageMode, EUserType } from '../constants/configs';
+import {
+  Channel,
+  Mentioned,
+  MentionedPmConfirm,
+  Msg,
+  Quiz,
+  User,
+  UserQuiz,
+} from '../models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BOT_ID, EMessageMode } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { ApiUrl } from '../constants/api_url';
-import { replyMessageGenerate } from '../utils/generateReplyMessage';
+import {
+  refGenerate,
+  replyMessageGenerate,
+} from '../utils/generateReplyMessage';
 import { ClientConfigService } from '../config/client-config.service';
+import { checkAnswerFormat } from '../utils/helper';
+import { QuizService } from '../services/quiz.services';
 
 @Injectable()
 export class EventListenerChannelMessage {
@@ -33,15 +46,22 @@ export class EventListenerChannelMessage {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(MentionedPmConfirm)
     private mentionPmConfirm: Repository<MentionedPmConfirm>,
+    @InjectRepository(UserQuiz)
+    private userQuizRepository: Repository<UserQuiz>,
+    @InjectRepository(Quiz)
+    private quizRepository: Repository<Quiz>,
     private readonly axiosClientService: AxiosClientService,
     private clientConfigService: ClientConfigService,
-  ) {}
+    private quizService: QuizService,
+  ) {
+    this.client = clientService.getClient();
+  }
 
   @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
     try {
       if (
-        message.is_public ||
+        // message.is_public ||
         message.sender_id === this.clientConfigService.botKomuId
       )
         return;
@@ -52,7 +72,6 @@ export class EventListenerChannelMessage {
           .set({ last_message_id: message.message_id })
           .where('"userId" = :userId', { userId: message.sender_id })
           .andWhere(`deactive IS NOT True`)
-          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
           .execute(),
         this.mentionedRepository
           .createQueryBuilder()
@@ -66,12 +85,7 @@ export class EventListenerChannelMessage {
           .andWhere(`"reactionTimestamp" IS NULL`)
           .execute(),
       ]);
-      if (
-        message.mode === 4 ||
-        ('t' in message.content &&
-          typeof message.content.t === 'string' &&
-          message.content.t.split(' ').includes('@here'))
-      )
+      if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
         return;
       // const checkCategories: string[] = [
       //   'PROJECTS',
@@ -170,7 +184,8 @@ export class EventListenerChannelMessage {
           mentions?.some((obj) => obj.user_id === BOT_ID) ||
           refs?.some((obj) => obj.message_sender_id === BOT_ID)) &&
         typeof message == 'string' &&
-        msg.sender_id !== BOT_ID
+        msg.sender_id !== BOT_ID &&
+        message.length > 10
       ) {
         const url = ApiUrl.AIApi;
         let AIReplyMessage;
@@ -243,6 +258,67 @@ export class EventListenerChannelMessage {
         value: '',
       };
       await this.mentionPmConfirm.insert(dataMentionPmConfirm);
+    }
+  }
+
+  @OnEvent(Events.ChannelMessage)
+  async handleAnswerBotQuiz(msg: ChannelMessage) {
+    if (
+      msg.mode == EMessageMode.DM_MESSAGE &&
+      msg.references &&
+      Array.isArray(msg.references) &&
+      msg.references.length > 0
+    ) {
+      const userQuiz = await this.userQuizRepository
+        .createQueryBuilder()
+        .where('"message_id" = :mess_id', {
+          mess_id: msg.references[0].message_ref_id,
+        })
+        .select('*')
+        .getRawOne();
+
+      if (userQuiz) {
+        let mess = '';
+
+        if (userQuiz['answer']) {
+          mess = `Bạn đã trả lời câu hỏi này rồi`;
+        } else {
+          const question = await this.quizRepository
+            .createQueryBuilder()
+            .where('id = :quizId', { quizId: userQuiz['quizId'] })
+            .select('*')
+            .getRawOne();
+          if (question) {
+            const answer = msg.content.t;
+            if (!checkAnswerFormat(answer, question['options'].length)) {
+              mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
+            } else {
+              if (Number(answer) === Number(question['correct'])) {
+                const newUser = await this.quizService.addScores(
+                  userQuiz['userId'],
+                );
+                if (!newUser) return;
+                mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
+              } else {
+                mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
+              }
+              await this.quizService.saveQuestionCorrect(
+                userQuiz['userId'],
+                userQuiz['quizId'],
+                Number(answer),
+              );
+            }
+          }
+        }
+
+        return await this.client.sendMessageUser(
+          userQuiz.userId,
+          mess,
+          {},
+          [],
+          refGenerate(msg),
+        );
+      }
     }
   }
 }

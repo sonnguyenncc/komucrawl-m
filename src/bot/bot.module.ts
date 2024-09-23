@@ -46,6 +46,7 @@ import {
   Dynamic,
   ChannelMezon,
   MentionedPmConfirm,
+  QuizMsg,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -87,6 +88,7 @@ import {
   EventListenerUserChannelAdded,
   EventListenerUserChannelRemoved,
 } from './listeners';
+import { QuizService } from './services/quiz.services';
 import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
 import { SendMessageSchedulerService } from './scheduler/send-message-scheduler.services';
 import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.command';
@@ -97,6 +99,7 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
 import { EventGiveCoffee } from './listeners/givecoffee.handle';
 import { ReportHolidayService } from './asterisk-commands/commands/report/reportHoliday.service';
 import { ReportOrderService } from './asterisk-commands/commands/report/reportOrder.service';
+import { KomuService } from './services/komu.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -150,6 +153,7 @@ import { ReportOrderService } from './asterisk-commands/commands/report/reportOr
       ImportantSMS,
       WOL,
       Dynamic,
+      QuizMsg,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -193,6 +197,7 @@ import { ReportOrderService } from './asterisk-commands/commands/report/reportOr
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
     EventGiveCoffee,
+    QuizService,
     WFHSchedulerService,
     MeetingSchedulerService,
     SendMessageSchedulerService,
@@ -200,6 +205,7 @@ import { ReportOrderService } from './asterisk-commands/commands/report/reportOr
     ReportHolidayService,
     ReportOrderService,
     RegisterCommand,
+    KomuService,
   ],
   controllers: [KomubotrestController],
 })
