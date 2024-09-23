@@ -79,9 +79,9 @@ export class BotGateway {
     this.eventEmitter.emit(Events.UserChannelRemoved, msg);
   };
 
-  handlegivecoffee =  async (data) => {
+  handlegivecoffee = async (data) => {
     this.eventEmitter.emit(Events.GiveCoffee, data);
-  }
+  };
 
   handleroleassigned = async (msg) => {
     console.log(msg);

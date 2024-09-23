@@ -10,16 +10,7 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { Repository } from 'typeorm';
-import { checkTimeMention } from '../utils/helper';
-import {
-  Channel,
-  Mentioned,
-  MentionedPmConfirm,
-  Msg,
-  Quiz,
-  User,
-  UserQuiz,
-} from '../models';
+import { Channel, Mentioned, Msg, User } from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BOT_ID, EMessageMode } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
@@ -44,12 +35,6 @@ export class EventListenerChannelMessage {
     private channelRepository: Repository<Channel>,
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(MentionedPmConfirm)
-    private mentionPmConfirm: Repository<MentionedPmConfirm>,
-    @InjectRepository(UserQuiz)
-    private userQuizRepository: Repository<UserQuiz>,
-    @InjectRepository(Quiz)
-    private quizRepository: Repository<Quiz>,
     private readonly axiosClientService: AxiosClientService,
     private clientConfigService: ClientConfigService,
     private quizService: QuizService,
@@ -239,86 +224,6 @@ export class EventListenerChannelMessage {
       }
     } catch (e) {
       console.log(e);
-    }
-  }
-
-  @OnEvent(Events.ChannelMessage)
-  async insertPmConfirmWFT(message: ChannelMessage) {
-    if (!message.content || typeof message.content.t !== 'string') return;
-    if (
-      message.content.t.includes('[CONFIRM WFH]') &&
-      message.mode === EMessageMode.DM_MESSAGE &&
-      message.sender_id === this.clientConfigService.botKomuId
-    ) {
-      const wfhId = +message.content.t.match(/ID:(\d+)/)[1];
-      const dataMentionPmConfirm = {
-        messageId: message.message_id,
-        wfhId,
-        confirm: false,
-        value: '',
-      };
-      await this.mentionPmConfirm.insert(dataMentionPmConfirm);
-    }
-  }
-
-  @OnEvent(Events.ChannelMessage)
-  async handleAnswerBotQuiz(msg: ChannelMessage) {
-    if (
-      msg.mode == EMessageMode.DM_MESSAGE &&
-      msg.references &&
-      Array.isArray(msg.references) &&
-      msg.references.length > 0
-    ) {
-      const userQuiz = await this.userQuizRepository
-        .createQueryBuilder()
-        .where('"message_id" = :mess_id', {
-          mess_id: msg.references[0].message_ref_id,
-        })
-        .select('*')
-        .getRawOne();
-
-      if (userQuiz) {
-        let mess = '';
-
-        if (userQuiz['answer']) {
-          mess = `Bạn đã trả lời câu hỏi này rồi`;
-        } else {
-          const question = await this.quizRepository
-            .createQueryBuilder()
-            .where('id = :quizId', { quizId: userQuiz['quizId'] })
-            .select('*')
-            .getRawOne();
-          if (question) {
-            const answer = msg.content.t;
-            if (!checkAnswerFormat(answer, question['options'].length)) {
-              mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
-            } else {
-              if (Number(answer) === Number(question['correct'])) {
-                const newUser = await this.quizService.addScores(
-                  userQuiz['userId'],
-                );
-                if (!newUser) return;
-                mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
-              } else {
-                mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
-              }
-              await this.quizService.saveQuestionCorrect(
-                userQuiz['userId'],
-                userQuiz['quizId'],
-                Number(answer),
-              );
-            }
-          }
-        }
-
-        return await this.client.sendMessageUser(
-          userQuiz.userId,
-          mess,
-          {},
-          [],
-          refGenerate(msg),
-        );
-      }
     }
   }
 }
