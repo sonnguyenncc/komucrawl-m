@@ -60,7 +60,8 @@ export class MentionSchedulerService {
 
   async notifyUser(user) {
     try {
-      const authorName = (await this.getUserData(user.authorId)).userName;
+      const authorName = (await this.getUserData(user.authorId))?.userName;
+      if (!authorName) return;
       const threadNoti = false;
       const textContent = `Hãy trả lời ${authorName} tại ${
         threadNoti ? 'thread' : 'channel'
@@ -113,7 +114,10 @@ export class MentionSchedulerService {
       return {
         userData,
         userName:
-          userData?.clan_nick || userData?.display_name || userData?.username,
+          userData?.clan_nick ||
+          userData?.display_name ||
+          userData?.username ||
+          '',
       };
     } catch (error) {
       console.log('error', error);
@@ -124,7 +128,7 @@ export class MentionSchedulerService {
     try {
       const { userData, userName } = await this.getUserData(user.mentionUserId);
       const authorName = (await this.getUserData(user.authorId)).userName;
-
+      if (!userName || !authorName) return;
       const timestamp = moment(parseInt(user.createdTimestamp.toString()))
         .utcOffset(420)
         .format('YYYY-MM-DD HH:mm:ss');

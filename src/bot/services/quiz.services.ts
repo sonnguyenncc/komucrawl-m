@@ -122,6 +122,8 @@ export class QuizService {
         .select('*')
         .execute();
 
+      if (!user) return;
+
       if (user[0].scores_quiz) {
         await this.userRepository
           .createQueryBuilder()
