@@ -45,6 +45,7 @@ import {
   WOL,
   Dynamic,
   ChannelMezon,
+  QuizMsg,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -86,6 +87,7 @@ import {
   EventListenerUserChannelAdded,
   EventListenerUserChannelRemoved,
 } from './listeners';
+import { QuizService } from './services/quiz.services';
 import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
 import { SendMessageSchedulerService } from './scheduler/send-message-scheduler.services';
 import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.command';
@@ -93,6 +95,7 @@ import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services'
 import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
 import { KomubotrestService } from './komubot-rest/komubot-rest.service';
 import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
+import { KomuService } from './services/komu.services';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -145,6 +148,7 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
       ImportantSMS,
       WOL,
       Dynamic,
+      QuizMsg,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -187,11 +191,13 @@ import { RegisterCommand } from './asterisk-commands/commands/register/register.
     EventListenerChannelDeleted,
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
+    QuizService,
     WFHSchedulerService,
     MeetingSchedulerService,
     SendMessageSchedulerService,
     KomubotrestService,
     RegisterCommand,
+    KomuService,
   ],
   controllers: [KomubotrestController],
 })
