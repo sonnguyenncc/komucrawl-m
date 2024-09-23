@@ -13,7 +13,7 @@ import { Repository } from 'typeorm';
 import { Channel, Mentioned, Msg, User } from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { checkTimeMention } from '../utils/helper';
-import { BOT_ID } from '../constants/configs';
+import { BOT_ID, EUserType } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { ApiUrl } from '../constants/api_url';
 import { replyMessageGenerate } from '../utils/generateReplyMessage';
@@ -39,7 +39,7 @@ export class EventListenerChannelMessage {
   async handleMentioned(message: ChannelMessage) {
     try {
       if (
-        // message.is_public ||
+        message.is_public ||
         message.sender_id === this.clientConfigService.botKomuId
       )
         return;
@@ -50,6 +50,7 @@ export class EventListenerChannelMessage {
           .set({ last_message_id: message.message_id })
           .where('"userId" = :userId', { userId: message.sender_id })
           .andWhere(`deactive IS NOT True`)
+          .andWhere('user_type = :userType', { userType: EUserType.MEZON })
           .execute(),
         this.mentionedRepository
           .createQueryBuilder()
@@ -63,7 +64,12 @@ export class EventListenerChannelMessage {
           .andWhere(`"reactionTimestamp" IS NULL`)
           .execute(),
       ]);
-      if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
+      if (
+        message.mode === 4 ||
+        ('t' in message.content &&
+          typeof message.content.t === 'string' &&
+          message.content.t.split(' ').includes('@here'))
+      )
         return;
       // const checkCategories: string[] = [
       //   'PROJECTS',

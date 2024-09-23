@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { EUserType } from 'src/bot/constants/configs';
 import { Penalty } from 'src/bot/models/penatly.entity';
 import { User } from 'src/bot/models/user.entity';
 import { Brackets, Repository } from 'typeorm';
@@ -64,6 +65,7 @@ export class PenaltyService {
         }),
       )
       .andWhere(`"deactive" IS NOT true`)
+      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .select('*')
       .execute();
   }
@@ -73,6 +75,7 @@ export class PenaltyService {
       .createQueryBuilder()
       .where(`"userId" = :userId`, { userId: _userId })
       .andWhere(`"deactive" IS NOT true`)
+      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .select('*')
       .execute();
   }
@@ -81,6 +84,7 @@ export class PenaltyService {
     return await this.userRepository
       .createQueryBuilder()
       .where(`"username" =:username`, { username: _username })
+      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
       .andWhere(`"deactive" IS NOT true`)
       .select('*')
       .execute();

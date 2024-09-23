@@ -3,14 +3,24 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { subDays } from 'date-fns';
 import { Repository } from 'typeorm';
 import { Holiday } from '../models/holiday.entity';
+import { AxiosClientService } from './axiosClient.services';
+import { MezonClient } from 'mezon-sdk';
+import { MezonClientService } from 'src/mezon/services/client.service';
+import { ClientConfigService } from '../config/client-config.service';
 
 const timeUTC = 60000 * 60 * 7;
 @Injectable()
 export class UtilsService {
+  private client: MezonClient;
   constructor(
     @InjectRepository(Holiday)
     private holidayRepository: Repository<Holiday>,
-  ) {}
+    private axiosClientService: AxiosClientService,
+    private clientService: MezonClientService,
+    private clientConfigService: ClientConfigService,
+  ) {
+    this.client = this.clientService.getClient();
+  }
 
   getYesterdayDate() {
     return subDays(new Date().setHours(23, 59, 59, 999), 1).getTime() - timeUTC;
@@ -70,9 +80,9 @@ export class UtilsService {
   checkTimeMeeting() {
     const dateTimeNow = new Date();
     dateTimeNow.setHours(dateTimeNow.getHours() + 7);
-    const day = dateTimeNow.getDay();
+    let day = dateTimeNow.getDay();
     const hourDateNow = dateTimeNow.getHours();
-    const dateNow = dateTimeNow.toLocaleDateString('en-US');
+    const dateNow = dateTimeNow.toLocaleDateString("en-US");
     const minuteDateNow = dateTimeNow.getMinutes();
     dateTimeNow.setHours(0, 0, 0, 0);
 
@@ -369,5 +379,57 @@ export class UtilsService {
       );
     }
     return arrayDay.map((item) => getDayofWeek(item));
+  }
+
+  async getUserOffWork(date?) {
+    try {
+      const baseUrl =
+        'https://timesheetapi.nccsoft.vn/api/services/app/Public/GetAllUserLeaveDay';
+      const url = date ? `${baseUrl}?date=${date.toDateString()}` : baseUrl;
+
+      const response = await this.axiosClientService.get(url);
+      const result = response?.data?.result || [];
+
+      const filterUsers = (type) =>
+        result
+          .filter((user) => user.message.includes(type))
+          .map((item) => item.emailAddress.replace('@ncc.asia', ''));
+
+      const userOffFullday = filterUsers('Off Fullday');
+      const userOffMorning = filterUsers('Off Morning');
+      const userOffAfternoon = filterUsers('Off Afternoon');
+
+      const notSendUser =
+        this.getStatusDay() === 'Morning'
+          ? [...userOffFullday, ...userOffMorning]
+          : [...userOffFullday, ...userOffAfternoon];
+
+      return { notSendUser, userOffFullday, userOffMorning, userOffAfternoon };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  getStatusDay() {
+    const date = new Date();
+    const hour = date.getHours() + date.getTimezoneOffset() / -60;
+
+    if (hour < 5) {
+      return 'Morning';
+    } else if (hour < 11) {
+      return 'Afternoon';
+    }
+    return 'Evening';
+  }
+
+  async sendMessageToDev(data) {
+    try {
+      await this.client.sendMessageUser(
+        this.clientConfigService.devMezonUserId,
+        `ERROR: *avatar Cant find user or userID: ${data}`,
+      );
+    } catch (error) {
+      console.log('sendMessageToDev', error);
+    }
   }
 }

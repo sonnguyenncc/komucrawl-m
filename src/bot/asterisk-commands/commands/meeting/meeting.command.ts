@@ -3,7 +3,6 @@ import { Command } from 'src/bot/base/commandRegister.decorator';
 import { CommandMessage } from '../../abstracts/command.abstract';
 import { MeetingService } from './meeting.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
-import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelMezon } from 'src/bot/models';
 import { Repository } from 'typeorm';
@@ -16,7 +15,6 @@ export class MeetingCommand extends CommandMessage {
   constructor(
     private meetingService: MeetingService,
     private clientService: MezonClientService,
-    private clientConfigService: ClientConfigService,
     @InjectRepository(ChannelMezon)
     private channelRepository: Repository<ChannelMezon>,
   ) {
@@ -34,18 +32,22 @@ export class MeetingCommand extends CommandMessage {
       );
     }
     if (args[0] === 'now') {
-      const listVoiceChannel = (await this.channelRepository.find()).filter(
-        (item) => item.channel_type === ChannelType.CHANNEL_TYPE_VOICE,
-      );
+      let listChannelVoiceUsers = [];
+      try {
+        listChannelVoiceUsers = (
+          await this.client.listChannelVoiceUsers(
+            message.clan_id,
+            '',
+            ChannelType.CHANNEL_TYPE_VOICE,
+          )
+        )?.voice_channel_users;
+      } catch (error) {
+        console.log('listChannelVoiceUsers', error);
+      }
 
-      const listChannelVoiceUsers = (
-        await this.client.listChannelVoiceUsers(
-          message.clan_id,
-          '',
-          ChannelType.CHANNEL_TYPE_VOICE,
-        )
-      ).voice_channel_users;
-
+      const listVoiceChannel = await this.channelRepository.find({
+        where: { channel_type: ChannelType.CHANNEL_TYPE_VOICE },
+      });
       const listVoiceChannelIdUsed = [];
       listChannelVoiceUsers.forEach((item) => {
         if (!listVoiceChannelIdUsed.includes(item.channel_id))
@@ -55,14 +57,23 @@ export class MeetingCommand extends CommandMessage {
         (item) => !listVoiceChannelIdUsed.includes(item.channel_id),
       );
 
-      const currentUserVoiceChannel = listChannelVoiceUsers.filter(
-        (item) => item.participant === message.display_name,
-      );
+      const filter = new Set();
+      const currentUserVoiceChannel = listChannelVoiceUsers.filter((item) => {
+        if (item.participant !== message.display_name) {
+          return false;
+        }
+        const identifier = `${item.user_id}-${item.channel_id}`;
+        if (!filter.has(identifier)) {
+          filter.add(identifier);
+          return true;
+        }
+        return false;
+      });
 
       if (currentUserVoiceChannel.length) {
         let messageContent =
           currentUserVoiceChannel.length > 1
-            ? `${message.clan_nick || message.display_name || message.username} are in ${currentUserVoiceChannel.length} voice channels!\n`
+            ? `${message.clan_nick || message.display_name || message.username} is in ${currentUserVoiceChannel.length} voice channels!\n`
             : '';
         const hg = currentUserVoiceChannel.map((item) => {
           messageContent += `Everyone please join the voice channel #\n`;
@@ -149,6 +160,7 @@ export class MeetingCommand extends CommandMessage {
         return this.replyMessageGenerate(
           {
             messageContent: messHelp,
+            mk: [{ type: 't', s: 0, e: messHelp.length }],
           },
           message,
         );
@@ -169,6 +181,7 @@ export class MeetingCommand extends CommandMessage {
         return this.replyMessageGenerate(
           {
             messageContent: messHelp,
+            mk: [{ type: 't', s: 0, e: messHelp.length }],
           },
           message,
         );
@@ -188,7 +201,8 @@ export class MeetingCommand extends CommandMessage {
     if (!allowedRepeats.includes(repeat)) {
       return this.replyMessageGenerate(
         {
-          messageContent: messHelp + '2222',
+          messageContent: messHelp,
+          mk: [{ type: 't', s: 0, e: messHelp.length }],
         },
         message,
       );

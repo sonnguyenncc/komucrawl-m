@@ -11,7 +11,10 @@ export class HelpCommand extends CommandMessage {
 
   execute(args: string[], message: ChannelMessage) {
     const allCommands = CommandStorage.getAllCommands();
-    const allCommandKeys = Array.from(allCommands.keys());
+    const hidenCommandList = ['holiday', 'register', 'ncc8'];
+    const allCommandKeys = Array.from(allCommands.keys()).filter(
+      (item) => !hidenCommandList.includes(item),
+    );
     const messageContent =
       '```' +
       'KOMU - Help Menu' +

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApiUrl } from 'src/bot/constants/api_url';
+import { EUserType } from 'src/bot/constants/configs';
 import { Daily, User } from 'src/bot/models';
 import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 import { TimeSheetService } from 'src/bot/services/timesheet.services';
@@ -57,7 +58,7 @@ export class ReportDailyService {
             }
           })
           .join('\n');
-        messes.push(`${dailyString} \n ${mess}`);
+        messes.push(`${dailyString} \n${mess}`);
       }
       return messes;
     }
@@ -125,6 +126,9 @@ export class ReportDailyService {
       )
       .andWhere('("createdAt" < :today OR "createdAt" is NULL)', {
         today: Date.now() - 86400 * 1000,
+      })
+      .andWhere('user_type = :userType', {
+        userType: EUserType.MEZON.toString(),
       })
       .andWhere(`"deactive" IS NOT TRUE`)
       .select('*')
@@ -234,6 +238,9 @@ export class ReportDailyService {
           })
           .andWhere('("createdAt" < :today OR "createdAt" is NULL)', {
             today: Date.now() - dayToMilliseconds,
+          })
+          .andWhere('user_type = :userType', {
+            userType: EUserType.MEZON.toString(),
           })
           .andWhere(`"deactive" IS NOT TRUE`)
           .select('*')

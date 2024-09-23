@@ -35,7 +35,7 @@ export class AvatarCommand extends CommandMessage {
         : { userId: queryUser, user_type: EUserType.MEZON },
     });
 
-    if (!findUser && args.length)
+    if (!findUser)
       return this.replyMessageGenerate(
         {
           messageContent: EUserError.INVALID_USER,

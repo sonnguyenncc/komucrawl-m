@@ -58,6 +58,7 @@ import { ClientConfigService } from './config/client-config.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { TimeSheetService } from './services/timesheet.services';
+import { FFmpegService } from './services/ffmpeg.service';
 import { AxiosClientService } from './services/axiosClient.services';
 import { OrderCommand } from './asterisk-commands/commands/order/order.command';
 import { WolCommandService } from './asterisk-commands/commands/wol/wol.services';
@@ -87,6 +88,13 @@ import {
   EventListenerUserChannelRemoved,
 } from './listeners';
 import { QuizService } from './services/quiz.services';
+import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
+import { SendMessageSchedulerService } from './scheduler/send-message-scheduler.services';
+import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.command';
+import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services';
+import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
+import { KomubotrestService } from './komubot-rest/komubot-rest.service';
+import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -166,12 +174,15 @@ import { QuizService } from './services/quiz.services';
     ExtendersService,
     Asterisk,
     TimeSheetService,
+    FFmpegService,
     UtilsService,
     AxiosClientService,
     MentionSchedulerService,
     ToggleActiveCommand,
     ToggleActiveService,
+    Ncc8Command,
     ReportDailyService,
+    HolidayCommand,
     EventListenerChannelMessage,
     EventListenerMessageReaction,
     EventListenerChannelCreated,
@@ -181,7 +192,11 @@ import { QuizService } from './services/quiz.services';
     EventListenerUserChannelRemoved,
     QuizService,
     WFHSchedulerService,
+    MeetingSchedulerService,
+    SendMessageSchedulerService,
+    KomubotrestService,
+    RegisterCommand,
   ],
-  controllers: [],
+  controllers: [KomubotrestController],
 })
 export class BotModule {}
