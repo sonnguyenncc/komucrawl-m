@@ -99,7 +99,7 @@ export class SendMessageSchedulerService {
             .andWhere('user_type = :userType', { userType: EUserType.MEZON })
             .select('*')
             .execute();
-
+          if (!checkUser) return;
           await Promise.all(
             checkUser.map(async (user) => {
               try {
@@ -145,6 +145,7 @@ export class SendMessageSchedulerService {
           .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
           .select('users.*')
           .execute();
+        if (!birthday) return;
         const resultBirthday = await this.birthdayRepository.find();
         const items = resultBirthday.map((item) => item.title);
         let wishes = items;
@@ -273,7 +274,7 @@ export class SendMessageSchedulerService {
           .andWhere(`"deactive" IS NOT TRUE`)
           .select('*')
           .getRawOne();
-        if (checkUser && checkUser !== null) {
+        if (checkUser && checkUser.userId) {
           this.client.sendMessageUser(
             checkUser.userId,
             'Đừng quên checkout trước khi ra về nhé!!!',

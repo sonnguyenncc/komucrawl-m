@@ -22,10 +22,12 @@ export class EventGiveCoffee extends BaseHandleEvent {
     try {
       const authorName = (
         await this.mentionSchedulerService.getUserData(data.sender_id)
-      ).userName;
+      )?.userName;
       const userName = (
         await this.mentionSchedulerService.getUserData(data.receiver_id)
-      ).userName;
+      )?.userName;
+
+      if (!userName || !authorName) return;
 
       const firstText = `${authorName} just sent a coffee to `;
       const messageContent = firstText + `${userName} at # channel!`; // '#' at message is channel, auto fill at FE

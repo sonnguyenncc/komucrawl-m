@@ -137,10 +137,9 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       // })
       .execute();
 
-    // TODO: apply react confirm 
+    // TODO: apply react confirm
     // await this.handleReactionMentonMessage(messageReaction);
     // await this.handlePmConfirmWfh(messageReaction);
-
 
     // const dataBwl = await this.bwlReactionRepository.findOne({
     //   relations: ["bwl", "author", "channel"],
@@ -387,9 +386,10 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       });
 
       const pmUsername = (await this.mentionSchedulerService.getUserData(pmId))
-        .userName;
+        ?.userName;
       const username = (await this.mentionSchedulerService.getUserData(userId))
-        .userName;
+        ?.userName;
+      if (!username || !pmUsername) return;
 
       const text = `${pmUsername} just ${typeConfirm} WFH complain from `;
       const messageContent = text + `${username}`;
