@@ -10,7 +10,16 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { Asterisk } from '../asterisk-commands/asterisk';
 import { Repository } from 'typeorm';
-import { Channel, Mentioned, Msg, User } from '../models';
+import { checkTimeMention } from '../utils/helper';
+import {
+  Channel,
+  Mentioned,
+  MentionedPmConfirm,
+  Msg,
+  Quiz,
+  User,
+  UserQuiz,
+} from '../models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BOT_ID, EMessageMode } from '../constants/configs';
 import { AxiosClientService } from '../services/axiosClient.services';
@@ -20,7 +29,7 @@ import {
   replyMessageGenerate,
 } from '../utils/generateReplyMessage';
 import { ClientConfigService } from '../config/client-config.service';
-import { checkAnswerFormat, checkTimeMention } from '../utils/helper';
+import { checkAnswerFormat } from '../utils/helper';
 import { QuizService } from '../services/quiz.services';
 
 @Injectable()
@@ -35,6 +44,12 @@ export class EventListenerChannelMessage {
     private channelRepository: Repository<Channel>,
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(MentionedPmConfirm)
+    private mentionPmConfirm: Repository<MentionedPmConfirm>,
+    @InjectRepository(UserQuiz)
+    private userQuizRepository: Repository<UserQuiz>,
+    @InjectRepository(Quiz)
+    private quizRepository: Repository<Quiz>,
     private readonly axiosClientService: AxiosClientService,
     private clientConfigService: ClientConfigService,
     private quizService: QuizService,
@@ -224,6 +239,101 @@ export class EventListenerChannelMessage {
       }
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  @OnEvent(Events.ChannelMessage)
+  async insertPmConfirmWFT(message: ChannelMessage) {
+    if (!message.content || typeof message.content.t !== 'string') return;
+    if (
+      message.content.t.includes('[CONFIRM WFH]') &&
+      message.mode === EMessageMode.DM_MESSAGE &&
+      message.sender_id === this.clientConfigService.botKomuId
+    ) {
+      const wfhId = +message.content.t.match(/ID:(\d+)/)[1];
+      const dataMentionPmConfirm = {
+        messageId: message.message_id,
+        wfhId,
+        confirm: false,
+        value: '',
+      };
+      await this.mentionPmConfirm.insert(dataMentionPmConfirm);
+    }
+  }
+
+  @OnEvent(Events.ChannelMessage)
+  async handleAnswerBotQuiz(msg: ChannelMessage) {
+    if (
+      msg.mode == EMessageMode.DM_MESSAGE &&
+      msg.references &&
+      Array.isArray(msg.references) &&
+      msg.references.length > 0
+    ) {
+      const userQuiz = await this.userQuizRepository
+        .createQueryBuilder()
+        .where('"message_id" = :mess_id', {
+          mess_id: msg.references[0].message_ref_id,
+        })
+        .select('*')
+        .getRawOne();
+
+      if (userQuiz) {
+        let mess = '';
+        const messOptions = {};
+        if (userQuiz['answer']) {
+          mess = `Bạn đã trả lời câu hỏi này rồi`;
+        } else {
+          const question = await this.quizRepository
+            .createQueryBuilder()
+            .where('id = :quizId', { quizId: userQuiz['quizId'] })
+            .select('*')
+            .getRawOne();
+          if (question) {
+            const answer = msg.content.t;
+            if (!checkAnswerFormat(answer, question['options'].length)) {
+              mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
+            } else {
+              if (Number(answer) === Number(question['correct'])) {
+                const newUser = await this.quizService.addScores(
+                  userQuiz['userId'],
+                );
+                if (!newUser) return;
+                mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
+                await this.quizService.saveQuestionCorrect(
+                  userQuiz['userId'],
+                  userQuiz['quizId'],
+                  Number(answer),
+                );
+              } else {
+                mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
+                await this.quizService.saveQuestionInCorrect(
+                  userQuiz['userId'],
+                  userQuiz['quizId'],
+                  Number(answer),
+                );
+              }
+
+              mess = `${mess}\nClick on the following link if you want to complain `;
+              const link = `https://quiz.nccsoft.vn/question/update/${userQuiz['quizId']}`;
+              messOptions['lk'] = [
+                {
+                  s: mess.length,
+                  e: mess.length + link.length,
+                },
+              ];
+              mess = mess + link;
+            }
+          }
+        }
+
+        return await this.client.sendMessageUser(
+          userQuiz.userId,
+          mess,
+          messOptions,
+          [],
+          refGenerate(msg),
+        );
+      }
     }
   }
 }
