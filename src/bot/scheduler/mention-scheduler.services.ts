@@ -134,17 +134,17 @@ export class MentionSchedulerService {
         .format('YYYY-MM-DD HH:mm:ss');
 
       const content = `${userName} không trả lời tin nhắn mention của ${authorName} lúc ${timestamp} tại ${thread ? 'thread' : 'channel'} `;
-      const textConfirm = '`React ❌ to Complain or ✅ to Accept`';
+      // const textConfirm = '`React ❌ to Complain or ✅ to Accept`';
 
       const messageReply = {
-        t: content + '#!\n' + textConfirm, // '#' at message is channel, auto fill at FE
-        mk: [
-          {
-            type: EMarkdownType.SINGLE,
-            s: content.length + 3,
-            e: content.length + 3 + textConfirm.length,
-          },
-        ],
+        t: content + '#!', // '#' at message is channel, auto fill at FE
+        // mk: [
+        //   {
+        //     type: EMarkdownType.SINGLE,
+        //     s: content.length + 3,
+        //     e: content.length + 3 + textConfirm.length,
+        //   },
+        // ],
         hg: [
           {
             channelid: user.channelId,

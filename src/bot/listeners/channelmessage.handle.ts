@@ -61,8 +61,9 @@ export class EventListenerChannelMessage {
   async handleMentioned(message: ChannelMessage) {
     try {
       if (
-        // message.is_public ||
-        message.sender_id === this.clientConfigService.botKomuId
+        message.is_public ||
+        message.sender_id === this.clientConfigService.botKomuId ||
+        message.sender_id === '0'
       )
         return;
       await Promise.all([
