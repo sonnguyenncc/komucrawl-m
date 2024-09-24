@@ -13,6 +13,7 @@ import { Repository } from 'typeorm';
 import { checkTimeMention } from '../utils/helper';
 import {
   Channel,
+  ChannelMezon,
   Mentioned,
   MentionedPmConfirm,
   Msg,
@@ -40,8 +41,8 @@ export class EventListenerChannelMessage {
     private asteriskCommand: Asterisk,
     @InjectRepository(Mentioned)
     private mentionedRepository: Repository<Mentioned>,
-    @InjectRepository(Channel)
-    private channelRepository: Repository<Channel>,
+    @InjectRepository(ChannelMezon)
+    private channelRepository: Repository<ChannelMezon>,
     @InjectRepository(Msg) private msgRepository: Repository<Msg>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(MentionedPmConfirm)
@@ -61,7 +62,6 @@ export class EventListenerChannelMessage {
   async handleMentioned(message: ChannelMessage) {
     try {
       if (
-        message.is_public ||
         message.sender_id === this.clientConfigService.botKomuId ||
         message.sender_id === '0'
       )
@@ -88,22 +88,27 @@ export class EventListenerChannelMessage {
       ]);
       if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
         return;
-      // const checkCategories: string[] = [
-      //   'PROJECTS',
-      //   'PROJECTS-EXT',
-      //   'PRODUCTS',
-      //   'LOREN',
-      //   'HRM&IT',
-      //   'SAODO',
-      //   'MANAGEMENT',
-      // ];
 
-      const validCategory: boolean = true;
-      // if (channel.name.slice(0, 4).toUpperCase() === 'PRJ-') {
-      //   validCategory = true;
-      // } else {
-      //   validCategory = checkCategories.includes(channel.name.toUpperCase());
-      // }
+      const findChannel = await this.channelRepository.findOne({
+        where: { channel_id: message.channel_id },
+      });
+
+      const checkCategoriesId: string[] = [
+        '1828296911740735488', // MEZON
+        '1779484504386179072', // PROJECTS
+        '1828297325110366208', // PRODUCTS
+        '1832960022313701376', // LOREN
+        '1833343309028790272', // HRM&IT
+        '1780077650828595200', // MANAGEMENT
+        '1833336406043267072', // PRJ-EU
+        '1833335148804837376', // prj-jp
+        '1833335520520835072', // prj-uk
+        '1833335458617102336', // prj-apac
+      ];
+
+      const validCategory: boolean = checkCategoriesId.includes(
+        findChannel.category_id,
+      );
 
       if (!checkTimeMention(new Date())) return;
       if (
