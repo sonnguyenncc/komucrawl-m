@@ -28,11 +28,7 @@ export class EventListenerChannelUpdated extends BaseHandleEvent {
       throw new NotFoundException(`Not found channal id ${channelId}`);
     }
     //TODO handle channel_private
-    const { channel_label, category_id } = channelInput;
-    const channelDb = this.channelRepository.merge(channel, {
-      channel_label,
-      category_id,
-    });
+    const channelDb = this.channelRepository.merge(channel, channelInput);
 
     // Save the updated channel back to the database
     return this.channelRepository.save(channelDb);

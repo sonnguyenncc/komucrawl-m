@@ -30,7 +30,7 @@ export class ExtendersService {
       findUser.user_type = EUserType.MEZON;
       findUser.flags = 0;
       findUser.last_message_id = message.message_id;
-      findUser.last_message_time = message.create_time_seconds;
+      findUser.last_message_time = Date.now();
       findUser.deactive = false;
       findUser.botPing = false;
       findUser.scores_workout = 0;
@@ -51,7 +51,7 @@ export class ExtendersService {
       clan_nick: message.clan_nick ?? '',
       flags: 0,
       last_message_id: message.message_id,
-      last_message_time: message.create_time_seconds,
+      last_message_time: Date.now(),
       scores_quiz: 0,
       deactive: false,
       botPing: false,
