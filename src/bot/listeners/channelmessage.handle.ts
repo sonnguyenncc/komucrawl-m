@@ -150,7 +150,6 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleCommand(msg: ChannelMessage) {
-    console.log('msg', msg);
     if (msg.code) return; // Do not support case edit message
     try {
       const content = msg.content.t;
