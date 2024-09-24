@@ -22,9 +22,10 @@ export class AvatarCommand extends CommandMessage {
     let queryUser: string;
 
     if (args.length) {
-      queryUser = message.references.length
-        ? message.references[0].message_sender_username
-        : args[0];
+      queryUser =
+        Array.isArray(message.references) && message.references.length
+          ? message.references[0].message_sender_username
+          : args[0];
     } else {
       queryUser = message.sender_id;
     }

@@ -143,6 +143,7 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleCommand(msg: ChannelMessage) {
+    if (msg.code) return; // Do not support case edit message
     try {
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
