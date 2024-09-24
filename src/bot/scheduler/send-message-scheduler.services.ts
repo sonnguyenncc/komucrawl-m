@@ -96,7 +96,7 @@ export class SendMessageSchedulerService {
             .createQueryBuilder()
             .where(`"email" = :email`, { email: list })
             .andWhere(`"deactive" IS NOT TRUE`)
-            .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
             .select('*')
             .execute();
           if (!checkUser) return;
