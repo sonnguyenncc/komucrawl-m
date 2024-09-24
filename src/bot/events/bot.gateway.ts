@@ -88,6 +88,9 @@ export class BotGateway {
   };
 
   handlechannelmessage = async (msg: ChannelMessage) => {
+    ['attachments', 'mentions', 'references'].forEach((key) => {
+      if (!Array.isArray(msg[key])) msg[key] = [];
+    });
     try {
       if (msg.sender_id) {
         await this.extendersService.addDBUser(msg);
