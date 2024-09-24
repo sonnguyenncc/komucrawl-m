@@ -25,9 +25,10 @@ export class UserInfoCommand extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     let userQuery = '';
     if (args.length) {
-      userQuery = message.references.length
-        ? message.references[0].message_sender_username
-        : args[0];
+      userQuery =
+        Array.isArray(message.references) && message.references.length
+          ? message.references[0].message_sender_username
+          : args[0];
     } else {
       userQuery = message.sender_id;
     }
