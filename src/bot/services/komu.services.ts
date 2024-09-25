@@ -39,7 +39,6 @@ export class KomuService {
       }
       const user = await this.client.getDMchannel(userdb.userId);
       if (!user) {
-        console.log(user, username);
         const message = `#admin-username ơi, đồng chí ${username} không đúng format rồi!!!`;
         await this.sendErrorToAdmin(
           message,
@@ -103,8 +102,8 @@ export class KomuService {
           [
             {
               user_id: userDb.userId,
-              s: messageItAdmin.indexOf(userDb.email),
-              e: messageItAdmin.indexOf(userDb.email) + userDb.email.length + 1,
+              s: messageItAdmin.indexOf(userDb.email) - 1,
+              e: messageItAdmin.indexOf(userDb.email) + userDb.email.length,
             },
           ],
         ),
@@ -141,6 +140,7 @@ export class KomuService {
       .getRawOne();
     if (!userAdmin) return;
     message = message.replace('#admin-username', `@${userAdmin.username}`);
+    console.log(message);
     await this.client.sendMessage(
       process.env.KOMUBOTREST_CLAN_NCC_ID,
       '0',

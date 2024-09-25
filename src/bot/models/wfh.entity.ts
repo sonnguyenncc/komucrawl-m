@@ -6,10 +6,10 @@ import {
   OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
-} from "typeorm";
+} from 'typeorm';
 
-import { TABLE } from "../constants/table";
-import { User } from "./user.entity";
+import { TABLE } from '../constants/table';
+import { User } from './user.entity';
 
 @Entity(TABLE.WFH)
 export class WorkFromHome {
@@ -17,27 +17,30 @@ export class WorkFromHome {
   id: number;
 
   @ManyToOne(() => User, (state) => state.wfh)
-  @JoinColumn({ name: "userId" })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text', nullable: true })
+  userId: string;
+
+  @Column({ type: 'text' })
   wfhMsg: string;
 
-  @Column({ type: "decimal" })
+  @Column({ type: 'decimal' })
   createdAt: number;
 
-  @Column({ type: "boolean" })
+  @Column({ type: 'boolean' })
   complain: boolean;
 
-  @Column({ type: "boolean" })
+  @Column({ type: 'boolean' })
   pmconfirm: boolean;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text' })
   status: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   data: string;
 
-  @Column({ type: "text", nullable: true })
+  @Column({ type: 'text', nullable: true })
   type: string;
 }
