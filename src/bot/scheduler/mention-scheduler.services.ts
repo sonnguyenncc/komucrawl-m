@@ -226,13 +226,23 @@ export class MentionSchedulerService {
     if (await this.utilsService.checkHoliday()) return;
     if (this.utilsService.checkTime(new Date())) return;
     try {
-      let mentionedUsers = await this.mentionRepository.find({
+      const mentionedUsers = await this.mentionRepository.find({
         where: { confirm: false },
       });
-
+      const mentionedUsersMezon = [];
+      await Promise.all(
+        mentionedUsers.map(async (user) => {
+          if (user.mentionUserId) {
+            const userDb = await this.userRepository.findOne({
+              where: { userId: user.mentionUserId, user_type: EUserType.MEZON },
+            });
+            if (userDb) mentionedUsersMezon.push(user);
+          }
+        }),
+      );
       // send noti for user mentioned
       const filteredMentionedUsers =
-        await this.processNotiUsers(mentionedUsers);
+        await this.processNotiUsers(mentionedUsersMezon);
 
       await this.processMentionedUsers(filteredMentionedUsers);
     } catch (error) {

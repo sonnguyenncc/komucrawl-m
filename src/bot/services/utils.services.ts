@@ -118,9 +118,10 @@ export class UtilsService {
 
     if (minuteDb >= 0 && minuteDb <= 4) {
       checkFiveMinute = minuteDb + 60 - minuteDateNow;
-      hourTimestamp = new Date(dateScheduler).setHours(
+      const setHourTimestamp = new Date(dateScheduler).setHours(
         dateScheduler.getHours() - 1,
       );
+      hourTimestamp = new Date(setHourTimestamp).getHours();
     } else {
       checkFiveMinute = minuteDb - minuteDateNow;
       hourTimestamp = dateScheduler.getHours();
