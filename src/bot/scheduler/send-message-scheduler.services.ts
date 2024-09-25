@@ -84,7 +84,7 @@ export class SendMessageSchedulerService {
       );
       if (!getListUserLogTimesheet) return;
 
-      const results = getListUserLogTimesheet.data.result;
+      const results = getListUserLogTimesheet?.data?.result;
 
       await Promise.all(
         results.map(async (item) => {
@@ -141,10 +141,10 @@ export class SendMessageSchedulerService {
           .where('"email" = :email', {
             email: item.email.slice(0, -9),
           })
-          .andWhere('"deactive" IS NOT True')
+          .andWhere('"deactive" IS NOT TRUE')
           .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
-          .select('users.*')
-          .execute();
+          .select('users')
+          .getRawOne();
         if (!birthday) return;
         const resultBirthday = await this.birthdayRepository.find();
         const items = resultBirthday.map((item) => item.title);
@@ -168,7 +168,7 @@ export class SendMessageSchedulerService {
           item.user[0]?.clan_nick ||
           item.user[0]?.display_name ||
           item.user[0]?.username;
-        this.client.sendMessage(
+        await this.client.sendMessage(
           this.clientConfigService.clandNccId,
           '0',
           this.clientConfigService.mezonNhaCuaChungChannelId,
@@ -185,8 +185,6 @@ export class SendMessageSchedulerService {
               e: item.wish.length + 1 + userName.length,
             },
           ],
-          undefined,
-          undefined,
         );
       }),
     );
@@ -208,22 +206,22 @@ export class SendMessageSchedulerService {
 
       await Promise.all(
         listsUser.data.map(async (user) => {
-          const checkUser = await this.userRepository
+          const query = this.userRepository
             .createQueryBuilder()
-            .where('"email" = :email', { email: user.komuUserName })
-            .orWhere('"username" = :username', { username: user.komuUserName })
-            .andWhere(
-              userOffFullday && userOffFullday.length > 0
-                ? '"email" NOT IN (:...userOffFullday)'
-                : 'true',
-              { userOffFullday: userOffFullday },
-            )
+            .where('"email" = :email OR "username" = :username', {
+              email: user.komuUserName,
+              username: user.komuUserName,
+            })
             .andWhere('"deactive" IS NOT TRUE')
-            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
-            .select('*')
-            .getRawOne();
+            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON });
+          if (userOffFullday && userOffFullday.length > 0) {
+            query.andWhere('"email" NOT IN (:...userOffFullday)', {
+              userOffFullday: userOffFullday,
+            });
+          }
 
-          if (checkUser) {
+          const checkUser = await query.select('*').getRawOne();
+          if (checkUser && checkUser.userId) {
             await this.client.sendMessageUser(
               checkUser.userId,
               'Nhớ tắt máy trước khi ra về nếu không dùng nữa nhé!!!',
@@ -232,7 +230,7 @@ export class SendMessageSchedulerService {
         }),
       );
     } catch (error) {
-      console.log(error);
+      console.error('Error in sendMessTurnOffPc:', error);
     }
   }
 
@@ -253,36 +251,33 @@ export class SendMessageSchedulerService {
       );
       const { userOffFullday } = await this.utilsService.getUserOffWork(null);
 
-      userListNotCheckOut.map(async (user) => {
-        const checkUser = await this.userRepository
-          .createQueryBuilder()
-          .where('"email" = :email', {
-            email: user.komuUserName,
-          })
-          .orWhere('"username" = :username', {
-            username: user.komuUserName,
-          })
-          .andWhere(
-            userOffFullday && userOffFullday.length > 0
-              ? '"email" NOT IN (:...userOffFullday)'
-              : 'true',
-            {
+      await Promise.all(
+        userListNotCheckOut.map(async (user) => {
+          const query = this.userRepository
+            .createQueryBuilder()
+            .where('"email" = :email OR "username" = :username', {
+              email: user.komuUserName,
+              username: user.komuUserName,
+            })
+            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
+            .andWhere(`"deactive" IS NOT TRUE`);
+          if (userOffFullday && userOffFullday.length > 0) {
+            query.andWhere('"email" NOT IN (:...userOffFullday)', {
               userOffFullday: userOffFullday,
-            },
-          )
-          .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
-          .andWhere(`"deactive" IS NOT TRUE`)
-          .select('*')
-          .getRawOne();
-        if (checkUser && checkUser.userId) {
-          this.client.sendMessageUser(
-            checkUser.userId,
-            'Đừng quên checkout trước khi ra về nhé!!!',
-          );
-        }
-      });
+            });
+          }
+
+          const checkUser = await query.select('*').getRawOne();
+          if (checkUser && checkUser.userId) {
+            this.client.sendMessageUser(
+              checkUser.userId,
+              'Đừng quên checkout trước khi ra về nhé!!!',
+            );
+          }
+        }),
+      );
     } catch (error) {
-      console.log(error);
+      console.error('Error in remindCheckout:', error);
     }
   }
 
@@ -310,7 +305,9 @@ export class SendMessageSchedulerService {
                   userType: 'MEZON',
                 },
               )
-              .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+              .andWhere('user.user_type = :userType', {
+                userType: EUserType.MEZON,
+              })
               .select('*')
               .getRawOne();
 
