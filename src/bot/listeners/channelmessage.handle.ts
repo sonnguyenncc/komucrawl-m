@@ -307,6 +307,12 @@ export class EventListenerChannelMessage {
             if (!checkAnswerFormat(answer, question['options'].length)) {
               mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
             } else {
+              await this.userRepository.update(
+                { userId: userQuiz['userId'] as string },
+                {
+                  botPing: false,
+                },
+              );
               if (Number(answer) === Number(question['correct'])) {
                 const newUser = await this.quizService.addScores(
                   userQuiz['userId'],

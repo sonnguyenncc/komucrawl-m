@@ -5661,10 +5661,10 @@ methods@^1.1.2, methods@~1.1.2:
   resolved "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mezon-sdk@^2.7.47:
-  version "2.7.47"
-  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.47.tgz#5fff76862151db3b89c1fc1496853b8d7e87d198"
-  integrity sha512-nYeITgkUpYA2Tc7cZJfi7I1fZDkn5fdqMwv6zfdeRL8kkj7jxNUI1gY5RAbsaPCmv+CuZbvJo61QQUoQLTzD3Q==
+mezon-sdk@^2.7.54:
+  version "2.7.54"
+  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.54.tgz#2bcd3221100839851ae7eee20a26afa061d6467a"
+  integrity sha512-NSlomvP1x3C2SNJ86VSDV19WCGAgsglrTGf3FkQZNMg1rN8qxL3P3T9RmdRjRiBeUjV0Oa96ed6bhqk+qfJM0g==
   dependencies:
     "@types/ws" "^8.5.12"
     base64-arraybuffer "^1.0.2"
