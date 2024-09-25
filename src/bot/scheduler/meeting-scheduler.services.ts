@@ -109,59 +109,63 @@ export class MeetingSchedulerService {
     dateScheduler,
     minuteDb,
   ) {
-    const newDateTimestamp = new Date(+data.createdTimestamp.toString());
-    const currentDate = new Date(newDateTimestamp.getTime());
-    const today = new Date();
-    currentDate.setDate(today.getDate());
-    currentDate.setMonth(today.getMonth());
-    switch (data.repeat) {
-      case 'once':
-        await this.handleOnceMeeting(
-          data,
-          listVoiceChannelAvalable,
-          dateCreatedTimestamp,
-          dateScheduler,
-          minuteDb,
-        );
-        break;
-      case 'daily':
-        await this.handleDailyMeeting(
-          data,
-          listVoiceChannelAvalable,
-          currentDate,
-          dateScheduler,
-          minuteDb,
-        );
-        break;
-      case 'weekly':
-        await this.handleWeeklyMeeting(
-          data,
-          listVoiceChannelAvalable,
-          currentDate,
-          dateScheduler,
-          minuteDb,
-        );
-        break;
-      case 'repeat':
-        await this.handleRepeatMeeting(
-          data,
-          listVoiceChannelAvalable,
-          currentDate,
-          dateScheduler,
-          minuteDb,
-        );
-        break;
-      case 'monthly':
-        await this.handleMonthlyMeeting(
-          data,
-          listVoiceChannelAvalable,
-          today,
-          dateScheduler,
-          minuteDb,
-        );
-        break;
-      default:
-        break;
+    try {
+      const newDateTimestamp = new Date(+data.createdTimestamp.toString());
+      const currentDate = new Date(newDateTimestamp.getTime());
+      const today = new Date();
+      currentDate.setDate(today.getDate());
+      currentDate.setMonth(today.getMonth());
+      switch (data.repeat) {
+        case 'once':
+          await this.handleOnceMeeting(
+            data,
+            listVoiceChannelAvalable,
+            dateCreatedTimestamp,
+            dateScheduler,
+            minuteDb,
+          );
+          break;
+        case 'daily':
+          await this.handleDailyMeeting(
+            data,
+            listVoiceChannelAvalable,
+            currentDate,
+            dateScheduler,
+            minuteDb,
+          );
+          break;
+        case 'weekly':
+          await this.handleWeeklyMeeting(
+            data,
+            listVoiceChannelAvalable,
+            currentDate,
+            dateScheduler,
+            minuteDb,
+          );
+          break;
+        case 'repeat':
+          await this.handleRepeatMeeting(
+            data,
+            listVoiceChannelAvalable,
+            currentDate,
+            dateScheduler,
+            minuteDb,
+          );
+          break;
+        case 'monthly':
+          await this.handleMonthlyMeeting(
+            data,
+            listVoiceChannelAvalable,
+            today,
+            dateScheduler,
+            minuteDb,
+          );
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log('meeting error', error);
     }
   }
 

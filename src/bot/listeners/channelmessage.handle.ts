@@ -61,9 +61,14 @@ export class EventListenerChannelMessage {
   @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
     try {
+      const findChannel = await this.channelRepository.findOne({
+        where: { channel_id: message.channel_id },
+      });
+
       if (
         message.sender_id === this.clientConfigService.botKomuId ||
-        message.sender_id === '0'
+        message.sender_id === '0' ||
+        !findChannel
       )
         return;
       await Promise.all([
@@ -86,12 +91,14 @@ export class EventListenerChannelMessage {
           .andWhere(`"reactionTimestamp" IS NULL`)
           .execute(),
       ]);
-      if (message.mode === 4 || message.content.t.split(' ').includes('@here'))
-        return;
 
-      const findChannel = await this.channelRepository.findOne({
-        where: { channel_id: message.channel_id },
-      });
+      if (
+        !message.content ||
+        typeof message.content.t !== 'string' ||
+        message.mode === 4 ||
+        message.content.t.split(' ').includes('@here')
+      )
+        return;
 
       const checkCategoriesId: string[] = [
         '1828296911740735488', // MEZON

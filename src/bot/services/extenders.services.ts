@@ -13,6 +13,7 @@ export class ExtendersService {
   ) {}
 
   async addDBUser(message: ChannelMessage) {
+    if (message.sender_id === '1767478432163172999') return; // ignored anonymous user
     const findUser = await this.userRepository.findOne({
       where: { userId: message.sender_id },
     });

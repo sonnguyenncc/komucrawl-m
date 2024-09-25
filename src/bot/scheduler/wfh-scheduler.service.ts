@@ -169,7 +169,7 @@ export class WFHSchedulerService {
         .select('*')
         .execute();
 
-      users.foreach(async (user) => {
+      users.forEach(async (user) => {
         const content = `@${user.username} không trả lời tin nhắn WFH lúc ${moment(
           parseInt(user.createAt.toString()),
         )
