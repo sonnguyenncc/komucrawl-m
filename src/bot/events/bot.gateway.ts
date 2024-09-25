@@ -88,6 +88,7 @@ export class BotGateway {
   };
 
   handlechannelmessage = async (msg: ChannelMessage) => {
+    if (msg.code) return; // ignored edited message
     ['attachments', 'mentions', 'references'].forEach((key) => {
       if (!Array.isArray(msg[key])) msg[key] = [];
     });
