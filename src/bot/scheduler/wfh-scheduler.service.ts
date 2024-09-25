@@ -28,9 +28,10 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  @Cron('*/5 9-11,13-17 * * 1-5')
+  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
+      console.log(new Date());
       if (await this.utilsService.checkHoliday()) return;
       if (this.utilsService.checkTime(new Date())) return;
       const { notSendUser: userOff } =
@@ -95,6 +96,7 @@ export class WFHSchedulerService {
         )
         .select('DISTINCT user.userId, user.username')
         .execute();
+      console.log(userLastSend.map((u) => u.username));
       const userLastSendIds = userLastSend.map((user) => user.userId);
       const userSend = await this.userRepository
         .createQueryBuilder('user')
@@ -197,7 +199,7 @@ export class WFHSchedulerService {
             {
               user_id: user.userId,
               s: 0,
-              e: user.userName.length + 1,
+              e: user.username.length + 1,
             },
           ],
         );
