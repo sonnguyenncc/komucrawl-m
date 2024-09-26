@@ -140,7 +140,6 @@ export class KomuService {
       .getRawOne();
     if (!userAdmin) return;
     message = message.replace('#admin-username', `@${userAdmin.username}`);
-    console.log(message);
     await this.client.sendMessage(
       process.env.KOMUBOTREST_CLAN_NCC_ID,
       '0',
@@ -162,5 +161,15 @@ export class KomuService {
       undefined,
       undefined,
     );
+  }
+
+  sendMessageToUser(
+    userId: string,
+    message: string,
+    option = {},
+    attachments = [],
+    ref = [],
+  ) {
+    this.client.sendMessageUser(userId, message, option, attachments, ref);
   }
 }

@@ -7,6 +7,7 @@ import { AxiosClientService } from './axiosClient.services';
 import { MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ClientConfigService } from '../config/client-config.service';
+import { KomuService } from './komu.services';
 
 const timeUTC = 60000 * 60 * 7;
 @Injectable()
@@ -18,6 +19,7 @@ export class UtilsService {
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
     private clientConfigService: ClientConfigService,
+    private komuService: KomuService,
   ) {
     this.client = this.clientService.getClient();
   }
@@ -111,20 +113,31 @@ export class UtilsService {
     return day === 0 || day === 6;
   }
 
-  isSameMinute(minuteDb, dateScheduler) {
+  isSameMinute(minuteDb, dateScheduler, channelId?) {
     const { minuteDateNow, hourDateNow } = this.checkTimeMeeting();
     let checkFiveMinute;
     let hourTimestamp;
 
+    let typeCheck: string;
+
     if (minuteDb >= 0 && minuteDb <= 4) {
+      typeCheck = '0 - 4';
       checkFiveMinute = minuteDb + 60 - minuteDateNow;
       const setHourTimestamp = new Date(dateScheduler).setHours(
         dateScheduler.getHours() - 1,
       );
       hourTimestamp = new Date(setHourTimestamp).getHours();
     } else {
+      typeCheck = '> 4';
       checkFiveMinute = minuteDb - minuteDateNow;
       hourTimestamp = dateScheduler.getHours();
+    }
+
+    if (channelId === '1833331797883097088') {
+      this.komuService.sendMessageToUser(
+        '1827994776956309504',
+        `(isSameMinute) typeCheck: ${typeCheck}, minuteDb: ${minuteDb}, checkFiveMinute:${checkFiveMinute}, hourTimestamp: ${hourTimestamp}`,
+      );
     }
 
     return (
@@ -144,8 +157,14 @@ export class UtilsService {
     return diffDays % multiples === 0;
   }
 
-  isTimeDay(newDateTimestamp) {
+  isTimeDay(newDateTimestamp, channelId?) {
     newDateTimestamp.setHours(0, 0, 0, 0);
+    if (channelId === '1833331797883097088') {
+      this.komuService.sendMessageToUser(
+        '1827994776956309504',
+        `(isTimeDay) dateTimeNow: ${(this.checkTimeMeeting() as any).dateTimeNow}, newDateTimestamp: ${newDateTimestamp}`,
+      );
+    }
     return (this.checkTimeMeeting() as any).dateTimeNow - newDateTimestamp >= 0;
   }
 
