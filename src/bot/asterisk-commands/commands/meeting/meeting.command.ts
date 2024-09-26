@@ -46,7 +46,10 @@ export class MeetingCommand extends CommandMessage {
       }
 
       const listVoiceChannel = await this.channelRepository.find({
-        where: { channel_type: ChannelType.CHANNEL_TYPE_VOICE },
+        where: {
+          channel_type: ChannelType.CHANNEL_TYPE_VOICE,
+          clan_id: message.clan_id,
+        },
       });
       const listVoiceChannelIdUsed = [];
       listChannelVoiceUsers.forEach((item) => {

@@ -31,11 +31,12 @@ export class UserInfoCommand extends CommandMessage {
     }
 
     const findUser = await this.userRepository
-      .createQueryBuilder()
-      .where('email = :email', { email: userQuery })
-      .orWhere('username = :username', { username: userQuery })
-      .orWhere('"userId" = :userId', { userId: userQuery })
-      .andWhere('user_type = :userType', { userType: EUserType.MEZON })
+      .createQueryBuilder('user')
+      .where(
+        '(user.email = :query OR user.username = :query OR user.userId = :query)',
+        { query: userQuery },
+      )
+      .andWhere('user.user_type = :userType', { userType: EUserType.MEZON })
       .getOne();
 
     if (!findUser)
