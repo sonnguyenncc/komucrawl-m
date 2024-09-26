@@ -254,22 +254,26 @@ export class SendMessageSchedulerService {
       await Promise.all(
         userListNotCheckOut.map(async (user) => {
           const query = this.userRepository
-            .createQueryBuilder()
-            .where('"email" = :email OR "username" = :username', {
-              email: user.komuUserName,
-              username: user.komuUserName,
+            .createQueryBuilder('user')
+            .where(
+              'user.email = :komuUserName OR user.username = :komuUserName',
+              {
+                komuUserName: user.komuUserName,
+              },
+            )
+            .andWhere('user.user_type = :userType', {
+              userType: EUserType.MEZON,
             })
-            .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
-            .andWhere(`"deactive" IS NOT TRUE`);
+            .andWhere('user.deactive IS NOT TRUE');
           if (userOffFullday && userOffFullday.length > 0) {
-            query.andWhere('"email" NOT IN (:...userOffFullday)', {
-              userOffFullday: userOffFullday,
+            query.andWhere('user.email NOT IN (:...userOffFullday)', {
+              userOffFullday,
             });
           }
 
-          const checkUser = await query.select('*').getRawOne();
-          if (checkUser && checkUser.userId) {
-            this.client.sendMessageUser(
+          const checkUser = await query.select('user').getOne();
+          if (checkUser?.userId) {
+            await this.client.sendMessageUser(
               checkUser.userId,
               'Đừng quên checkout trước khi ra về nhé!!!',
             );
@@ -302,14 +306,10 @@ export class SendMessageSchedulerService {
                 '(user.email = :username OR user.username = :username) AND user.deactive IS NOT TRUE AND user.user_type = :userType',
                 {
                   username,
-                  userType: 'MEZON',
+                  userType: EUserType.MEZON,
                 },
               )
-              .andWhere('user.user_type = :userType', {
-                userType: EUserType.MEZON,
-              })
-              .select('*')
-              .getRawOne();
+              .getOne();
 
             if (userdb) {
               await this.client.sendMessageUser(
