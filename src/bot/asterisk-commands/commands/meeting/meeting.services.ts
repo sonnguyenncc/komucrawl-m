@@ -42,6 +42,17 @@ export class MeetingService {
       .execute();
   }
 
+  async cancelMeetingByChannelId(channelId) {
+    return await this.meetingRepository
+      .createQueryBuilder('meeting')
+      .update(Meeting)
+      .set({
+        cancel: true,
+      })
+      .where(`"channelId" = :channelId`, { channelId: channelId })
+      .execute();
+  }
+
   validateRepeatTime(repeatTime) {
     return repeatTime.length === 0 || /^[0-9]+$/.test(repeatTime);
   }

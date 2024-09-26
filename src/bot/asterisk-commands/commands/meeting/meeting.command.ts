@@ -129,6 +129,21 @@ export class MeetingCommand extends CommandMessage {
           },
           message,
         );
+
+      if (args[1] === 'channel' && !args[2]) {
+        const channelId = message.channel_id;
+        const findChannelId =
+          await this.meetingService.cancelMeetingByChannelId(channelId);
+        return this.replyMessageGenerate(
+          {
+            messageContent: !findChannelId
+              ? 'Not found.'
+              : '✅ Cancel all channel meeting successfully.',
+          },
+          message,
+        );
+      }
+
       const id = args[1];
       const findId = await this.meetingService.cancelMeetingById(id);
 

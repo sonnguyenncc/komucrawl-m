@@ -19,21 +19,16 @@ export class AvatarCommand extends CommandMessage {
 
   async execute(args: string[], message: ChannelMessage) {
     let messageContent: string;
-    let queryUser: string;
+    let userQuery: string;
 
-    if (args.length) {
-      queryUser =
-        Array.isArray(message.references) && message.references.length
-          ? message.references[0].message_sender_username
-          : args[0];
+    if (Array.isArray(message.references) && message.references.length) {
+      userQuery = message.references[0].message_sender_username;
     } else {
-      queryUser = message.sender_id;
+      userQuery = args.length ? args[0] : message.username;
     }
 
     const findUser = await this.userRepository.findOne({
-      where: args.length
-        ? { username: queryUser, user_type: EUserType.MEZON }
-        : { userId: queryUser, user_type: EUserType.MEZON },
+      where: { username: userQuery, user_type: EUserType.MEZON },
     });
 
     if (!findUser)
