@@ -10,6 +10,7 @@ import { ChannelMezon } from '../models/mezonChannel.entity';
 import { ChannelType, MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { EMessageMode } from '../constants/configs';
+import { KomuService } from '../services/komu.services';
 
 @Injectable()
 export class MeetingSchedulerService {
@@ -23,6 +24,7 @@ export class MeetingSchedulerService {
     private channelRepository: Repository<ChannelMezon>,
     private clientConfig: ClientConfigService,
     private clientService: MezonClientService,
+    private komuService: KomuService,
   ) {
     this.client = this.clientService.getClient();
   }
@@ -245,10 +247,15 @@ export class MeetingSchedulerService {
     dateScheduler,
     minuteDb,
   ) {
+    if (data.channel_id === '1833331797883097088') {
+      const dataMeeting = this.utilsService.checkTimeMeeting();
+      const message = `Time now: ${dataMeeting}`;
+      this.komuService.sendMessageToUser('1827994776956309504', message);
+    }
     if (this.utilsService.isSameDay()) return;
     if (
-      this.utilsService.isSameMinute(minuteDb, dateScheduler) &&
-      this.utilsService.isTimeDay(dateScheduler)
+      this.utilsService.isSameMinute(minuteDb, dateScheduler, data.channel_id) &&
+      this.utilsService.isTimeDay(dateScheduler, data.channel_id)
     ) {
       const messageContent = `@here Our meeting room is `;
       await this.sendMeetingMessage(
