@@ -58,7 +58,7 @@ export class EventListenerChannelMessage {
     this.client = clientService.getClient();
   }
 
-  @OnEvent(Events.ChannelMessage)
+  // @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
     try {
       const findChannel = await this.channelRepository.findOne({
@@ -275,7 +275,7 @@ export class EventListenerChannelMessage {
     }
   }
 
-  @OnEvent(Events.ChannelMessage)
+  // @OnEvent(Events.ChannelMessage)
   async handleAnswerBotQuiz(msg: ChannelMessage) {
     if (
       msg.mode == EMessageMode.DM_MESSAGE &&
