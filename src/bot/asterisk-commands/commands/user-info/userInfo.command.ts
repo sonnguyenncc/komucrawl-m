@@ -24,13 +24,10 @@ export class UserInfoCommand extends CommandMessage {
 
   async execute(args: string[], message: ChannelMessage) {
     let userQuery = '';
-    if (args.length) {
-      userQuery =
-        Array.isArray(message.references) && message.references.length
-          ? message.references[0].message_sender_username
-          : args[0];
+    if (Array.isArray(message.references) && message.references.length) {
+      userQuery = message.references[0].message_sender_username;
     } else {
-      userQuery = message.sender_id;
+      userQuery = args.length ? args[0] : message.sender_id;
     }
 
     const findUser = await this.userRepository
