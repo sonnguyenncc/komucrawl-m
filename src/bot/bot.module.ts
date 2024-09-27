@@ -47,6 +47,7 @@ import {
   ChannelMezon,
   MentionedPmConfirm,
   QuizMsg,
+  MezonBotMessage,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -154,6 +155,7 @@ import { KomuService } from './services/komu.services';
       WOL,
       Dynamic,
       QuizMsg,
+      MezonBotMessage,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),

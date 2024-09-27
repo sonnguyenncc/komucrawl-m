@@ -58,11 +58,15 @@ export class Ncc8Command extends CommandMessage {
         // check channel is not streaming
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
+          try {
+            this.ffmpegService.transcodeMp3ToRtmp(
+              res?.data?.url,
+              channel?.streaming_url,
+            );
+          } catch (error) {
+            console.log('transcodeMp3ToRtmp', error);
+          }
           // /home/mjnk9xw/Downloads/test.mp3
-          this.ffmpegService.transcodeMp3ToRtmp(
-            res?.data?.url,
-            channel?.streaming_url,
-          );
         }
 
         await sleep(1000);
