@@ -60,7 +60,7 @@ export class MeetingSchedulerService {
     return listVoiceChannelAvalable;
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { timeZone: 'Asia/Ho_Chi_Minh' })
+  // @Cron(CronExpression.EVERY_MINUTE, { timeZone: 'Asia/Ho_Chi_Minh' })
   async tagMeeting() {
     this.logger.warn(
       `time ${CronExpression.EVERY_MINUTE} for job tagMeeting to run!`,
@@ -225,6 +225,7 @@ export class MeetingSchedulerService {
     dateScheduler,
     minuteDb,
   ) {
+    // console.log('datadatadata', data);
     if (
       this.utilsService.isSameDate(dateCreatedTimestamp) &&
       this.utilsService.isSameMinute(minuteDb, dateScheduler)
@@ -377,7 +378,7 @@ export class MeetingSchedulerService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { timeZone: 'Asia/Ho_Chi_Minh' })
+  // @Cron(CronExpression.EVERY_MINUTE, { timeZone: 'Asia/Ho_Chi_Minh' })
   async updateReminderMeeting() {
     this.logger.warn(
       `time ${CronExpression.EVERY_MINUTE} for job updateReminderMeeting to run!`,
