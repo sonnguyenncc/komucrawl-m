@@ -58,7 +58,7 @@ export class EventListenerChannelMessage {
     this.client = clientService.getClient();
   }
 
-  @OnEvent(Events.ChannelMessage)
+  // @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
     try {
       const findChannel = await this.channelRepository.findOne({
@@ -154,6 +154,13 @@ export class EventListenerChannelMessage {
     try {
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
+      // const client = this.clientService.getClient();
+      // if (msg.sender_id != BOT_ID) {
+      //   client.sendMessageUser(
+      //     msg.sender_id,
+      //     `Bot rep lại tin nhắn ${content}`,
+      //   );
+      // }
       if (typeof content == 'string' && content.trim()) {
         const firstLetter = content.trim()[0];
         switch (firstLetter) {
@@ -268,7 +275,7 @@ export class EventListenerChannelMessage {
     }
   }
 
-  @OnEvent(Events.ChannelMessage)
+  // @OnEvent(Events.ChannelMessage)
   async handleAnswerBotQuiz(msg: ChannelMessage) {
     if (
       msg.mode == EMessageMode.DM_MESSAGE &&
