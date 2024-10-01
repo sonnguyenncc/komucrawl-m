@@ -60,15 +60,13 @@ export class Ncc8Command extends CommandMessage {
         if (channel?.streaming_url !== '') {
           // /home/mjnk9xw/Downloads/test.mp3
           if (args[2]) {
-            this.ffmpegService.transcodeVideoToRtmp(
-              res?.data?.url,
-              channel?.streaming_url,
-            );
+            this.ffmpegService
+              .transcodeVideoToRtmp(res?.data?.url, channel?.streaming_url)
+              .catch((error) => console.log('error video', error));
           } else {
-            this.ffmpegService.transcodeMp3ToRtmp(
-              res?.data?.url,
-              channel?.streaming_url,
-            );
+            this.ffmpegService
+              .transcodeMp3ToRtmp(res?.data?.url, channel?.streaming_url)
+              .catch((error) => console.log('error mp3', error));
           }
         }
 
