@@ -11,6 +11,8 @@ import { BOT_ID, EMessageMode, EUserType } from '../constants/configs';
 import { ClientConfigService } from '../config/client-config.service';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { MentionSchedulerService } from '../scheduler/mention-scheduler.services';
+import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
+import { MessageQueue } from '../services/messageQueue.service';
 
 @Injectable()
 export class EventListenerMessageReaction extends BaseHandleEvent {
@@ -26,6 +28,7 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     private mentionPmConfirm: Repository<MentionedPmConfirm>,
     private axiosClientService: AxiosClientService,
     private mentionSchedulerService: MentionSchedulerService,
+    private messageQueue: MessageQueue,
   ) {
     super(clientService);
   }
@@ -230,10 +233,15 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           })
           .where(`"userId" = :userId`, { userId: data.mentionUserId })
           .execute();
-        await this.client.sendMessageUser(
-          data.mentionUserId,
-          'You just accepted the machleo punishment. Thanks!!!',
-        );
+        const messageToUser: ReplyMezonMessage = {
+          userId: data.mentionUserId,
+          textContent: 'You just accepted the machleo punishment. Thanks!!!',
+        };
+        this.messageQueue.addMessage(messageToUser);
+        // await this.client.sendMessageUser(
+        //   data.mentionUserId,
+        //   'You just accepted the machleo punishment. Thanks!!!',
+        // );
       } else {
         const wfhdata = await this.wfhRepository.findOne({
           where: {
@@ -241,23 +249,39 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           },
         });
         if (!wfhdata) {
-          await this.client.sendMessageUser(data.mentionUserId, 'No WFH found');
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent: 'No WFH found',
+          };
+          this.messageQueue.addMessage(messageToUser);
+          // await this.client.sendMessageUser(data.mentionUserId, 'No WFH found');
           return;
         }
         const msec = (new Date() as any) - (new Date(wfhdata.createdAt) as any);
         if (msec > 3600000) {
-          await this.client.sendMessageUser(
-            data.mentionUserId,
-            'WFH complain is expired. You have an hour to request.',
-          );
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent:
+              'WFH complain is expired. You have an hour to request.',
+          };
+          this.messageQueue.addMessage(messageToUser);
+          // await this.client.sendMessageUser(
+          //   data.mentionUserId,
+          //   'WFH complain is expired. You have an hour to request.',
+          // );
           return;
         }
 
         if (wfhdata.complain) {
-          await this.client.sendMessageUser(
-            data.mentionUserId,
-            'You have already complained.',
-          );
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent: 'You have already complained.',
+          };
+          this.messageQueue.addMessage(messageToUser);
+          // await this.client.sendMessageUser(
+          //   data.mentionUserId,
+          //   'You have already complained.',
+          // );
           return;
         }
 
@@ -269,10 +293,15 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           .select('*')
           .getRawOne();
         if (!userdb) {
-          await this.client.sendMessageUser(
-            data.mentionUserId,
-            'User is not valid',
-          );
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent: 'User is not valid',
+          };
+          this.messageQueue.addMessage(messageToUser);
+          // await this.client.sendMessageUser(
+          //   data.mentionUserId,
+          //   'User is not valid',
+          // );
           return;
         }
         const url = encodeURI(
@@ -293,7 +322,13 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           response.data.result.projectDtos.length == 0
         ) {
           let msg = `There is no PM to confirm for **${userdb.email}**. Please contact to your PM`;
-          return await this.client.sendMessageUser(data.mentionUserId, msg);
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent: msg,
+          };
+          this.messageQueue.addMessage(messageToUser);
+          return;
+          // return await this.client.sendMessageUser(data.mentionUserId, msg);
         }
 
         const pmdb = await this.userRepository
@@ -317,10 +352,16 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
         //   .getRawOne();
 
         if (!pmdb) {
-          return await this.client.sendMessageUser(
-            data.mentionUserId,
-            `Cannot fetch data for PM ${response.data.result.projectDtos[0].pmUsername}`,
-          );
+          const messageToUser: ReplyMezonMessage = {
+            userId: data.mentionUserId,
+            textContent: `Cannot fetch data for PM ${response.data.result.projectDtos[0].pmUsername}`,
+          };
+          this.messageQueue.addMessage(messageToUser);
+          return;
+          // return await this.client.sendMessageUser(
+          //   data.mentionUserId,
+          //   `Cannot fetch data for PM ${response.data.result.projectDtos[0].pmUsername}`,
+          // );
         }
         const contentMessage =
           '```' +
@@ -328,10 +369,10 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           `\n` +
           `<@${userdb.username}> just sent WFH complain. Please check?\n`;
         const confirmText = 'React ❌ to Reject or ✅ to Confirm```';
-        const dataMess = await this.client.sendMessageUser(
-          pmdb.userId,
-          contentMessage + confirmText,
-          {
+        const messageToUser: ReplyMezonMessage = {
+          userId: pmdb.userId,
+          textContent: contentMessage + confirmText,
+          messOptions: {
             mk: [
               {
                 type: 't',
@@ -340,13 +381,32 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
               },
             ],
           },
-        );
+        };
+        this.messageQueue.addMessage(messageToUser);
+        // const dataMess = await this.client.sendMessageUser(
+        //   pmdb.userId,
+        //   contentMessage + confirmText,
+        //   {
+        //     mk: [
+        //       {
+        //         type: 't',
+        //         s: 0,
+        //         e: contentMessage.length + confirmText.length,
+        //       },
+        //     ],
+        //   },
+        // );
 
         await this.wfhRepository.update({ id: wfhdata.id }, { complain: true });
-        await this.client.sendMessageUser(
-          userdb.userId,
-          `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
-        );
+        // await this.client.sendMessageUser(
+        //   userdb.userId,
+        //   `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
+        // );
+        const messageToUserError: ReplyMezonMessage = {
+          userId: userdb.userId,
+          textContent: `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
+        };
+        this.messageQueue.addMessage(messageToUserError);
       }
     } catch (error) {
       console.log('handleReactionMentonMessage', error);
@@ -394,17 +454,17 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       const text = `${pmUsername} just ${typeConfirm} WFH complain from `;
       const messageContent = text + `${username}`;
 
-      await this.client.sendMessage(
-        this.clientConfig.clandNccId,
-        '0',
-        this.clientConfig.machleoChannelId,
-        EMessageMode.CHANNEL_MESSAGE,
-        true,
-        true,
-        {
+      const replyMessage: ReplyMezonMessage = {
+        clan_id: this.clientConfig.clandNccId,
+        channel_id: this.clientConfig.machleoChannelId,
+        is_public: true,
+        is_parent_public: true,
+        parent_id: '0',
+        mode: EMessageMode.CHANNEL_MESSAGE,
+        msg: {
           t: messageContent,
         },
-        [
+        mentions: [
           { user_id: pmId, s: 0, e: pmUsername.length },
           {
             user_id: userId,
@@ -412,8 +472,8 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
             e: text.length + username.length,
           },
         ],
-        [],
-        [
+        attachments: [],
+        ref: [
           {
             message_ref_id: dataMention.messageId,
             message_sender_id: this.clientConfig.botKomuId,
@@ -426,7 +486,42 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
             has_attachment: false,
           },
         ],
-      );
+      };
+      this.messageQueue.addMessage(replyMessage);
+
+      // await this.client.sendMessage(
+      //   this.clientConfig.clandNccId,
+      //   '0',
+      //   this.clientConfig.machleoChannelId,
+      //   EMessageMode.CHANNEL_MESSAGE,
+      //   true,
+      //   true,
+      //   {
+      //     t: messageContent,
+      //   },
+      //   [
+      //     { user_id: pmId, s: 0, e: pmUsername.length },
+      //     {
+      //       user_id: userId,
+      //       s: text.length,
+      //       e: text.length + username.length,
+      //     },
+      //   ],
+      //   [],
+      //   [
+      //     {
+      //       message_ref_id: dataMention.messageId,
+      //       message_sender_id: this.clientConfig.botKomuId,
+      //       content: dataWfh.wfhMsg,
+      //       ref_type: 0,
+      //       message_sender_username: dataBot.username,
+      //       mesages_sender_avatar: dataBot.avatar,
+      //       message_sender_clan_nick: dataBot.clan_nick,
+      //       message_sender_display_name: dataBot.display_name,
+      //       has_attachment: false,
+      //     },
+      //   ],
+      // );
 
       await this.wfhRepository
         .createQueryBuilder()
@@ -440,11 +535,15 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           id: data.wfhId,
         })
         .execute();
-
-      await this.client.sendMessageUser(
-        pmId,
-        `You just ${typeConfirm} WFH complain for ${username}`,
-      );
+      const messageToUser: ReplyMezonMessage = {
+        userId: pmId,
+        textContent: `You just ${typeConfirm} WFH complain for ${username}`,
+      };
+      this.messageQueue.addMessage(messageToUser);
+      // await this.client.sendMessageUser(
+      //   pmId,
+      //   `You just ${typeConfirm} WFH complain for ${username}`,
+      // );
     } catch (error) {
       console.log('handlePmConfirmWfh', error);
     }

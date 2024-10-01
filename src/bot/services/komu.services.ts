@@ -5,6 +5,8 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { User } from '../models';
 import { Repository } from 'typeorm';
 import { EMessageMode, EUserType } from '../constants/configs';
+import { MessageQueue } from './messageQueue.service';
+import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 
 @Injectable()
 export class KomuService {
@@ -13,6 +15,7 @@ export class KomuService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private clientService: MezonClientService,
+    private messageQueue: MessageQueue,
   ) {
     this.client = clientService.getClient();
   }
@@ -140,17 +143,17 @@ export class KomuService {
       .getRawOne();
     if (!userAdmin) return;
     message = message.replace('#admin-username', `@${userAdmin.username}`);
-    await this.client.sendMessage(
-      process.env.KOMUBOTREST_CLAN_NCC_ID,
-      '0',
-      channelId,
-      EMessageMode.CHANNEL_MESSAGE,
-      true,
-      true,
-      {
+    const replyMessage = {
+      clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
+      channel_id: channelId,
+      is_public: true,
+      is_parent_public: true,
+      parent_id: '0',
+      mode: EMessageMode.CHANNEL_MESSAGE,
+      msg: {
         t: message,
       },
-      [
+      mentions: [
         ...mentions,
         {
           user_id: process.env.KOMUBOTREST_ADMIN_USER_ID,
@@ -158,18 +161,7 @@ export class KomuService {
           e: userAdmin.username.length + 1,
         },
       ],
-      undefined,
-      undefined,
-    );
-  }
-
-  sendMessageToUser(
-    userId: string,
-    message: string,
-    option = {},
-    attachments = [],
-    ref = [],
-  ) {
-    this.client.sendMessageUser(userId, message, option, attachments, ref);
+    };
+    this.messageQueue.addMessage(replyMessage);
   }
 }

@@ -100,6 +100,8 @@ import { EventGiveCoffee } from './listeners/givecoffee.handle';
 import { ReportHolidayService } from './asterisk-commands/commands/report/reportHoliday.service';
 import { ReportOrderService } from './asterisk-commands/commands/report/reportOrder.service';
 import { KomuService } from './services/komu.services';
+import { MessageQueue } from './services/messageQueue.service';
+import { MessageCommand } from './services/messageCommand.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -206,6 +208,8 @@ import { KomuService } from './services/komu.services';
     ReportOrderService,
     RegisterCommand,
     KomuService,
+    MessageQueue,
+    MessageCommand,
   ],
   controllers: [KomubotrestController],
 })

@@ -6,6 +6,7 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { MentionSchedulerService } from '../scheduler/mention-scheduler.services';
 import { ClientConfigService } from '../config/client-config.service';
 import { EMessageMode } from '../constants/configs';
+import { MessageQueue } from '../services/messageQueue.service';
 
 @Injectable()
 export class EventGiveCoffee extends BaseHandleEvent {
@@ -13,6 +14,7 @@ export class EventGiveCoffee extends BaseHandleEvent {
     clientService: MezonClientService,
     private mentionSchedulerService: MentionSchedulerService,
     private clientConfig: ClientConfigService,
+    private messageQueue: MessageQueue
   ) {
     super(clientService);
   }
@@ -31,17 +33,17 @@ export class EventGiveCoffee extends BaseHandleEvent {
 
       const firstText = `${authorName} just sent a coffee to `;
       const messageContent = firstText + `${userName}`;
-      await this.client.sendMessage(
-        data.clan_id,
-        '0',
-        this.clientConfig.welcomeChannelId,
-        EMessageMode.CHANNEL_MESSAGE,
-        true,
-        true,
-        {
+      const replyMessage = {
+        clan_id: data.clan_id,
+        channel_id: this.clientConfig.welcomeChannelId,
+        is_public: true,
+        is_parent_public: true,
+        parent_id: '0',
+        mode: EMessageMode.CHANNEL_MESSAGE,
+        msg: {
           t: messageContent,
         },
-        [
+        mentions: [
           { user_id: data.sender_id, s: 0, e: authorName.length },
           {
             user_id: data.receiver_id,
@@ -49,8 +51,8 @@ export class EventGiveCoffee extends BaseHandleEvent {
             e: firstText.length + userName.length,
           },
         ],
-        [],
-      );
+      };
+      this.messageQueue.addMessage(replyMessage)
     } catch (error) {
       console.log('give coffee', error);
     }

@@ -11,6 +11,7 @@ import { QuizService } from '../services/quiz.services';
 import { UtilsService } from '../services/utils.services';
 import { getUserNameByEmail } from '../utils/helper';
 import moment from 'moment';
+import { MessageQueue } from '../services/messageQueue.service';
 
 @Injectable()
 export class WFHSchedulerService {
@@ -24,11 +25,12 @@ export class WFHSchedulerService {
     private quizeService: QuizService,
     @InjectRepository(WorkFromHome)
     private wfhRepository: Repository<WorkFromHome>,
+    private messageQueue: MessageQueue,
   ) {
     this.client = clientService.getClient();
   }
 
-  // @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
@@ -115,17 +117,29 @@ export class WFHSchedulerService {
         )
         .select('*')
         .execute();
-      await Promise.all(
-        userSend.map((user) =>
-          this.quizeService.sendQuizToSingleUser(user, true),
-        ),
-      );
+      await this.sendQuizzesWithLimit(userSend);
+      // await Promise.all(
+      //   userSend.map((user) =>
+      //     this.quizeService.sendQuizToSingleUser(user, true),
+      //   ),
+      // );
     } catch (error) {
       console.log(error);
     }
   }
 
-  // @Cron('*/1 9-11,13-17 * * 1-5')
+  async sendQuizzesWithLimit(userSend) {
+    const delay = 400;
+    for (let i = 0; i < userSend.length; i++) {
+      const user = userSend[i];
+      await this.quizeService.sendQuizToSingleUser(user, true);
+      if (i < userSend.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  @Cron('*/1 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async punish() {
     if (await this.utilsService.checkHoliday()) return;
     if (this.utilsService.checkTime(new Date())) return;
@@ -184,23 +198,25 @@ export class WFHSchedulerService {
         //   type: 'wfh',
         //   createdAt: Date.now(),
         // });
-
-        await this.client.sendMessage(
-          process.env.KOMUBOTREST_CLAN_NCC_ID,
-          '0',
-          process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
-          EMessageMode.CHANNEL_MESSAGE,
-          true,
-          true,
-          { t: content },
-          [
+        const replyMessage = {
+          clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
+          channel_id: process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
+          is_public: true,
+          is_parent_public: true,
+          parent_id: '0',
+          mode: EMessageMode.CHANNEL_MESSAGE,
+          msg: {
+            t: content,
+          },
+          mentions: [
             {
               user_id: user.userId,
               s: 0,
               e: user.username.length + 1,
             },
           ],
-        );
+        };
+        this.messageQueue.addMessage(replyMessage);
 
         await this.userRepository
           .createQueryBuilder('user')

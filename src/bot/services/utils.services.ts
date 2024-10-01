@@ -133,13 +133,6 @@ export class UtilsService {
       hourTimestamp = dateScheduler.getHours();
     }
 
-    if (channelId === '1833331797883097088') {
-      this.komuService.sendMessageToUser(
-        '1827994776956309504',
-        `(isSameMinute) typeCheck: ${typeCheck}, minuteDb: ${minuteDb}, checkFiveMinute:${checkFiveMinute}, hourTimestamp: ${hourTimestamp}`,
-      );
-    }
-
     return (
       hourDateNow === hourTimestamp &&
       checkFiveMinute >= 0 &&
@@ -159,12 +152,6 @@ export class UtilsService {
 
   isTimeDay(newDateTimestamp, channelId?) {
     newDateTimestamp.setHours(0, 0, 0, 0);
-    if (channelId === '1833331797883097088') {
-      this.komuService.sendMessageToUser(
-        '1827994776956309504',
-        `(isTimeDay) dateTimeNow: ${(this.checkTimeMeeting() as any).dateTimeNow}, newDateTimestamp: ${newDateTimestamp}`,
-      );
-    }
     return (this.checkTimeMeeting() as any).dateTimeNow - newDateTimestamp >= 0;
   }
 
@@ -446,16 +433,5 @@ export class UtilsService {
       return 'Afternoon';
     }
     return 'Evening';
-  }
-
-  async sendMessageToDev(data) {
-    try {
-      await this.client.sendMessageUser(
-        this.clientConfigService.devMezonUserId,
-        `ERROR: *avatar Cant find user or userID: ${data}`,
-      );
-    } catch (error) {
-      console.log('sendMessageToDev', error);
-    }
   }
 }
