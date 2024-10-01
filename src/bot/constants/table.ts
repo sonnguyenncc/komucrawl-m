@@ -47,4 +47,5 @@ export const TABLE = {
   DYNAMIC: 'komu_dynamic',
   CHANNEL_MEZON: 'komu_channelmezon',
   QUIZ_MSG: 'komu_quizmsg',
+  MEZON_BOT_MESSAGE: 'komu_mezonBotMessage',
 };
