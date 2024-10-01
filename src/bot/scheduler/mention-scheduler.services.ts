@@ -12,6 +12,8 @@ import { UtilsService } from 'src/bot/services/utils.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { EMarkdownType, MezonClient } from 'mezon-sdk';
 import { EMessageMode, EUserType } from '../constants/configs';
+import { MessageQueue } from '../services/messageQueue.service';
+import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 
 @Injectable()
 export class MentionSchedulerService {
@@ -27,6 +29,7 @@ export class MentionSchedulerService {
     private schedulerRegistry: SchedulerRegistry,
     private clientConfig: ClientConfigService,
     private clientService: MezonClientService,
+    private messageQueue: MessageQueue,
   ) {
     this.client = this.clientService.getClient();
   }
@@ -66,10 +69,10 @@ export class MentionSchedulerService {
       const textContent = `Hãy trả lời ${authorName} tại ${
         threadNoti ? 'thread' : 'channel'
       } `;
-      await this.client.sendMessageUser(
-        user.mentionUserId,
-        textContent + `#` + ` nhé!`, // '#' at message is channel, auto fill at FE
-        {
+      const messageToUser: ReplyMezonMessage = {
+        userId: user.mentionUserId,
+        textContent: textContent + `#` + ` nhé!`, // '#' at message is channel, auto fill at FE,
+        messOptions: {
           hg: [
             {
               channelid: user.channelId,
@@ -78,7 +81,21 @@ export class MentionSchedulerService {
             },
           ],
         },
-      );
+      };
+      this.messageQueue.addMessage(messageToUser);
+      // await this.client.sendMessageUser(
+      //   user.mentionUserId,
+      //   textContent + `#` + ` nhé!`, // '#' at message is channel, auto fill at FE
+      //   {
+      //     hg: [
+      //       {
+      //         channelid: user.channelId,
+      //         s: textContent.length, // replace to '#' in text
+      //         e: textContent.length + 1, // replace to '#' in text
+      //       },
+      //     ],
+      //   },
+      // );
       await this.mentionRepository.update({ id: user.id }, { noti: true });
     } catch (error) {
       console.log(error);
@@ -167,15 +184,15 @@ export class MentionSchedulerService {
       // });
 
       // send message to channel machleo
-      const botMessage = await this.client.sendMessage(
-        this.clientConfig.clandNccId,
-        '0',
-        this.clientConfig.machleoChannelId,
-        EMessageMode.CHANNEL_MESSAGE,
-        true,
-        true,
-        messageReply,
-        [
+      const replyMessage: ReplyMezonMessage = {
+        clan_id: this.clientConfig.clandNccId,
+        channel_id: this.clientConfig.machleoChannelId,
+        is_public: true,
+        is_parent_public: true,
+        parent_id: '0',
+        mode: EMessageMode.CHANNEL_MESSAGE,
+        msg: messageReply,
+        mentions: [
           { user_id: user.mentionUserId, s: 0, e: userName.length },
           {
             user_id: user.authorId,
@@ -183,21 +200,8 @@ export class MentionSchedulerService {
             e: userName.length + 36 + authorName.length,
           },
         ],
-      );
-
-      // TODO: apply react confirm
-      // const dataBot = {
-      //   messageId: botMessage.message_id,
-      //   authorId: this.clientConfig.botKomuId,
-      //   channelId: botMessage.channel_id,
-      //   mentionUserId: user.mentionUserId,
-      //   createdTimestamp: createdAt,
-      //   noti: true,
-      //   confirm: true,
-      //   punish: false,
-      //   reactionTimestamp: null,
-      // };
-      // await this.mentionRepository.insert(dataBot);
+      };
+      this.messageQueue.addMessage(replyMessage);
 
       // update user punish
       await this.mentionRepository.update(

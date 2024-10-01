@@ -11,6 +11,7 @@ import { ChannelType, MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { EMessageMode } from '../constants/configs';
 import { KomuService } from '../services/komu.services';
+import { MessageQueue } from '../services/messageQueue.service';
 
 @Injectable()
 export class MeetingSchedulerService {
@@ -25,6 +26,7 @@ export class MeetingSchedulerService {
     private clientConfig: ClientConfigService,
     private clientService: MezonClientService,
     private komuService: KomuService,
+    private messageQueue: MessageQueue,
   ) {
     this.client = this.clientService.getClient();
   }
@@ -81,17 +83,18 @@ export class MeetingSchedulerService {
         this.utilsService.isSameMinute(minuteDb, dateScheduler) &&
         this.utilsService.isSameDate(dateCreatedTimestamp)
       ) {
-        await this.client.sendMessage(
-          this.clientConfig.clandNccId,
-          '0',
-          dataMeeing.channelId,
-          EMessageMode.CHANNEL_MESSAGE,
-          true,
-          true,
-          {
+        const replyMessage = {
+          clan_id: this.clientConfig.clandNccId,
+          channel_id: dataMeeing.channelId,
+          is_public: true,
+          is_parent_public: true,
+          parent_id: '0',
+          mode: EMessageMode.CHANNEL_MESSAGE,
+          msg: {
             t: 'Voice channel full',
           },
-        );
+        };
+        this.messageQueue.addMessage(replyMessage);
       } else {
         await this.handleMeetingRepeat(
           dataMeeing,
@@ -176,14 +179,14 @@ export class MeetingSchedulerService {
       Math.random() * listVoiceChannelAvalable.length,
     );
 
-    await this.client.sendMessage(
-      this.clientConfig.clandNccId,
-      '0',
-      data.channelId,
-      EMessageMode.CHANNEL_MESSAGE,
-      true,
-      true,
-      {
+    const replyMessage = {
+      clan_id: this.clientConfig.clandNccId,
+      channel_id: data.channelId,
+      is_public: true,
+      is_parent_public: true,
+      parent_id: '0',
+      mode: EMessageMode.CHANNEL_MESSAGE,
+      msg: {
         t: messageContent + `# (${data?.task ?? ''})`,
         hg: [
           {
@@ -194,8 +197,9 @@ export class MeetingSchedulerService {
           },
         ],
       },
-      [{ user_id: this.configClient.hereUserId, s: 0, e: 5 }],
-    );
+      mentions: [{ user_id: this.configClient.hereUserId, s: 0, e: 5 }],
+    };
+    this.messageQueue.addMessage(replyMessage);
   }
 
   async updateMeetingRepository(data, createdTimestamp?) {
@@ -247,14 +251,13 @@ export class MeetingSchedulerService {
     dateScheduler,
     minuteDb,
   ) {
-    if (data.channel_id === '1833331797883097088') {
-      const dataMeeting = this.utilsService.checkTimeMeeting();
-      const message = `Time now: ${dataMeeting}`;
-      this.komuService.sendMessageToUser('1827994776956309504', message);
-    }
     if (this.utilsService.isSameDay()) return;
     if (
-      this.utilsService.isSameMinute(minuteDb, dateScheduler, data.channel_id) &&
+      this.utilsService.isSameMinute(
+        minuteDb,
+        dateScheduler,
+        data.channel_id,
+      ) &&
       this.utilsService.isTimeDay(dateScheduler, data.channel_id)
     ) {
       const messageContent = `@here Our meeting room is `;

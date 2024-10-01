@@ -12,6 +12,8 @@ import { MezonClientService } from 'src/mezon/services/client.service';
 import { MezonClient } from 'mezon-sdk';
 import { EMessageMode, EUserType } from '../constants/configs';
 import { TimeSheetService } from '../services/timesheet.services';
+import { MessageQueue } from '../services/messageQueue.service';
+import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 
 @Injectable()
 export class SendMessageSchedulerService {
@@ -28,6 +30,7 @@ export class SendMessageSchedulerService {
     private clientService: MezonClientService,
     private utilsService: UtilsService,
     private timeSheetService: TimeSheetService,
+    private messageQueue: MessageQueue,
   ) {
     this.client = this.clientService.getClient();
   }
@@ -103,10 +106,16 @@ export class SendMessageSchedulerService {
           await Promise.all(
             checkUser.map(async (user) => {
               try {
-                await this.client.sendMessageUser(
-                  user.userId,
-                  'Nhớ submit timesheet cuối tuần tránh bị phạt bạn nhé!!! Nếu bạn có tham gia opentalk bạn hãy log timesheet vào project company activities nhé.',
-                );
+                const messageToUser: ReplyMezonMessage = {
+                  userId: user.userId,
+                  textContent:
+                    'Nhớ submit timesheet cuối tuần tránh bị phạt bạn nhé!!! Nếu bạn có tham gia opentalk bạn hãy log timesheet vào project company activities nhé.',
+                };
+                this.messageQueue.addMessage(messageToUser);
+                // await this.client.sendMessageUser(
+                //   user.userId,
+                //   'Nhớ submit timesheet cuối tuần tránh bị phạt bạn nhé!!! Nếu bạn có tham gia opentalk bạn hãy log timesheet vào project company activities nhé.',
+                // );
               } catch (error) {
                 console.log('checkUser', error);
               }
@@ -168,24 +177,25 @@ export class SendMessageSchedulerService {
           item.user[0]?.clan_nick ||
           item.user[0]?.display_name ||
           item.user[0]?.username;
-        await this.client.sendMessage(
-          this.clientConfigService.clandNccId,
-          '0',
-          this.clientConfigService.mezonNhaCuaChungChannelId,
-          EMessageMode.CHANNEL_MESSAGE,
-          true,
-          true,
-          {
+        const replyMessage = {
+          clan_id: this.clientConfigService.clandNccId,
+          channel_id: this.clientConfigService.mezonNhaCuaChungChannelId,
+          is_public: true,
+          is_parent_public: true,
+          parent_id: '0',
+          mode: EMessageMode.CHANNEL_MESSAGE,
+          msg: {
             t: item.wish + ' ' + userName + ' +1 trà sữa full topping nhé b iu',
           },
-          [
+          mentions: [
             {
               user_id: item.user[0]?.userId,
               s: item.wish.length + 1,
               e: item.wish.length + 1 + userName.length,
             },
           ],
-        );
+        };
+        this.messageQueue.addMessage(replyMessage);
       }),
     );
   }
@@ -222,10 +232,16 @@ export class SendMessageSchedulerService {
 
           const checkUser = await query.select('*').getRawOne();
           if (checkUser && checkUser.userId) {
-            await this.client.sendMessageUser(
-              checkUser.userId,
-              'Nhớ tắt máy trước khi ra về nếu không dùng nữa nhé!!!',
-            );
+            const messageToUser: ReplyMezonMessage = {
+              userId: checkUser.userId,
+              textContent:
+                'Nhớ tắt máy trước khi ra về nếu không dùng nữa nhé!!!',
+            };
+            this.messageQueue.addMessage(messageToUser);
+            // await this.client.sendMessageUser(
+            //   checkUser.userId,
+            //   'Nhớ tắt máy trước khi ra về nếu không dùng nữa nhé!!!',
+            // );
           }
         }),
       );
@@ -273,10 +289,15 @@ export class SendMessageSchedulerService {
 
           const checkUser = await query.select('user').getOne();
           if (checkUser?.userId) {
-            await this.client.sendMessageUser(
-              checkUser.userId,
-              'Đừng quên checkout trước khi ra về nhé!!!',
-            );
+            const messageToUser: ReplyMezonMessage = {
+              userId: checkUser.userId,
+              textContent: 'Đừng quên checkout trước khi ra về nhé!!!',
+            };
+            this.messageQueue.addMessage(messageToUser);
+            // await this.client.sendMessageUser(
+            //   checkUser.userId,
+            //   'Đừng quên checkout trước khi ra về nhé!!!',
+            // );
           }
         }),
       );
@@ -312,12 +333,19 @@ export class SendMessageSchedulerService {
               .getOne();
 
             if (userdb) {
-              await this.client.sendMessageUser(
-                userdb.userId,
-                type === 'last'
-                  ? '[WARNING] Five minutes until lost 20k because of missing DAILY. Thanks!'
-                  : "Don't forget to daily, dude! Don't be mad at me, we are friends I mean we are best friends.",
-              );
+              const messageToUser: ReplyMezonMessage = {
+                userId: userdb.userId,
+                textContent: type === 'last'
+                ? '[WARNING] Five minutes until lost 20k because of missing DAILY. Thanks!'
+                : "Don't forget to daily, dude! Don't be mad at me, we are friends I mean we are best friends.",
+              };
+              this.messageQueue.addMessage(messageToUser);
+              // await this.client.sendMessageUser(
+              //   userdb.userId,
+              //   type === 'last'
+              //     ? '[WARNING] Five minutes until lost 20k because of missing DAILY. Thanks!'
+              //     : "Don't forget to daily, dude! Don't be mad at me, we are friends I mean we are best friends.",
+              // );
             }
           } catch (error) {
             console.error(error);

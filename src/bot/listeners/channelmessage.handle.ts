@@ -32,6 +32,7 @@ import {
 import { ClientConfigService } from '../config/client-config.service';
 import { checkAnswerFormat } from '../utils/helper';
 import { QuizService } from '../services/quiz.services';
+import { MessageQueue } from '../services/messageQueue.service';
 
 @Injectable()
 export class EventListenerChannelMessage {
@@ -54,11 +55,12 @@ export class EventListenerChannelMessage {
     private readonly axiosClientService: AxiosClientService,
     private clientConfigService: ClientConfigService,
     private quizService: QuizService,
+    private messageQueue: MessageQueue,
   ) {
     this.client = clientService.getClient();
   }
 
-  // @OnEvent(Events.ChannelMessage)
+  @OnEvent(Events.ChannelMessage)
   async handleMentioned(message: ChannelMessage) {
     try {
       const findChannel = await this.channelRepository.findOne({
@@ -114,7 +116,7 @@ export class EventListenerChannelMessage {
       ];
 
       const validCategory: boolean = checkCategoriesId.includes(
-        findChannel.category_id,
+        findChannel?.category_id,
       );
 
       if (!checkTimeMention(new Date())) return;
@@ -154,13 +156,6 @@ export class EventListenerChannelMessage {
     try {
       const content = msg.content.t;
       let replyMessage: ReplyMezonMessage;
-      // const client = this.clientService.getClient();
-      // if (msg.sender_id != BOT_ID) {
-      //   client.sendMessageUser(
-      //     msg.sender_id,
-      //     `Bot rep lại tin nhắn ${content}`,
-      //   );
-      // }
       if (typeof content == 'string' && content.trim()) {
         const firstLetter = content.trim()[0];
         switch (firstLetter) {
@@ -177,7 +172,8 @@ export class EventListenerChannelMessage {
             ? replyMessage
             : [replyMessage];
           for (const mess of replyMessageArray) {
-            await this.clientService.sendMessage(mess);
+            this.messageQueue.addMessage(mess); // add to queue, send every 0.2s
+            // await this.clientService.sendMessage(mess);
           }
         }
       }
@@ -248,8 +244,8 @@ export class EventListenerChannelMessage {
           { messageContent: AIReplyMessage, mentions: [] },
           msg,
         );
-
-        await this.clientService.sendMessage(replyMessage);
+        this.messageQueue.addMessage(replyMessage);
+        // await this.clientService.sendMessage(replyMessage);
       }
     } catch (e) {
       console.log(e);
@@ -345,14 +341,14 @@ export class EventListenerChannelMessage {
             }
           }
         }
-
-        return await this.client.sendMessageUser(
-          userQuiz.userId,
-          mess,
-          messOptions,
-          [],
-          refGenerate(msg),
-        );
+        const messageToUser: ReplyMezonMessage = {
+          userId: userQuiz.userId,
+          textContent: mess,
+          messOptions: messOptions,
+          attachments: [],
+          refs: refGenerate(msg),
+        };
+        this.messageQueue.addMessage(messageToUser);
       }
     }
   }
