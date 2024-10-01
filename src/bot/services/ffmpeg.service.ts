@@ -7,6 +7,7 @@ import * as path from 'path';
 export class FFmpegService {
   constructor() {
     ffmpeg.setFfmpegPath(ffmpegPath);
+    ffmpeg.setFfprobePath(ffmpegPath.replace('ffmpeg', 'ffprobe'));
   }
 
   transcodeMp3ToRtmp(inputPath: string, rtmpUrl: string): Promise<void> {
