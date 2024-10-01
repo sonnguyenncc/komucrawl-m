@@ -39,4 +39,32 @@ export class FFmpegService {
         .run();
     });
   }
+
+  transcodeVideoToRtmp(inputPath: string, rtmpUrl: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      ffmpeg()
+        .input(inputPath)
+        .inputOptions('-re')
+        .videoCodec('libx264')
+        .audioCodec('aac')
+        .output(rtmpUrl)
+        .outputOptions([
+          '-f flv', // RTMP protocol uses FLV container format
+          '-preset veryfast', // Faster encoding preset (adjust if needed)
+          '-tune zerolatency', // Low latency tuning for streaming
+        ])
+        .on('start', (commandLine) => {
+          console.log('FFmpeg command: ' + commandLine);
+        })
+        .on('end', () => {
+          console.error('transcodeMp3ToRtmp success');
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error('transcodeMp3ToRtmp Error:', err);
+          reject(err);
+        })
+        .run();
+    });
+  }
 }
