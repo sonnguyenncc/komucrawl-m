@@ -59,10 +59,17 @@ export class Ncc8Command extends CommandMessage {
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           // /home/mjnk9xw/Downloads/test.mp3
-          this.ffmpegService.transcodeMp3ToRtmp(
-            res?.data?.url,
-            channel?.streaming_url,
-          );
+          if (args[2]) {
+            this.ffmpegService.transcodeVideoToRtmp(
+              res?.data?.url,
+              channel?.streaming_url,
+            );
+          } else {
+            this.ffmpegService.transcodeMp3ToRtmp(
+              res?.data?.url,
+              channel?.streaming_url,
+            );
+          }
         }
 
         await sleep(1000);
