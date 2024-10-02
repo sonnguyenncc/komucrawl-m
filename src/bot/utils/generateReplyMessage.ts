@@ -4,6 +4,7 @@ import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 export function replyMessageGenerate(
   replayConent: { [x: string]: any },
   message: ChannelMessage,
+  hasRef: boolean = true,
 ): ReplyMezonMessage {
   const replayMessage: ReplyMezonMessage = {} as ReplyMezonMessage;
   const defaultValue = {
@@ -39,7 +40,7 @@ export function replyMessageGenerate(
 
   replayMessage['msg'] = { ...messageContent };
 
-  replayMessage['ref'] = refGenerate(message);
+  replayMessage['ref'] = hasRef ? refGenerate(message) : [];
 
   return replayMessage;
 }

@@ -102,6 +102,7 @@ import { ReportOrderService } from './asterisk-commands/commands/report/reportOr
 import { KomuService } from './services/komu.services';
 import { MessageQueue } from './services/messageQueue.service';
 import { MessageCommand } from './services/messageCommand.service';
+import { NotificationCommand } from './asterisk-commands/commands/notification/noti.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -210,6 +211,7 @@ import { MessageCommand } from './services/messageCommand.service';
     KomuService,
     MessageQueue,
     MessageCommand,
+    NotificationCommand
   ],
   controllers: [KomubotrestController],
 })
