@@ -300,6 +300,8 @@ export class ClientConfigService {
 
     this.ncc8ChannelId = `${configService.get<string>('MEZON_NCC8_CHANNEL_ID')}`;
 
+    this.movieChannelId = `${configService.get<string>('MEZON_MOVIE_CHANNEL_ID')}`;
+
     this.devMezonUserId = `${configService.get<string>('MEZON_DEV_USER_ID')}`;
 
     this.mezonNhaCuaChungChannelId = `${configService.get<string>('MEZON_NHACUACHUNG_CHANNEL_ID')}`;
@@ -524,6 +526,8 @@ export class ClientConfigService {
   devMezonUserId: string;
 
   ncc8ChannelId: string;
+
+  movieChannelId: string;
 
   mezonNhaCuaChungChannelId: string;
 
