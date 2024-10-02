@@ -41,11 +41,15 @@ export class Ncc8Command extends CommandMessage {
         );
 
       const textContent = `Go to `;
+      let channel_id = this.clientConfigService.ncc8ChannelId;
+      if (args[2]) {
+        channel_id = this.clientConfigService.movieChannelId;
+      }
       try {
         // call api in sdk
         const channel = await this.client.registerStreamingChannel({
           clan_id: message.clan_id,
-          channel_id: this.clientConfigService.ncc8ChannelId,
+          channel_id: channel_id,
         });
 
         if (!channel) return;
@@ -58,7 +62,6 @@ export class Ncc8Command extends CommandMessage {
         // check channel is not streaming
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
-          // /home/mjnk9xw/Downloads/test.mp3
           if (args[2]) {
             this.ffmpegService
               .transcodeVideoToRtmp(res?.data?.url, channel?.streaming_url)
@@ -77,7 +80,7 @@ export class Ncc8Command extends CommandMessage {
             messageContent: textContent,
             hg: [
               {
-                channelid: this.clientConfigService.ncc8ChannelId,
+                channelid: channel_id,
                 s: textContent.length,
                 e: textContent.length + 1,
               },
@@ -89,7 +92,7 @@ export class Ncc8Command extends CommandMessage {
         console.log(
           'error',
           message.clan_id,
-          this.clientConfigService.ncc8ChannelId,
+          channel_id,
           error,
         );
         return this.replyMessageGenerate(

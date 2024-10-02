@@ -41,46 +41,31 @@ export class FFmpegService {
     });
   }
 
-  getVideoCodec(inputPath: string) {
-    return new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(inputPath, (err, metadata) => {
-        if (err) {
-          return reject(err);
-        }
-        const videoStream = metadata.streams.find(
-          (stream) => stream.codec_type === 'video',
-        );
-        resolve(videoStream.codec_name); // e.g., 'h264', 'vp9'
-      });
-    });
-  }
-
-  async transcodeVideoToRtmp(
+  transcodeVideoToRtmp(
     inputPath: string,
     rtmpUrl: string,
   ): Promise<void> {
-    const codec = await this.getVideoCodec(inputPath);
     return new Promise((resolve, reject) => {
       ffmpeg()
         .input(inputPath)
         .inputOptions('-re')
-        .videoCodec(codec)
-        .audioCodec('aac')
+        .videoCodec('copy') // Keep original video codec (H.264)
+        .audioCodec('aac') // Transcode audio to AAC
+        .audioBitrate('128k') // Set audio bitrate
+        .audioChannels(2) // Convert audio to stereo
         .output(rtmpUrl)
         .outputOptions([
           '-f flv', // RTMP protocol uses FLV container format
-          '-preset veryfast', // Faster encoding preset (adjust if needed)
-          '-tune zerolatency', // Low latency tuning for streaming
         ])
         .on('start', (commandLine) => {
           console.log('FFmpeg command: ' + commandLine);
         })
         .on('end', () => {
-          console.error('transcodeMp3ToRtmp success');
+          console.error('transcodeVideoToRtmp success');
           resolve();
         })
         .on('error', (err) => {
-          console.error('transcodeMp3ToRtmp Error:', err);
+          console.error('transcodeVideoToRtmp Error:', err);
           reject(err);
         })
         .run();
