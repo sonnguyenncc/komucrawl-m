@@ -8,7 +8,8 @@ export abstract class CommandMessage {
   replyMessageGenerate(
     replayConent: { [x: string]: any },
     message: ChannelMessage,
+    hasRef: boolean = true,
   ): ReplyMezonMessage {
-    return replyMessageGenerate(replayConent, message);
+    return replyMessageGenerate(replayConent, message, hasRef);
   }
 }
