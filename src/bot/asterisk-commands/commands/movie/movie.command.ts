@@ -41,7 +41,7 @@ export class MovieCommand extends CommandMessage {
       '```' +
       'Command: *movie play ID' +
       '\n' +
-      'Example: *movie play 180' +
+      'Example: *movie play 1' +
       '```';
     if (args[0] === 'play') {
       if (!args[1])
@@ -104,6 +104,7 @@ export class MovieCommand extends CommandMessage {
     }
 
     if (args[0] === 'playlist') {
+      console.log('playlist');
       let dataMp3 = await this.uploadFileData.find({
         where: {
           file_type: FileType.FILM,
