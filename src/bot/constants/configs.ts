@@ -11,3 +11,8 @@ export enum EMessageMode {
   CHANNEL_MESSAGE = 2,
   DM_MESSAGE = 4,
 }
+
+export enum FileType {
+  NCC8 = 'ncc8',
+  FILM = 'film',
+}

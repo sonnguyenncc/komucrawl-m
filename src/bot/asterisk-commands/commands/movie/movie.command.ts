@@ -10,8 +10,8 @@ async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-@Command('ncc8')
-export class Ncc8Command extends CommandMessage {
+@Command('movie')
+export class MovieCommand extends CommandMessage {
   private client: MezonClient;
   constructor(
     private clientConfigService: ClientConfigService,
@@ -26,9 +26,9 @@ export class Ncc8Command extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
-      'Command: *ncc8 play ID' +
+      'Command: *movie play ID' +
       '\n' +
-      'Example: *ncc8 play 180' +
+      'Example: *movie play 180' +
       '```';
     if (args[0] === 'play') {
       if (!args[1])
@@ -41,7 +41,7 @@ export class Ncc8Command extends CommandMessage {
         );
 
       const textContent = `Go to `;
-      let channel_id = this.clientConfigService.ncc8ChannelId;
+      const channel_id = this.clientConfigService.movieChannelId;
       try {
         // call api in sdk
         const channel = await this.client.registerStreamingChannel({
@@ -52,7 +52,7 @@ export class Ncc8Command extends CommandMessage {
         if (!channel) return;
 
         const res = await this.axiosClientService.get(
-          `${process.env.NCC8_API}/ncc8/episode/${args[1]}`,
+          `${process.env.NCC8_API}/ncc8/film/${args[1]}`,
         );
         if (!res) return;
 
@@ -60,8 +60,8 @@ export class Ncc8Command extends CommandMessage {
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           this.ffmpegService
-            .transcodeMp3ToRtmp(res?.data?.url, channel?.streaming_url)
-            .catch((error) => console.log('error mp3', error));
+            .transcodeVideoToRtmp(res?.data?.url, channel?.streaming_url)
+            .catch((error) => console.log('error video', error));
         }
 
         await sleep(1000);
@@ -83,7 +83,7 @@ export class Ncc8Command extends CommandMessage {
         console.log('error', message.clan_id, channel_id, error);
         return this.replyMessageGenerate(
           {
-            messageContent: 'Ncc8 not found',
+            messageContent: 'Movie not found',
           },
           message,
         );
