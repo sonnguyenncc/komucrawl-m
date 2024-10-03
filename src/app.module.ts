@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BotModule } from './bot/bot.module';
 import { MezonModule } from './mezon/mezon.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import path from 'path';
 
 @Module({
   imports: [
@@ -32,7 +33,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: false,
+        migrations: [path.join(__dirname, 'src', 'migration', '*.js')],
+        cli: {
+          migrationsDir: __dirname + '/migration',
+        },
       }),
     }),
     MezonModule.forRootAsync({
