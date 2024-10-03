@@ -30,9 +30,10 @@ export class MovieCommand extends CommandMessage {
   }
 
   removeFileNameExtension(fileName) {
-    const lastDotIndex = fileName.lastIndexOf('.');
-    const newFileName = fileName.substring(0, lastDotIndex);
-    return newFileName;
+    const withoutFirstFiveChars = fileName.substring(5);
+    const lastDotIndex = withoutFirstFiveChars.lastIndexOf('.');
+    const finalFileName = withoutFirstFiveChars.substring(0, lastDotIndex);
+    return finalFileName;
   }
 
   async execute(args: string[], message: ChannelMessage) {
