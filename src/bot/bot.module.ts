@@ -103,6 +103,7 @@ import { KomuService } from './services/komu.services';
 import { MessageQueue } from './services/messageQueue.service';
 import { MessageCommand } from './services/messageCommand.service';
 import { NotificationCommand } from './asterisk-commands/commands/notification/noti.command';
+import { MovieCommand } from './asterisk-commands/commands/movie/movie.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -211,7 +212,8 @@ import { NotificationCommand } from './asterisk-commands/commands/notification/n
     KomuService,
     MessageQueue,
     MessageCommand,
-    NotificationCommand
+    NotificationCommand,
+    MovieCommand,
   ],
   controllers: [KomubotrestController],
 })
