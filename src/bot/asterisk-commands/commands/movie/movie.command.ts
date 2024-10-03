@@ -29,6 +29,12 @@ export class MovieCommand extends CommandMessage {
     this.client = this.clientService.getClient();
   }
 
+  removeFileNameExtension(fileName) {
+    const lastDotIndex = fileName.lastIndexOf('.');
+    const newFileName = fileName.substring(0, lastDotIndex);
+    return newFileName;
+  }
+
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
@@ -108,7 +114,7 @@ export class MovieCommand extends CommandMessage {
       if (!dataMp3) {
         return;
       } else if (Array.isArray(dataMp3) && dataMp3.length === 0) {
-        let mess = '```' + 'Không có NCC nào' + '```';
+        let mess = '```' + 'Không có movie nào' + '```';
         return this.replyMessageGenerate(
           {
             messageContent: mess,
@@ -121,11 +127,14 @@ export class MovieCommand extends CommandMessage {
         for (let i = 0; i <= Math.ceil(dataMp3.length / 50); i += 1) {
           if (dataMp3.slice(i * 50, (i + 1) * 50).length === 0) break;
           let mess =
-            '```Danh sách NCC8\n' +
+            '```Danh sách movie\n' +
             dataMp3
               .slice(i * 50, (i + 1) * 50)
               .filter((item) => item.episode)
-              .map((list) => `NCC8 số ${list.episode}`)
+              .map(
+                (list) =>
+                  `Id: ${list.episode}, name: ${this.removeFileNameExtension(list.fileName)}`,
+              )
               .join('\n') +
             '```';
           listReplyMessage.push(mess);
