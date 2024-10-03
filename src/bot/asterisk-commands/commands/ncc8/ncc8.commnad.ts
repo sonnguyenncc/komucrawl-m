@@ -5,6 +5,10 @@ import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { FFmpegService } from 'src/bot/services/ffmpeg.service';
+import { Uploadfile } from 'src/bot/models';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FileType } from 'src/bot/constants/configs';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,6 +22,8 @@ export class Ncc8Command extends CommandMessage {
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
     private ffmpegService: FFmpegService,
+    @InjectRepository(Uploadfile)
+    private uploadFileData: Repository<Uploadfile>,
   ) {
     super();
     this.client = this.clientService.getClient();
@@ -89,6 +95,53 @@ export class Ncc8Command extends CommandMessage {
         );
       }
     }
+
+    if (args[0] === 'playlist') {
+      let dataMp3 = await this.uploadFileData.find({
+        where: {
+          file_type: FileType.NCC8,
+        },
+        order: {
+          episode: 'DESC',
+        },
+      });
+      if (!dataMp3) {
+        return;
+      } else if (Array.isArray(dataMp3) && dataMp3.length === 0) {
+        let mess = '```' + 'Không có NCC nào' + '```';
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      } else {
+        const listReplyMessage = [];
+        for (let i = 0; i <= Math.ceil(dataMp3.length / 50); i += 1) {
+          if (dataMp3.slice(i * 50, (i + 1) * 50).length === 0) break;
+          let mess =
+            '```Danh sách NCC8\n' +
+            dataMp3
+              .slice(i * 50, (i + 1) * 50)
+              .filter((item) => item.episode)
+              .map((list) => `NCC8 số ${list.episode}`)
+              .join('\n') +
+            '```';
+          listReplyMessage.push(mess);
+        }
+        return listReplyMessage.map((mess) => {
+          return this.replyMessageGenerate(
+            {
+              messageContent: mess,
+              mk: [{ type: 't', s: 0, e: mess.length }],
+            },
+            message,
+          );
+        });
+      }
+    }
+
     return this.replyMessageGenerate(
       {
         messageContent: messageContent,
