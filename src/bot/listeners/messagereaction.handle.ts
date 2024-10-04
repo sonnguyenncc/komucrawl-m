@@ -457,7 +457,7 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       const replyMessage: ReplyMezonMessage = {
         clan_id: this.clientConfig.clandNccId,
         channel_id: this.clientConfig.machleoChannelId,
-        is_public: true,
+        is_public: false,
         is_parent_public: true,
         parent_id: '0',
         mode: EMessageMode.CHANNEL_MESSAGE,

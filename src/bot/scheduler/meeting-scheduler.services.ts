@@ -83,11 +83,14 @@ export class MeetingSchedulerService {
         this.utilsService.isSameMinute(minuteDb, dateScheduler) &&
         this.utilsService.isSameDate(dateCreatedTimestamp)
       ) {
+        const findChannel = await this.channelRepository.findOne({
+          where: { channel_id: dataMeeing.channelId },
+        });
         const replyMessage = {
           clan_id: this.clientConfig.clandNccId,
           channel_id: dataMeeing.channelId,
-          is_public: true,
-          is_parent_public: true,
+          is_public: !findChannel?.channel_private,
+          is_parent_public: findChannel?.is_parent_public ?? true,
           parent_id: '0',
           mode: EMessageMode.CHANNEL_MESSAGE,
           msg: {
@@ -178,12 +181,14 @@ export class MeetingSchedulerService {
     const randomIndexVoiceChannel = Math.floor(
       Math.random() * listVoiceChannelAvalable.length,
     );
-
+    const findChannel = await this.channelRepository.findOne({
+      where: { channel_id: data.channelId },
+    });
     const replyMessage = {
       clan_id: this.clientConfig.clandNccId,
       channel_id: data.channelId,
-      is_public: true,
-      is_parent_public: true,
+      is_public: !findChannel?.channel_private,
+      is_parent_public: findChannel?.is_parent_public ?? true,
       parent_id: '0',
       mode: EMessageMode.CHANNEL_MESSAGE,
       msg: {

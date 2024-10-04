@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
-import { User } from '../models';
+import { ChannelMezon, User } from '../models';
 import { Repository } from 'typeorm';
 import { EMessageMode, EUserType } from '../constants/configs';
 import { MessageQueue } from './messageQueue.service';
@@ -16,6 +16,8 @@ export class KomuService {
     private userRepository: Repository<User>,
     private clientService: MezonClientService,
     private messageQueue: MessageQueue,
+    @InjectRepository(ChannelMezon)
+    private channelRepository: Repository<ChannelMezon>,
   ) {
     this.client = clientService.getClient();
   }
@@ -143,10 +145,13 @@ export class KomuService {
       .getRawOne();
     if (!userAdmin) return;
     message = message.replace('#admin-username', `@${userAdmin.username}`);
+    const findChannel = await this.channelRepository.findOne({
+      where: { channel_id: channelId },
+    });
     const replyMessage = {
       clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
       channel_id: channelId,
-      is_public: true,
+      is_public: !findChannel?.channel_private,
       is_parent_public: true,
       parent_id: '0',
       mode: EMessageMode.CHANNEL_MESSAGE,
