@@ -201,7 +201,7 @@ export class WFHSchedulerService {
         const replyMessage = {
           clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
           channel_id: process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
-          is_public: true,
+          is_public: false,
           is_parent_public: true,
           parent_id: '0',
           mode: EMessageMode.CHANNEL_MESSAGE,
