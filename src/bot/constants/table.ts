@@ -39,6 +39,7 @@ export const TABLE = {
   CHECKLIST: 'komu_checklist',
   CHECK_CAMERA: 'komu_checkCamera',
   CHANNEL: 'komu_channel',
+  CHANNEL_DM_MEZON: 'komu_channel_dm_mezon',
   BWLREACTION: 'komu_bwlReaction',
   INDIVIDUAL_CHANNEL: 'komu_individualChannel',
   EVENT: 'komu_event',

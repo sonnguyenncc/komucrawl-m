@@ -171,17 +171,16 @@ export class MentionSchedulerService {
         ],
       };
 
-      // TODO: apply react confirm
-      // const createdAt = Date.now();
-      // const data = await this.wfhRepository.save({
-      //   user: userData,
-      //   wfhMsg: JSON.stringify(messageReply),
-      //   complain: false,
-      //   pmconfirm: false,
-      //   status: 'ACTIVE',
-      //   type: 'mention',
-      //   createdAt: createdAt,
-      // });
+      const createdAt = Date.now();
+      const data = await this.wfhRepository.save({
+        user: userData,
+        wfhMsg: JSON.stringify(messageReply),
+        complain: false,
+        pmconfirm: false,
+        status: 'ACTIVE',
+        type: 'mention',
+        createdAt: createdAt,
+      });
 
       // send message to channel machleo
       const replyMessage: ReplyMezonMessage = {
@@ -206,7 +205,7 @@ export class MentionSchedulerService {
       // update user punish
       await this.mentionRepository.update(
         { id: user.id },
-        { confirm: true, punish: false }, // TODO: apply react confirm
+        { confirm: true, punish: true }, // TODO: apply react confirm
       );
     } catch (error) {
       console.log(error);
