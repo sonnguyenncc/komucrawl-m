@@ -104,6 +104,9 @@ import { MessageQueue } from './services/messageQueue.service';
 import { MessageCommand } from './services/messageCommand.service';
 import { NotificationCommand } from './asterisk-commands/commands/notification/noti.command';
 import { MovieCommand } from './asterisk-commands/commands/movie/movie.command';
+import { EventAddClanUser } from './listeners/addclanuser.handle';
+import { ChannelDMMezon } from './models/channelDmMezon.entity';
+import { ReportWFHService } from './utils/report-wfh.serivce';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -158,6 +161,7 @@ import { MovieCommand } from './asterisk-commands/commands/movie/movie.command';
       WOL,
       Dynamic,
       QuizMsg,
+      ChannelDMMezon
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -201,6 +205,7 @@ import { MovieCommand } from './asterisk-commands/commands/movie/movie.command';
     EventListenerUserChannelAdded,
     EventListenerUserChannelRemoved,
     EventGiveCoffee,
+    EventAddClanUser,
     QuizService,
     WFHSchedulerService,
     MeetingSchedulerService,
@@ -214,6 +219,7 @@ import { MovieCommand } from './asterisk-commands/commands/movie/movie.command';
     MessageCommand,
     NotificationCommand,
     MovieCommand,
+    ReportWFHService
   ],
   controllers: [KomubotrestController],
 })

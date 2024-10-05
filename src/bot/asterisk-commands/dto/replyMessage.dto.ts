@@ -8,6 +8,7 @@ import {
 export interface ReplyMezonMessage {
   clan_id?: string;
   channel_id?: string;
+  channelDmId?: string;
   is_public?: boolean;
   is_parent_public?: boolean;
   parent_id?: string;

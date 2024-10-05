@@ -35,95 +35,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
 
   @OnEvent(Events.MessageReaction)
   async handleReactMessageMention(messageReaction: ApiMessageReaction) {
-    // try {
-    //   const { message, emoji } = messageReaction;
-    //   const chid = message.channel.id;
-    //   const messageId = message.id;
-    //   const guildId = message.guildId;
-    //   const createdTimestamp = message.createdTimestamp;
-    //   let channel = message.channel;
-
-    //   if (!message.guildId) return;
-
-    //   const fetchMessage = await message.client.channels.fetch(
-    //     message.channelId,
-    //   );
-
-    //   const msg = await (fetchMessage as any).messages.fetch(message.id);
-    //   // if ((channel as any).type !== ChannelType.GuildCategory) {
-    //   //   (channel as any) = await message.client.channels.fetch(
-    //   //     (channel as any).parentId
-    //   //   );
-    //   // }
-
-    //   if (
-    //     channel.type === ChannelType.GuildPublicThread ||
-    //     channel.type === ChannelType.GuildPrivateThread
-    //   ) {
-    //     const channelParent = await message.client.channels.fetch(
-    //       channel.parentId,
-    //     );
-    //     channel = (await message.client.channels.fetch(
-    //       (channelParent as any).parentId,
-    //     )) as any;
-    //   } else if (channel.type === ChannelType.GuildText) {
-    //     channel = (await message.client.channels.fetch(
-    //       channel.parentId,
-    //     )) as any;
-    //   }
-
-    //   const checkCategories = [
-    //     'PROJECTS',
-    //     'PROJECTS-EXT',
-    //     'PRODUCTS',
-    //     'LOREN',
-    //     'HRM&IT',
-    //     'SAODO',
-    //     'MANAGEMENT',
-    //   ];
-
-    //   let validCategory;
-    //   if ((channel as any).name.slice(0, 4).toUpperCase() === 'PRJ-') {
-    //     validCategory = true;
-    //   } else {
-    //     validCategory = checkCategories.includes(
-    //       (channel as any).name.toUpperCase(),
-    //     );
-    //   }
-
-    //   if (
-    //     validCategory &&
-    //     message.channelId !== '921339190090797106' &&
-    //     msg.author.id != '922003239887581205'
-    //   ) {
-    //     const userDiscord = await message.client.users.fetch(msg.author.id);
-    //     userDiscord
-    //       .send(
-    //         `${user.username} react ${emoji.name} on your comment ${message.url}`,
-    //       )
-    //       .catch((err) => console.log(err));
-    //   }
-
-    //   const resolveMention = message.mentions.users.find(
-    //     (current) => current.id === user.id,
-    //   );
-
-    //   if (resolveMention) {
-
-    // this.client.sendMessage()
-    // const data: ApiCreateChannelDescRequest = {
-    //   clan_id: '0',
-    //   channel_id: '0',
-    //   category_id: '0',
-    //   type: ChannelType.CHANNEL_TYPE_DM,
-    //   user_ids: [messageReaction.sender_id, BOT_ID],
-    // };
-    // try {
-    //   const result = await this.client.createChannelDesc(data);
-    // } catch (e) {
-    //   console.log(e);
-    // }
-
     await this.mentionedRepository
       .createQueryBuilder()
       .update(Mentioned)
@@ -143,58 +54,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     // TODO: apply react confirm
     // await this.handleReactionMentonMessage(messageReaction);
     // await this.handlePmConfirmWfh(messageReaction);
-
-    // const dataBwl = await this.bwlReactionRepository.findOne({
-    //   relations: ["bwl", "author", "channel"],
-    //   where: {
-    //     guildId: guildId,
-    //     // bwl: messageId,
-    //     bwl: {
-    //       messageId: messageId,
-    //     },
-    //     author: {
-    //       userId: user.id,
-    //     },
-    //     channel: { id: chid },
-    //   },
-    // });
-
-    // if (dataBwl != null) {
-    //   await this.bwlReactionRepository
-    //     .createQueryBuilder()
-    //     .update(BwlReaction)
-    //     .set({ count: dataBwl.count + 1 })
-    //     .where("id = :id", { id: dataBwl.id })
-    //     .execute();
-    //   return;
-    // }
-
-    //   const bwl = await this.bwlRepository.findOne({
-    //     where: {
-    //       messageId: messageId,
-    //     },
-    //   });
-    //   const userInsert = await this.userRepository.findOne({
-    //     where: {
-    //       userId: user.id,
-    //     },
-    //   });
-    //   const channelInsert = await this.channelRepository.findOne({
-    //     where: {
-    //       id: chid,
-    //     },
-    //   });
-
-    //   await this.bwlReactionRepository.insert({
-    //     channel: channelInsert,
-    //     guildId: guildId,
-    //     bwl: bwl,
-    //     author: userInsert,
-    //     emoji: emoji.name,
-    //     count: 1,
-    //     createdTimestamp: createdTimestamp,
-    //   });
-    // } catch (error) {}
   }
 
   async handleReactionMentonMessage(messageReaction: ApiMessageReaction) {
@@ -238,10 +97,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           textContent: 'You just accepted the machleo punishment. Thanks!!!',
         };
         this.messageQueue.addMessage(messageToUser);
-        // await this.client.sendMessageUser(
-        //   data.mentionUserId,
-        //   'You just accepted the machleo punishment. Thanks!!!',
-        // );
       } else {
         const wfhdata = await this.wfhRepository.findOne({
           where: {
@@ -254,7 +109,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
             textContent: 'No WFH found',
           };
           this.messageQueue.addMessage(messageToUser);
-          // await this.client.sendMessageUser(data.mentionUserId, 'No WFH found');
           return;
         }
         const msec = (new Date() as any) - (new Date(wfhdata.createdAt) as any);
@@ -265,10 +119,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
               'WFH complain is expired. You have an hour to request.',
           };
           this.messageQueue.addMessage(messageToUser);
-          // await this.client.sendMessageUser(
-          //   data.mentionUserId,
-          //   'WFH complain is expired. You have an hour to request.',
-          // );
           return;
         }
 
@@ -278,10 +128,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
             textContent: 'You have already complained.',
           };
           this.messageQueue.addMessage(messageToUser);
-          // await this.client.sendMessageUser(
-          //   data.mentionUserId,
-          //   'You have already complained.',
-          // );
           return;
         }
 
@@ -298,10 +144,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
             textContent: 'User is not valid',
           };
           this.messageQueue.addMessage(messageToUser);
-          // await this.client.sendMessageUser(
-          //   data.mentionUserId,
-          //   'User is not valid',
-          // );
           return;
         }
         const url = encodeURI(
@@ -328,7 +170,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           };
           this.messageQueue.addMessage(messageToUser);
           return;
-          // return await this.client.sendMessageUser(data.mentionUserId, msg);
         }
 
         const pmdb = await this.userRepository
@@ -358,10 +199,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           };
           this.messageQueue.addMessage(messageToUser);
           return;
-          // return await this.client.sendMessageUser(
-          //   data.mentionUserId,
-          //   `Cannot fetch data for PM ${response.data.result.projectDtos[0].pmUsername}`,
-          // );
         }
         const contentMessage =
           '```' +
@@ -383,25 +220,8 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           },
         };
         this.messageQueue.addMessage(messageToUser);
-        // const dataMess = await this.client.sendMessageUser(
-        //   pmdb.userId,
-        //   contentMessage + confirmText,
-        //   {
-        //     mk: [
-        //       {
-        //         type: 't',
-        //         s: 0,
-        //         e: contentMessage.length + confirmText.length,
-        //       },
-        //     ],
-        //   },
-        // );
 
         await this.wfhRepository.update({ id: wfhdata.id }, { complain: true });
-        // await this.client.sendMessageUser(
-        //   userdb.userId,
-        //   `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
-        // );
         const messageToUserError: ReplyMezonMessage = {
           userId: userdb.userId,
           textContent: `${userdb.username} your WFH complain is sent to ${pmdb.username}.`,
@@ -489,40 +309,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       };
       this.messageQueue.addMessage(replyMessage);
 
-      // await this.client.sendMessage(
-      //   this.clientConfig.clandNccId,
-      //   '0',
-      //   this.clientConfig.machleoChannelId,
-      //   EMessageMode.CHANNEL_MESSAGE,
-      //   true,
-      //   true,
-      //   {
-      //     t: messageContent,
-      //   },
-      //   [
-      //     { user_id: pmId, s: 0, e: pmUsername.length },
-      //     {
-      //       user_id: userId,
-      //       s: text.length,
-      //       e: text.length + username.length,
-      //     },
-      //   ],
-      //   [],
-      //   [
-      //     {
-      //       message_ref_id: dataMention.messageId,
-      //       message_sender_id: this.clientConfig.botKomuId,
-      //       content: dataWfh.wfhMsg,
-      //       ref_type: 0,
-      //       message_sender_username: dataBot.username,
-      //       mesages_sender_avatar: dataBot.avatar,
-      //       message_sender_clan_nick: dataBot.clan_nick,
-      //       message_sender_display_name: dataBot.display_name,
-      //       has_attachment: false,
-      //     },
-      //   ],
-      // );
-
       await this.wfhRepository
         .createQueryBuilder()
         .update(WorkFromHome)
@@ -540,10 +326,6 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
         textContent: `You just ${typeConfirm} WFH complain for ${username}`,
       };
       this.messageQueue.addMessage(messageToUser);
-      // await this.client.sendMessageUser(
-      //   pmId,
-      //   `You just ${typeConfirm} WFH complain for ${username}`,
-      // );
     } catch (error) {
       console.log('handlePmConfirmWfh', error);
     }

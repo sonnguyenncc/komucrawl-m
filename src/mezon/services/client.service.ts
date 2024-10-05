@@ -47,8 +47,8 @@ export class MezonClientService {
 
   async sendMessageToUser(messageToUser: ReplyMezonMessage) {
     try {
-      return await this.client.sendMessageUser(
-        messageToUser.userId,
+      return await this.client.sendDMChannelMessage(
+        messageToUser.channelDmId,
         messageToUser.textContent ?? '',
         messageToUser.messOptions ?? {},
         messageToUser.attachments ?? [],
@@ -56,6 +56,14 @@ export class MezonClientService {
       );
     } catch (error) {
       console.log('sendMessageToUser', error);
+    }
+  }
+
+  async createDMchannel(userId: string) {
+    try {
+      return await this.client.createDMchannel(userId);
+    } catch (error) {
+      console.log('createDMchannel', error);
     }
   }
 }

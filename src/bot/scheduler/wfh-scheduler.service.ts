@@ -118,18 +118,13 @@ export class WFHSchedulerService {
         .select('*')
         .execute();
       await this.sendQuizzesWithLimit(userSend);
-      // await Promise.all(
-      //   userSend.map((user) =>
-      //     this.quizeService.sendQuizToSingleUser(user, true),
-      //   ),
-      // );
     } catch (error) {
       console.log(error);
     }
   }
 
   async sendQuizzesWithLimit(userSend) {
-    const delay = 400;
+    const delay = 100;
     for (let i = 0; i < userSend.length; i++) {
       const user = userSend[i];
       await this.quizeService.sendQuizToSingleUser(user, true);
@@ -189,15 +184,15 @@ export class WFHSchedulerService {
         )
           .utcOffset(420)
           .format('YYYY-MM-DD HH:mm:ss')} !\n`;
-        // await this.wfhRepository.save({
-        //   userId: user.userId,
-        //   wfhMsg: content,
-        //   complain: false,
-        //   pmconfirm: false,
-        //   status: 'ACTIVE',
-        //   type: 'wfh',
-        //   createdAt: Date.now(),
-        // });
+        await this.wfhRepository.save({
+          userId: user.userId,
+          wfhMsg: content,
+          complain: false,
+          pmconfirm: false,
+          status: 'ACTIVE',
+          type: 'wfh',
+          createdAt: Date.now(),
+        });
         const replyMessage = {
           clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
           channel_id: process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,

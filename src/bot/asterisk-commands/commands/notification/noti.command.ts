@@ -107,6 +107,7 @@ export class NotificationCommand extends CommandMessage {
               : [],
           mentions: newMentions,
           channel_id: channelId,
+          is_public: false,
         },
         message,
         false,

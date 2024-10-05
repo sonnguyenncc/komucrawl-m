@@ -83,6 +83,10 @@ export class BotGateway {
     this.eventEmitter.emit(Events.GiveCoffee, data);
   };
 
+  handleaddclanuser = async (data) => {
+    this.eventEmitter.emit(Events.AddClanUser, data);
+  };
+
   handleroleassigned = async (msg) => {
     console.log(msg);
   };
