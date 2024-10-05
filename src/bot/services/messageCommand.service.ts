@@ -60,6 +60,6 @@ export class MessageCommand {
           }
         }
       }
-    }, 100);
+    }, 200);
   }
 }

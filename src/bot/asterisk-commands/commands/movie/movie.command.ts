@@ -29,11 +29,17 @@ export class MovieCommand extends CommandMessage {
     this.client = this.clientService.getClient();
   }
 
-  removeFileNameExtension(fileName) {
-    const withoutFirstFiveChars = fileName.substring(5);
+  removeFileNameExtension(fileName: string, isSubtitle?: boolean) {
+    const withoutFirstFiveChars = fileName.substring(isSubtitle ? 0 : 5);
     const lastDotIndex = withoutFirstFiveChars.lastIndexOf('.');
     const finalFileName = withoutFirstFiveChars.substring(0, lastDotIndex);
     return finalFileName;
+  }
+
+  generateFileSubtitlePath(filePath: string) {
+    const lastDotIndex = filePath.lastIndexOf('.');
+    const fileSubtitlePath = filePath.substring(0, lastDotIndex);
+    return fileSubtitlePath.replace('film_', '');
   }
 
   async execute(args: string[], message: ChannelMessage) {
@@ -73,7 +79,11 @@ export class MovieCommand extends CommandMessage {
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           this.ffmpegService
-            .transcodeVideoToRtmp(res?.data?.url, channel?.streaming_url)
+            .transcodeVideoToRtmp(
+              res?.data?.url,
+              channel?.streaming_url,
+              this.generateFileSubtitlePath(res?.data?.url),
+            )
             .catch((error) => console.log('error video', error));
         }
 
