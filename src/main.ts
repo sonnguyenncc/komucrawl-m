@@ -28,6 +28,6 @@ async function bootstrap() {
   const komubotrestService = app.get(KomubotrestService);
   await komubotrestService.startWatchingFolder();
 
-  await app.listen(8000);
+  await app.listen(3000);
 }
 bootstrap();
