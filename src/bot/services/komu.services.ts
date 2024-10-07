@@ -42,16 +42,16 @@ export class KomuService {
       if (!userdb) {
         return null;
       }
-      const user = await this.client.getDMchannel(userdb.userId);
-      if (!user) {
-        const message = `#admin-username ơi, đồng chí ${username} không đúng format rồi!!!`;
-        await this.sendErrorToAdmin(
-          message,
-          process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
-          0,
-        );
-        return null;
-      }
+      // const user = await this.client.getDMchannel(userdb.userId);
+      // if (!user) {
+      //   const message = `#admin-username ơi, đồng chí ${username} không đúng format rồi!!!`;
+      //   await this.sendErrorToAdmin(
+      //     message,
+      //     process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
+      //     0,
+      //   );
+      //   return null;
+      // }
       // if (username == 'son.nguyenhoai') {
       msg = '```' + msg + '```';
       const sent = await this.client.sendMessageUser(userdb.userId, msg, {
