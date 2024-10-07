@@ -222,6 +222,7 @@ export class ClientConfigService {
       'HANOI2CORNER_CHANNEL_ID',
     )}`;
     this.hanoicorner = `${configService.get<string>('HANOICORNER_CHANNEL_ID')}`;
+    this.dalatcorner = `${configService.get<string>('DALATCORNER_CHANNEL_ID')}`;
     this.chuyenphiem_id = `${configService.get<string>(
       'CHUYENPHIEM_CHANNEL_ID',
     )}`;
@@ -306,7 +307,7 @@ export class ClientConfigService {
 
     this.mezonNhaCuaChungChannelId = `${configService.get<string>('MEZON_NHACUACHUNG_CHANNEL_ID')}`;
 
-    this.welcomeChannelId = `${configService.get<string>('MEZON_WELCOME_CHANNEL_ID')}`
+    this.welcomeChannelId = `${configService.get<string>('MEZON_WELCOME_CHANNEL_ID')}`;
   }
 
   https: https.Agent;
@@ -350,6 +351,9 @@ export class ClientConfigService {
 
   //hanoicorner
   hanoicorner: string;
+
+  //dalatcorner
+  dalatcorner: string;
 
   //guild_komu_id
   guild_komu_id: string;

@@ -51,8 +51,8 @@ export class BotGateway {
     this.eventEmitter.emit(Events.ChannelCreated, channel);
   };
 
-  private async handleuserclanremoved(user: UserClanRemovedEvent) {
-    console.log('onuserclanremoved', user);
+  handleuserclanremoved(user: UserClanRemovedEvent) {
+    this.eventEmitter.emit(Events.UserClanRemoved, user);
   }
 
   private async handlerole(msg) {
