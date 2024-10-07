@@ -158,8 +158,8 @@ export class SendMessageSchedulerService {
         const resultBirthday = await this.birthdayRepository.find();
         const items = resultBirthday.map((item) => item.title);
         let wishes = items;
-        if (!wishes.length) wishes = items;
-        const index = Math.floor(Math.random() * items.length);
+        if (!wishes?.length) wishes = items;
+        const index = Math.floor(Math.random() * items?.length);
         const birthdayWish = wishes[index];
         wishes.splice(index, 1);
         result.push({ user: birthday, wish: birthdayWish });
@@ -172,7 +172,7 @@ export class SendMessageSchedulerService {
     const result = await this.birthdayUser();
     await Promise.all(
       result.map(async (item) => {
-        if (item.user.length === 0) return;
+        if (item?.user?.length === 0) return;
         const userName =
           item.user[0]?.clan_nick ||
           item.user[0]?.display_name ||
@@ -190,8 +190,8 @@ export class SendMessageSchedulerService {
           mentions: [
             {
               user_id: item.user[0]?.userId,
-              s: item.wish.length + 1,
-              e: item.wish.length + 1 + userName.length,
+              s: item.wish?.length + 1,
+              e: item.wish?.length + 1 + userName?.length,
             },
           ],
         };
@@ -224,7 +224,7 @@ export class SendMessageSchedulerService {
             })
             .andWhere('"deactive" IS NOT TRUE')
             .andWhere('"user_type" = :userType', { userType: EUserType.MEZON });
-          if (userOffFullday && userOffFullday.length > 0) {
+          if (userOffFullday && userOffFullday?.length > 0) {
             query.andWhere('"email" NOT IN (:...userOffFullday)', {
               userOffFullday: userOffFullday,
             });
@@ -281,7 +281,7 @@ export class SendMessageSchedulerService {
               userType: EUserType.MEZON,
             })
             .andWhere('user.deactive IS NOT TRUE');
-          if (userOffFullday && userOffFullday.length > 0) {
+          if (userOffFullday && userOffFullday?.length > 0) {
             query.andWhere('user.email NOT IN (:...userOffFullday)', {
               userOffFullday,
             });
