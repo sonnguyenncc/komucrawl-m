@@ -46,8 +46,8 @@ export class ToggleActiveCommand extends CommandMessage {
       const checkRole = await this.toggleActiveService.checkrole(
         message.sender_id,
       );
-
-      if (message.sender_id === '182799477695630504') {
+      const userIdValid = ['1827994776956309504', '1779815181480628224'];
+      if (userIdValid.includes(message.sender_id)) {
         const findUserId = await this.toggleActiveService.findAcc(authorId);
         if (!findUserId.deactive) {
           await this.toggleActiveService.deactiveAcc(findUserId.userId);
