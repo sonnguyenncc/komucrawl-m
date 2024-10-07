@@ -56,21 +56,41 @@ export class NotificationCommand extends CommandMessage {
     }
 
     const devId = '1827994776956309504';
-    const validUserId = ['1800396411926220800'];
-    if (!validUserId.includes(authorId) && authorId !== devId) return;
-    if (validUserId.includes(authorId)) {
-      await this.axiosClientService.post(
-        this.clientConfigService.noti.api_url_quickNews,
+    const validUserId = [
+      '1800396411926220800', //'hien.ngothu'
+      '1779815181480628224', //'thiet.nguyenba'
+      '1800478701561843712', // 'vy.truongngoccam'
+      '1805137029512564736', // 'anh.ngothuc'
+      '1783441451758129152', // 'giang.tranminhchau'
+      '1820647107783036928', //'ngan.tonthuy'
+      '1801170072400564224', //chi.trantung
+    ];
+    if (!validUserId.includes(authorId) && authorId !== devId)
+      return this.replyMessageGenerate(
         {
-          content: messageContent,
+          messageContent:
+            '❌You do not have permission to execute this command!',
         },
-        {
-          httpsAgent: this.clientConfigService.https,
-          headers: {
-            securityCode: this.clientConfigService.imsKeySecret,
-          },
-        },
+        message,
       );
+    if (validUserId.includes(authorId)) {
+      try {
+        const resNoti = await this.axiosClientService.post(
+          this.clientConfigService.noti.api_url_quickNews,
+          {
+            content: messageContent,
+          },
+          {
+            httpsAgent: this.clientConfigService.https,
+            headers: {
+              securityCode: this.clientConfigService.imsKeySecret,
+            },
+          },
+        );
+        console.log('resNoti', resNoti);
+      } catch (error) {
+        console.log('errorNoti', error);
+      }
     }
     const fetchChannel = [
       message.channel_id,
@@ -82,6 +102,7 @@ export class NotificationCommand extends CommandMessage {
       this.clientConfigService.mezonNhaCuaChungChannelId,
       this.clientConfigService.quynhoncorner,
       this.clientConfigService.hanoi3corner,
+      this.clientConfigService.dalatcorner,
     ];
     const newMentions =
       Array.isArray(message.mentions) && message.mentions.length
