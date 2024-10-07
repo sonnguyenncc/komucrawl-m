@@ -27,7 +27,34 @@ export class UserInfoCommand extends CommandMessage {
     if (Array.isArray(message.references) && message.references.length) {
       userQuery = message.references[0].message_sender_username;
     } else {
-      userQuery = args.length ? args[0] : message.sender_id;
+      if (
+        Array.isArray(message.mentions) &&
+        message.mentions.length &&
+        args[0]?.startsWith('@')
+      ) {
+        const findUser = await this.userRepository.findOne({
+          where: {
+            userId: message.mentions[0].user_id,
+            user_type: EUserType.MEZON,
+          },
+        });
+        userQuery = findUser.userId;
+      } else {
+        userQuery = args.length ? args[0] : message.sender_id;
+      }
+
+      //check fist arg
+      const findUserArg = await this.userRepository
+        .createQueryBuilder('user')
+        .where(
+          '(user.email = :query OR user.username = :query OR user.userId = :query)',
+          { query: args[0] },
+        )
+        .andWhere('user.user_type = :userType', { userType: EUserType.MEZON })
+        .getOne();
+      if (findUserArg) {
+        userQuery = findUserArg.userId;
+      }
     }
 
     const findUser = await this.userRepository

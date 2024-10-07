@@ -108,6 +108,8 @@ import { EventAddClanUser } from './listeners/addclanuser.handle';
 import { ChannelDMMezon } from './models/channelDmMezon.entity';
 import { ReportWFHService } from './utils/report-wfh.serivce';
 import { EventUserClanRemoved } from './listeners/userclanremoved.handle';
+import { ReportMentionService } from './services/reportMention.serivce';
+import { ReportTrackerService } from './services/reportTracker.sevicer';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -221,7 +223,9 @@ import { EventUserClanRemoved } from './listeners/userclanremoved.handle';
     NotificationCommand,
     MovieCommand,
     ReportWFHService,
-    EventUserClanRemoved
+    EventUserClanRemoved,
+    ReportMentionService,
+    ReportTrackerService
   ],
   controllers: [KomubotrestController],
 })
