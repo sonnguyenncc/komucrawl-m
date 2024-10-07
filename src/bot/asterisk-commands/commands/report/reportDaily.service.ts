@@ -97,6 +97,8 @@ export class ReportDailyService {
       getUserNameByEmail(item.emailAddress),
     );
 
+    console.log('wfhUserEmail', wfhUserEmail);
+
     const [wfhMorning, wfhAfternoon, wfhFullday] = [
       'Morning',
       'Afternoon',
@@ -134,7 +136,11 @@ export class ReportDailyService {
       .select('*')
       .execute();
 
+    console.log('userNotWFH___________________ ', userNotWFH);
+
     const userEmail = userNotWFH.map((item) => item.email);
+
+    console.log('userEmail ', userEmail);
 
     const [dailyEmailMorning, dailyEmailAfternoon, dailyEmailFullday] =
       await Promise.all(
@@ -178,7 +184,7 @@ export class ReportDailyService {
         }
       }
     }
-
+    console.log('notDailyMorning___', notDailyMorning)
     const notDailyAfternoon = [];
     for (const wfhData of wfhUserEmail) {
       if (wfhAfternoon.includes(wfhData) || wfhFullday.includes(wfhData)) {
@@ -190,7 +196,7 @@ export class ReportDailyService {
         }
       }
     }
-
+    console.log('notDailyAfternoon', notDailyAfternoon)
     const notDailyFullday = [];
     for (const userNotWFHData of userEmail) {
       if (
@@ -200,6 +206,7 @@ export class ReportDailyService {
         notDailyFullday.push(userNotWFHData);
       }
     }
+    console.log('notDailyFullday', notDailyFullday)
 
     const spreadNotDaily = [
       ...notDailyMorning,
@@ -247,12 +254,13 @@ export class ReportDailyService {
           .getRawOne(),
       ),
     );
-
+    console.log('userNotDaily 111', [...userNotDaily])
     for (let i = 0; i < userNotDaily.length; i++) {
       if (userNotDaily[i] === null) {
         userNotDaily[i] = notDaily[i];
       }
     }
+    console.log('userNotDaily 2222', [...userNotDaily])
     return {
       notDaily,
       userNotDaily,
