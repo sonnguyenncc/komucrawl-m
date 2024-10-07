@@ -118,17 +118,11 @@ export class UtilsService {
     let checkFiveMinute;
     let hourTimestamp;
 
-    let typeCheck: string;
-
     if (minuteDb >= 0 && minuteDb <= 4) {
-      typeCheck = '0 - 4';
       checkFiveMinute = minuteDb + 60 - minuteDateNow;
-      const setHourTimestamp = new Date(dateScheduler).setHours(
-        dateScheduler.getHours() - 1,
-      );
-      hourTimestamp = new Date(setHourTimestamp).getHours();
+      dateScheduler.setHours(dateScheduler.getHours() - 1);
+      hourTimestamp = dateScheduler.getHours();
     } else {
-      typeCheck = '> 4';
       checkFiveMinute = minuteDb - minuteDateNow;
       hourTimestamp = dateScheduler.getHours();
     }

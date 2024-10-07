@@ -101,7 +101,7 @@ export class DailyCommand extends CommandMessage {
       {
         messageContent,
         mk:
-          messageContent === baseMessage
+          messageContent !== baseMessage
             ? [{ type: 't', s: 0, e: messageContent.length }]
             : [],
       },
