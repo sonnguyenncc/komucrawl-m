@@ -102,7 +102,7 @@ export class NotificationCommand extends CommandMessage {
       this.clientConfigService.mezonNhaCuaChungChannelId,
       this.clientConfigService.quynhoncorner,
       this.clientConfigService.hanoi3corner,
-      this.clientConfigService.dalatcorner,
+      // this.clientConfigService.dalatcorner,
     ];
     const newMentions =
       Array.isArray(message.mentions) && message.mentions.length
