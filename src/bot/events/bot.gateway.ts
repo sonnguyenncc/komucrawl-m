@@ -97,7 +97,7 @@ export class BotGateway {
       if (!Array.isArray(msg[key])) msg[key] = [];
     });
     try {
-      if (msg.sender_id) {
+      if (msg.sender_id && msg.sender_id !== '0') {
         await this.extendersService.addDBUser(msg);
       }
     } catch (e) {
