@@ -89,6 +89,7 @@ export class KomuService {
         };
         sent = await this.clientService.sendMessageToUser(newMessage);
       }
+      console.log('sent', sent)
       // msg = '```' + msg + '```';
       // const sent = await this.client.sendDMChannelMessage(userdb.userId, msg, {
       //   mk: [{ type: 't', s: 0, e: msg.length }],
@@ -100,10 +101,10 @@ export class KomuService {
       //* isSendQuiz : work when bot send quiz
       if (isSendQuiz) {
         if (botPing) {
-          userdb.last_bot_message_id = sent.message_id;
+          userdb.last_bot_message_id = sent?.message_id;
           userdb.botPing = true;
         } else {
-          userdb.last_bot_message_id = sent.message_id;
+          userdb.last_bot_message_id = sent?.message_id;
         }
       }
 
