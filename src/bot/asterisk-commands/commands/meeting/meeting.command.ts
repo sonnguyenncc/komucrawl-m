@@ -8,7 +8,6 @@ import { ChannelMezon } from 'src/bot/models';
 import { Repository } from 'typeorm';
 import { messHelp } from './meeting.constants';
 
-// TODO: canot get user, channel data from MEZON
 @Command('meeting')
 export class MeetingCommand extends CommandMessage {
   private client: MezonClient;

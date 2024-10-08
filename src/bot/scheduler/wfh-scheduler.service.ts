@@ -140,11 +140,15 @@ export class WFHSchedulerService {
     if (this.utilsService.checkTime(new Date())) return;
     const wfhResult = await this.timeSheetService.findWFHUser();
 
-    const wfhUserEmail = wfhResult.map((item) =>
-      getUserNameByEmail(item.emailAddress),
-    );
+    const currentHours = new Date().getHours() + 7;
+    const dateTypeNames =
+      currentHours < 13 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
+    const wfhUserEmail = wfhResult
+      .filter((item) => dateTypeNames.includes(item.dateTypeName))
+      .map((item) => {
+        return getUserNameByEmail(item.emailAddress);
+      });
     const thirtyMinutes = Date.now() - 30 * 60 * 1000;
-
     if (wfhUserEmail.length > 0) {
       const users = await this.userRepository
         .createQueryBuilder('user')

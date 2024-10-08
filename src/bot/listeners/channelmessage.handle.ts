@@ -202,42 +202,36 @@ export class EventListenerChannelMessage {
         AIReplyMessage = `Very busy, too much work today. I'm so tired. BRB.`;
 
         try {
-          const response = await this.axiosClientService.post(
-            url,
-            {
-              text: message,
-            },
-            { timeout: 5000 },
-          );
+          const response = await this.axiosClientService.post(url, {
+            text: message,
+          });
           if (response.status == 200) {
             AIReplyMessage = response.data.Response;
           } else {
             throw Error('swtich AI API');
           }
         } catch (e) {
-          const baseUrl = 'https://api.aimlapi.com/v1';
-          const apiKey = process.env.FREE_API_KEY;
-          const systemPrompt =
-            'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé. Hiện tại trợ lý ảo của công ty đang ra ngoài có chút việc nên bạn sẽ giúp bạn ấy trả lời các câu hỏi khi bạn ấy vắng mặt';
-
-          const headers = {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          };
-          const response = await this.axiosClientService.post(
-            `${baseUrl}/chat/completions`,
-            {
-              model: 'mistralai/Mistral-7B-Instruct-v0.2',
-              messages: [
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: message },
-              ],
-            },
-            { headers },
-          );
-
-          const completion = response.data;
-          AIReplyMessage = completion.choices[0].message.content;
+          // const baseUrl = 'https://api.aimlapi.com/v1';
+          // const apiKey = process.env.FREE_API_KEY;
+          // const systemPrompt =
+          //   'bạn là một công cụ ảo được hỗ trợ của công ty công nghệ có hơn 200 nhân viên tên là KOMU. hãy trả lời bằng tiếng việt nhé. Hiện tại trợ lý ảo của công ty đang ra ngoài có chút việc nên bạn sẽ giúp bạn ấy trả lời các câu hỏi khi bạn ấy vắng mặt';
+          // const headers = {
+          //   Authorization: `Bearer ${apiKey}`,
+          //   'Content-Type': 'application/json',
+          // };
+          // const response = await this.axiosClientService.post(
+          //   `${baseUrl}/chat/completions`,
+          //   {
+          //     model: 'mistralai/Mistral-7B-Instruct-v0.2',
+          //     messages: [
+          //       { role: 'system', content: systemPrompt },
+          //       { role: 'user', content: message },
+          //     ],
+          //   },
+          //   { headers },
+          // );
+          // const completion = response.data;
+          // AIReplyMessage = completion.choices[0].message.content;
         }
 
         const replyMessage = replyMessageGenerate(

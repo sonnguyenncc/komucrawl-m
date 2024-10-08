@@ -146,13 +146,13 @@ export class SendMessageSchedulerService {
     await Promise.all(
       data.result.map(async (item) => {
         const birthday = await this.userRepository
-          .createQueryBuilder('users')
+          .createQueryBuilder()
           .where('"email" = :email', {
             email: item.email.slice(0, -9),
           })
           .andWhere('"deactive" IS NOT TRUE')
           .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
-          .select('users')
+          .select('*')
           .getRawOne();
         if (!birthday) return;
         const resultBirthday = await this.birthdayRepository.find();
@@ -172,11 +172,11 @@ export class SendMessageSchedulerService {
     const result = await this.birthdayUser();
     await Promise.all(
       result.map(async (item) => {
-        if (item?.user?.length === 0) return;
+        if (!item?.user?.userId) return;
         const userName =
-          item.user[0]?.clan_nick ||
-          item.user[0]?.display_name ||
-          item.user[0]?.username;
+          item?.user?.clan_nick ||
+          item?.user?.display_name ||
+          item?.user?.username;
         const replyMessage = {
           clan_id: this.clientConfigService.clandNccId,
           channel_id: this.clientConfigService.mezonNhaCuaChungChannelId,
@@ -189,7 +189,7 @@ export class SendMessageSchedulerService {
           },
           mentions: [
             {
-              user_id: item.user[0]?.userId,
+              user_id: item?.user?.userId,
               s: item.wish?.length + 1,
               e: item.wish?.length + 1 + userName?.length,
             },
@@ -335,9 +335,10 @@ export class SendMessageSchedulerService {
             if (userdb) {
               const messageToUser: ReplyMezonMessage = {
                 userId: userdb.userId,
-                textContent: type === 'last'
-                ? '[WARNING] Five minutes until lost 20k because of missing DAILY. Thanks!'
-                : "Don't forget to daily, dude! Don't be mad at me, we are friends I mean we are best friends.",
+                textContent:
+                  type === 'last'
+                    ? '[WARNING] Five minutes until lost 20k because of missing DAILY. Thanks!'
+                    : "Don't forget to daily, dude! Don't be mad at me, we are friends I mean we are best friends.",
               };
               this.messageQueue.addMessage(messageToUser);
               // await this.client.sendMessageUser(
