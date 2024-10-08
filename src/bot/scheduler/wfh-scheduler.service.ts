@@ -140,7 +140,7 @@ export class WFHSchedulerService {
     if (this.utilsService.checkTime(new Date())) return;
     const wfhResult = await this.timeSheetService.findWFHUser();
 
-    const currentHours = new Date().getHours() + 7;
+    const currentHours = new Date().getHours();
     const dateTypeNames =
       currentHours < 13 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
     const wfhUserEmail = wfhResult
