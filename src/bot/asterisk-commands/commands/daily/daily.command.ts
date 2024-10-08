@@ -83,7 +83,7 @@ export class DailyCommand extends CommandMessage {
 
     const isValidTimeFrame = checkTimeSheet();
     const isValidWFH = checkTimeNotWFH();
-    const baseMessage = '✅ Daily saved.';
+    const baseMessage = '```✅ Daily saved.```';
     const errorMessageWFH =
       '```✅ Daily saved. (Invalid daily time frame. Please daily at 7h30-9h30, 12h-17h. WFH not daily 20k/time.)```';
     const errorMessageNotWFH =
@@ -100,10 +100,7 @@ export class DailyCommand extends CommandMessage {
     return this.replyMessageGenerate(
       {
         messageContent,
-        mk:
-          messageContent !== baseMessage
-            ? [{ type: 't', s: 0, e: messageContent.length }]
-            : [],
+        mk: [{ type: 't', s: 0, e: messageContent.length }],
       },
       message,
     );

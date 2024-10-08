@@ -110,6 +110,8 @@ import { ReportWFHService } from './utils/report-wfh.serivce';
 import { EventUserClanRemoved } from './listeners/userclanremoved.handle';
 import { ReportMentionService } from './services/reportMention.serivce';
 import { ReportTrackerService } from './services/reportTracker.sevicer';
+import { CallCommand } from './asterisk-commands/commands/call/call.command';
+import { WhereCommand } from './asterisk-commands/commands/where/where.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -164,7 +166,7 @@ import { ReportTrackerService } from './services/reportTracker.sevicer';
       WOL,
       Dynamic,
       QuizMsg,
-      ChannelDMMezon
+      ChannelDMMezon,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -225,7 +227,9 @@ import { ReportTrackerService } from './services/reportTracker.sevicer';
     ReportWFHService,
     EventUserClanRemoved,
     ReportMentionService,
-    ReportTrackerService
+    ReportTrackerService,
+    CallCommand,
+    WhereCommand,
   ],
   controllers: [KomubotrestController],
 })
