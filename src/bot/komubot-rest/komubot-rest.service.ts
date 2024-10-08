@@ -152,7 +152,7 @@ export class KomubotrestService {
       const findUser = await this.userRepository.findOne({
         where: { username: username, user_type: EUserType.MEZON },
       });
-
+      if (!findUser) return;
       const messageToUser: ReplyMezonMessage = {
         userId: findUser.userId,
         textContent: message,

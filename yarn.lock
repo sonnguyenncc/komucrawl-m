@@ -1540,9 +1540,9 @@
     undici-types "~6.19.2"
 
 "@types/node@>=13.7.0":
-  version "22.7.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.4.tgz#e35d6f48dca3255ce44256ddc05dee1c23353fcc"
-  integrity sha512-y+NPi1rFzDs1NdQHHToqeiX2TIS79SWEAw9GYhkkx8bD0ChpfqC+n2j5OXOCpzfojBEBt6DnEnnG9MY0zk1XLg==
+  version "22.7.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.7.5.tgz#cfde981727a7ab3611a481510b473ae54442b92b"
+  integrity sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==
   dependencies:
     undici-types "~6.19.2"
 
@@ -3150,9 +3150,9 @@ ejs@^3.1.10:
     jake "^10.8.5"
 
 electron-to-chromium@^1.5.28:
-  version "1.5.32"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.32.tgz#4a05ee78e29e240aabaf73a67ce9fe73f52e1bc7"
-  integrity sha512-M+7ph0VGBQqqpTT2YrabjNKSQ2fEl9PVx6AK3N558gDH9NO8O6XN9SXXFWRo9u9PbEg/bWq+tjXQr+eXmxubCw==
+  version "1.5.33"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.33.tgz#8f64698661240e70fdbc4b032e6085e391f05e09"
+  integrity sha512-+cYTcFB1QqD4j4LegwLfpCNxifb6dDFUAwk6RsLusCwIaZI6or2f+q8rs5tTB2YC53HhOlIbEaqHMAAC8IOIwA==
 
 electron-to-chromium@^1.5.4:
   version "1.5.31"
@@ -5949,10 +5949,10 @@ methods@^1.1.2, methods@~1.1.2:
   resolved "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
   integrity sha512-iclAHeNqNm68zFtnZ0e+1L2yUIdvzNoauKU4WBA3VvH/vPFieF7qfRlwUZU+DA9P9bPXIS90ulxoUoCH23sV2w==
 
-mezon-sdk@^2.7.57:
-  version "2.7.57"
-  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.57.tgz#a9316dc03412ea7640f84ebc37ed88854eab5863"
-  integrity sha512-a66irRzpsgdx4z3xBtDaDFemLSL7zV3ed310z6FboMr5t1PdAWgMDRbZwdshDAdFW+n1KI24Kphll94CPGRLkg==
+mezon-sdk@^2.7.58:
+  version "2.7.58"
+  resolved "https://registry.yarnpkg.com/mezon-sdk/-/mezon-sdk-2.7.58.tgz#15fbea175302e3a20407b7e2e4ff31700ba1b08e"
+  integrity sha512-zc4NzErRmUOHVtC3jl3vpnTXGJGjEzWvQGteCMWhOVOEK21HpFTP47VEK9MhvuDtMh7F6uKHbeYTkilYK6/VPg==
   dependencies:
     "@types/ws" "^8.5.12"
     base64-arraybuffer "^1.0.2"
