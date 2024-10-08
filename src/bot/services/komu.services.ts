@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { EMessageMode, EUserType } from '../constants/configs';
 import { MessageQueue } from './messageQueue.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
+import { ChannelDMMezon } from '../models/channelDmMezon.entity';
 
 @Injectable()
 export class KomuService {
@@ -18,6 +19,8 @@ export class KomuService {
     private messageQueue: MessageQueue,
     @InjectRepository(ChannelMezon)
     private channelRepository: Repository<ChannelMezon>,
+    @InjectRepository(ChannelDMMezon)
+    private channelDmMezonRepository: Repository<ChannelDMMezon>,
   ) {
     this.client = clientService.getClient();
   }
@@ -33,10 +36,10 @@ export class KomuService {
         .where('("email" = :username or "username" = :username)', {
           username: username,
         })
-        .andWhere('user_type = :userType', {
+        .andWhere('"user_type" = :userType', {
           userType: EUserType.MEZON.toString(),
         })
-        .andWhere('deactive IS NOT True ')
+        .andWhere('"deactive" IS NOT True ')
         .select('*')
         .getRawOne();
       if (!userdb) {
@@ -53,10 +56,43 @@ export class KomuService {
       //   return null;
       // }
       // if (username == 'son.nguyenhoai') {
-      msg = '```' + msg + '```';
-      const sent = await this.client.sendMessageUser(userdb.userId, msg, {
-        mk: [{ type: 't', s: 0, e: msg.length }],
+      const findDMChannel = await this.channelDmMezonRepository.findOne({
+        where: { user_id: userdb.userId },
       });
+      let sent;
+      if (!findDMChannel) {
+        const newDMChannel = await this.clientService.createDMchannel(
+          userdb.userId,
+        ); // create new DM channel
+        if (!newDMChannel) return;
+        const dataInsert = {
+          user_id: userdb.userId,
+          channel_id: newDMChannel.channel_id,
+          username: userdb?.username,
+        };
+        await this.channelDmMezonRepository.insert(dataInsert);
+        const newMessage = {
+          textContent: '```' + msg + '```',
+          messOptions: {
+            mk: [{ type: 't', s: 0, e: msg.length + 6 }],
+          },
+          channelDmId: newDMChannel.channel_id,
+        };
+        sent = await this.clientService.sendMessageToUser(newMessage);
+      } else {
+        const newMessage = {
+          textContent: '```' + msg + '```',
+          messOptions: {
+            mk: [{ type: 't', s: 0, e: msg.length + 6 }],
+          },
+          channelDmId: findDMChannel.channel_id,
+        };
+        sent = await this.clientService.sendMessageToUser(newMessage);
+      }
+      // msg = '```' + msg + '```';
+      // const sent = await this.client.sendDMChannelMessage(userdb.userId, msg, {
+      //   mk: [{ type: 't', s: 0, e: msg.length }],
+      // });
 
       // }
 
