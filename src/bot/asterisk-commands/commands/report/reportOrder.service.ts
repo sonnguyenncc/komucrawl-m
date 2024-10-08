@@ -25,9 +25,9 @@ export class ReportOrderService {
         })
         .andWhere(`"isCancel" IS NOT TRUE`)
         .andWhere(
-          `"createdTimestamp" > ${this.utilsService.getYesterdayDate()}`,
+          `"createdTimestamp" > ${this.utilsService.getYesterdayDate() + 60000 * 60 * 7}`,
         )
-        .andWhere(`"createdTimestamp" < ${this.utilsService.getTomorrowDate()}`)
+        .andWhere(`"createdTimestamp" < ${this.utilsService.getTomorrowDate() + 60000 * 60 * 7}`) 
         .groupBy('username')
         .execute();
 
