@@ -44,6 +44,7 @@ export class ReportDailyService {
         mess = userNotDaily
           .slice(i * 50, (i + 1) * 50)
           .filter((user) => user)
+          .filter((user) => user.username)
           .map((user) => {
             if (user.userId) {
               return `${user.email.toLowerCase()} (${this.findCountNotDaily(
