@@ -234,7 +234,7 @@ export class KomubotrestController {
     @Res() res: Response
   ) {
     try {
-      const file = await this.komubotrestService.getNcc8Episode(episode, FileType.AUDIO_BOOK);
+      const file = await this.komubotrestService.getNcc8Episode(episode, FileType.AUDIOBOOK);
       if (!file?.length) {
         res.status(404).send({ message: 'Not found' });
         return;
