@@ -20,5 +20,5 @@ export enum FileType {
 
 export enum FFmpegImagePath {
   NCC8 = '/dist/public/images/ncc8.png',
-  AUDIOBOOK = '/dist/public/images/audiobook.jpg',
+  AUDIOBOOK = '/dist/public/images/audiobook.png',
 }
