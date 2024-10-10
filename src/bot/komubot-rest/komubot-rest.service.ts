@@ -274,11 +274,11 @@ export class KomubotrestService {
     return file;
   }
 
-  async findMaxEpisodeFilm(): Promise<number> {
+  async findMaxEpisodeFilm(fileType: FileType): Promise<number> {
     const result = await this.uploadFileData
       .createQueryBuilder('upload_file')
       .select('MAX(upload_file.episode)', 'maxEpisode')
-      .where('upload_file.file_type = :fileType', { fileType: FileType.FILM })
+      .where('upload_file.file_type = :fileType', { fileType })
       .getRawOne();
     return result?.maxEpisode || 0;
   }
@@ -296,17 +296,32 @@ export class KomubotrestService {
                 fileName: `${filename}`,
               });
             } else if (stats.isFile()) {
-              console.log('New film inserted: ', filename);
               const isNewFilm = filename.startsWith('film_');
-              if (!isNewFilm) return;
-              const episode = await this.findMaxEpisodeFilm(); // find current episode film
-              await this.uploadFileData.insert({
-                filePath: this.folderPath,
-                fileName: `${filename}`,
-                createTimestamp: Date.now(),
-                episode: episode + 1,
-                file_type: FileType.FILM,
-              });
+              if (isNewFilm) {
+                console.log('New film inserted: ', filename);
+                const episode = await this.findMaxEpisodeFilm(FileType.FILM); // find current episode film
+                await this.uploadFileData.insert({
+                  filePath: this.folderPath,
+                  fileName: `${filename}`,
+                  createTimestamp: Date.now(),
+                  episode: episode + 1,
+                  file_type: FileType.FILM,
+                });
+              }
+              const isNewAudioBook = filename.startsWith('audiobook_');
+              if (isNewAudioBook) {
+                // find current episode audioBook
+                const episodeBook = await this.findMaxEpisodeFilm(
+                  FileType.AUDIO_BOOK,
+                );
+                await this.uploadFileData.insert({
+                  filePath: this.folderPath,
+                  fileName: `${filename}`,
+                  createTimestamp: Date.now(),
+                  episode: episodeBook + 1,
+                  file_type: FileType.AUDIO_BOOK,
+                });
+              }
             }
           });
         }

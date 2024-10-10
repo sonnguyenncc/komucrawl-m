@@ -15,4 +15,5 @@ export enum EMessageMode {
 export enum FileType {
   NCC8 = 'ncc8',
   FILM = 'film',
+  AUDIO_BOOK = 'audioBook'
 }
