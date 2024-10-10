@@ -91,6 +91,7 @@ import {
 } from './listeners';
 import { QuizService } from './services/quiz.services';
 import { Ncc8Command } from './asterisk-commands/commands/ncc8/ncc8.commnad';
+import { AudiobookCommand } from './asterisk-commands/commands/audiobook/audiobook.command';
 import { SendMessageSchedulerService } from './scheduler/send-message-scheduler.services';
 import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.command';
 import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services';
@@ -205,6 +206,7 @@ import { PollSchedulerService } from './scheduler/poll-scheduler.service';
     ToggleActiveCommand,
     ToggleActiveService,
     Ncc8Command,
+    AudiobookCommand,
     ReportDailyService,
     HolidayCommand,
     EventListenerChannelMessage,
@@ -237,7 +239,7 @@ import { PollSchedulerService } from './scheduler/poll-scheduler.service';
     WhereCommand,
     PollCommand,
     PollService,
-    PollSchedulerService
+    PollSchedulerService,
   ],
   controllers: [KomubotrestController],
 })

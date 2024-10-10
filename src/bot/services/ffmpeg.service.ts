@@ -4,7 +4,7 @@ import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
 import * as path from 'path';
 import * as fs from 'fs';
-
+import { FFmpegImagePath } from 'src/bot/constants/configs';
 @Injectable()
 export class FFmpegService {
   constructor() {
@@ -12,15 +12,19 @@ export class FFmpegService {
     ffmpeg.setFfprobePath(ffprobePath.path);
   }
 
-  transcodeMp3ToRtmp(inputPath: string, rtmpUrl: string): Promise<void> {
+  transcodeMp3ToRtmp(
+    imagePath: string,
+    inputPath: string,
+    rtmpUrl: string,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const imagePath = path.join(
-        process.cwd(),
-        '/dist/public/images/ncc8.png',
-      );
+      if (imagePath === '') {
+        imagePath = FFmpegImagePath.NCC8;
+      }
+      const imagePathJoined = path.join(process.cwd(), imagePath);
 
       ffmpeg()
-        .input(imagePath)
+        .input(imagePathJoined)
         .inputOptions('-re')
         .loop()
         .input(inputPath)
@@ -61,7 +65,7 @@ export class FFmpegService {
               audioCodec = stream.codec_name;
             }
           }
-  
+
           resolve({
             video: videoCodec,
             audio: audioCodec,
@@ -72,8 +76,7 @@ export class FFmpegService {
   }
 
   escapeFilePath(filePath: string): string {
-    return filePath
-      .replace(/:/g, '\\:');
+    return filePath.replace(/:/g, '\\:');
   }
 
   async transcodeVideoToRtmp(
@@ -97,13 +100,13 @@ export class FFmpegService {
       );
       if (existingSubtitle) {
         subTitlePathFull = subTitlePath + existingSubtitle;
-        const subTitlePathFullValid = this.escapeFilePath(subTitlePathFull)
+        const subTitlePathFullValid = this.escapeFilePath(subTitlePathFull);
         outputOptions.push(`-vf subtitles='${subTitlePathFullValid}'`);
       }
 
       return new Promise((resolve, reject) => {
         const ffmpegCommand = ffmpeg().input(inputPath).inputOptions('-re');
-  
+
         switch (codecInfo.video) {
           case 'h264':
             ffmpegCommand.videoCodec('libx264');
@@ -125,7 +128,7 @@ export class FFmpegService {
             ffmpegCommand.videoCodec('libx264');
             break;
         }
-  
+
         switch (codecInfo.audio) {
           case 'aac':
             ffmpegCommand.audioCodec('copy');
@@ -143,7 +146,7 @@ export class FFmpegService {
             ffmpegCommand.audioCodec('aac');
             break;
         }
-  
+
         ffmpegCommand
           .outputOptions(outputOptions)
           .output(rtmpUrl)

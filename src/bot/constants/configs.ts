@@ -15,4 +15,10 @@ export enum EMessageMode {
 export enum FileType {
   NCC8 = 'ncc8',
   FILM = 'film',
+  AUDIOBOOK = 'audioBook',
+}
+
+export enum FFmpegImagePath {
+  NCC8 = '/dist/public/images/ncc8.png',
+  AUDIOBOOK = '/dist/public/images/audiobook.jpg',
 }
