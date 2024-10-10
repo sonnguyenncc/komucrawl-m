@@ -1,7 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ApiMessageAttachment, ApiMessageRef, MezonClient } from 'mezon-sdk';
 import { MezonClientConfig } from '../dtos/MezonClientConfig';
-import { ReplyMezonMessage } from 'src/bot/asterisk-commands/dto/replyMessage.dto';
+import {
+  ReactMessageChannel,
+  ReplyMezonMessage,
+} from 'src/bot/asterisk-commands/dto/replyMessage.dto';
+import { EMessageMode } from 'src/bot/constants/configs';
 
 @Injectable()
 export class MezonClientService {
@@ -64,6 +68,28 @@ export class MezonClientService {
       return await this.client.createDMchannel(userId);
     } catch (error) {
       console.log('createDMchannel', error);
+    }
+  }
+
+  async reactMessageChannel(dataReact: ReactMessageChannel) {
+    try {
+      return await this.client.reactionMessage(
+        '',
+        dataReact.clan_id,
+        '0',
+        dataReact.channel_id,
+        EMessageMode.CHANNEL_MESSAGE,
+        dataReact.is_public,
+        dataReact.is_parent_public ?? true,
+        dataReact.message_id,
+        dataReact.emoji_id,
+        dataReact.emoji,
+        dataReact.count,
+        dataReact.message_sender_id,
+        false,
+      );
+    } catch (error) {
+      console.log('reactMessageChannel', error);
     }
   }
 }

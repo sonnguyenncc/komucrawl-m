@@ -2,17 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApiMessageReaction, ChannelType, Events } from 'mezon-sdk';
-import { Mentioned, MentionedPmConfirm, User, WorkFromHome } from '../models';
-import { Repository } from 'typeorm';
+import {
+  Mentioned,
+  MentionedPmConfirm,
+  MezonBotMessage,
+  User,
+  WorkFromHome,
+} from '../models';
+import { LessThan, Repository } from 'typeorm';
 import { BaseHandleEvent } from './base.handle';
 import { MezonClientService } from 'src/mezon/services/client.service';
-import { ApiCreateChannelDescRequest } from 'mezon-sdk/dist/cjs/interfaces/client';
 import { BOT_ID, EMessageMode, EUserType } from '../constants/configs';
 import { ClientConfigService } from '../config/client-config.service';
 import { AxiosClientService } from '../services/axiosClient.services';
 import { MentionSchedulerService } from '../scheduler/mention-scheduler.services';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { MessageQueue } from '../services/messageQueue.service';
+import { PollService } from '../services/poll.service';
 
 @Injectable()
 export class EventListenerMessageReaction extends BaseHandleEvent {
@@ -29,6 +35,9 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
     private axiosClientService: AxiosClientService,
     private mentionSchedulerService: MentionSchedulerService,
     private messageQueue: MessageQueue,
+    @InjectRepository(MezonBotMessage)
+    private mezonBotMessageRepository: Repository<MezonBotMessage>,
+    private pollService: PollService,
   ) {
     super(clientService);
   }
@@ -328,6 +337,74 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       this.messageQueue.addMessage(messageToUser);
     } catch (error) {
       console.log('handlePmConfirmWfh', error);
+    }
+  }
+
+  @OnEvent(Events.MessageReaction)
+  async handleReactMessagePoll(messageReaction: ApiMessageReaction) {
+    if (messageReaction.sender_id === this.clientConfig.botKomuId) return;
+    const findMessagePoll = await this.mezonBotMessageRepository.findOne({
+      where: { messageId: messageReaction.message_id, deleted: false },
+    });
+    if (!findMessagePoll) return;
+    if (!this.pollService.hasPollManagerKey(findMessagePoll.messageId)) {
+      this.pollService.addPoll(findMessagePoll.messageId, []);
+    }
+
+    let userReactMessageId = this.pollService.getPollManagerByKey(
+      findMessagePoll.messageId,
+    );
+    const options = this.pollService.getOptionPoll(findMessagePoll.content);
+    let checkExist = false;
+    if (
+      !isNaN(Number(messageReaction.emoji)) &&
+      Number(messageReaction.emoji) <= options.length
+    ) {
+      if (userReactMessageId.length && !messageReaction.action) {
+        userReactMessageId = userReactMessageId.map((user) => {
+          if (user.username === messageReaction.sender_name) {
+            checkExist = true;
+            return { ...user, emoji: messageReaction.emoji };
+          }
+          return user;
+        });
+      }
+
+      if (!checkExist && !messageReaction.action) {
+        userReactMessageId.push({
+          username: messageReaction.sender_name,
+          emoji: messageReaction.emoji,
+        });
+      }
+
+      if (messageReaction.action) {
+        userReactMessageId = userReactMessageId.filter((user) => {
+          return !(
+            user.username === messageReaction.sender_name &&
+            +user.emoji === +messageReaction.emoji
+          );
+        });
+      }
+      this.pollService.addPoll(findMessagePoll.messageId, userReactMessageId);
+    }
+  }
+
+  @OnEvent(Events.MessageReaction)
+  async handleResultPoll(messageReaction) {
+    const findMessagePoll = await this.mezonBotMessageRepository.findOne({
+      where: { messageId: messageReaction?.message_id, deleted: false },
+    });
+    if (!findMessagePoll) return;
+    let userReactMessageId = this.pollService.getPollManagerByKey(
+      findMessagePoll.messageId,
+    );
+
+    if (
+      messageReaction?.sender_id === findMessagePoll.userId &&
+      messageReaction?.emoji === 'checked' &&
+      !messageReaction?.action
+    ) {
+      this.pollService.handleResultPoll(findMessagePoll, userReactMessageId);
     }
   }
 }

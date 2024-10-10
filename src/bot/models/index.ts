@@ -41,3 +41,4 @@ export { Dynamic } from './dynamic.entity';
 export { ChannelMezon } from './mezonChannel.entity';
 export { MentionedPmConfirm } from './metionPmConfirm.entity';
 export { QuizMsg } from './quizMsg.entity';
+export { MezonBotMessage } from './mezonBotMessage.entity';
