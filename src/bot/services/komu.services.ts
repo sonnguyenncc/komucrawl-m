@@ -127,7 +127,6 @@ export class KomuService {
         .execute();
       return sent;
     } catch (error) {
-      console.log('error', error);
       const userDb = await this.userRepository
         .createQueryBuilder()
         .where('"email" = :username and deactive IS NOT True ', {
@@ -145,30 +144,31 @@ export class KomuService {
       const messageItAdmin = `KOMU không gửi được tin nhắn cho @${userDb.email}. #admin-username hỗ trợ nhé!!!`;
 
       await Promise.all([
-        this.sendErrorToAdmin(
-          messageItAdmin,
-          process.env.KOMUBOTREST_ITADMIN_CHANNEL_ID,
-          messageItAdmin.indexOf('#admin-username'),
-          [
-            {
-              user_id: userDb.userId,
-              s: messageItAdmin.indexOf(userDb.email) - 1,
-              e: messageItAdmin.indexOf(userDb.email) + userDb.email.length,
-            },
-          ],
-        ),
-        this.sendErrorToAdmin(
-          message,
-          process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
-          message.indexOf('#admin-username'),
-          [
-            {
-              user_id: userDb.userId,
-              s: message.indexOf(userDb.email),
-              e: message.indexOf(userDb.email) + userDb.email.length + 1,
-            },
-          ],
-        ),
+        this.sendErrorToDev(messageItAdmin),
+        // this.sendErrorToAdmin(
+        //   messageItAdmin,
+        //   process.env.KOMUBOTREST_ITADMIN_CHANNEL_ID,
+        //   messageItAdmin.indexOf('#admin-username'),
+        //   [
+        //     {
+        //       user_id: userDb.userId,
+        //       s: messageItAdmin.indexOf(userDb.email) - 1,
+        //       e: messageItAdmin.indexOf(userDb.email) + userDb.email.length,
+        //     },
+        //   ],
+        // ),
+        // this.sendErrorToAdmin(
+        //   message,
+        //   process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
+        //   message.indexOf('#admin-username'),
+        //   [
+        //     {
+        //       user_id: userDb.userId,
+        //       s: message.indexOf(userDb.email),
+        //       e: message.indexOf(userDb.email) + userDb.email.length + 1,
+        //     },
+        //   ],
+        // ),
       ]);
 
       return null;
@@ -184,7 +184,7 @@ export class KomuService {
     const userAdmin = await this.userRepository
       .createQueryBuilder()
       .where('"userId" = :userId', {
-        userId: process.env.KOMUBOTREST_ADMIN_USER_ID,
+        userId: '1827994776956309504',
       })
       .select('*')
       .getRawOne();
@@ -196,7 +196,7 @@ export class KomuService {
     const replyMessage = {
       clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
       channel_id: channelId,
-      is_public: !findChannel?.channel_private,
+      is_public: findChannel ? !findChannel?.channel_private : false,
       is_parent_public: true,
       parent_id: '0',
       mode: EMessageMode.CHANNEL_MESSAGE,

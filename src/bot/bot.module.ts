@@ -47,6 +47,7 @@ import {
   ChannelMezon,
   MentionedPmConfirm,
   QuizMsg,
+  MezonBotMessage,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -112,6 +113,9 @@ import { ReportMentionService } from './services/reportMention.serivce';
 import { ReportTrackerService } from './services/reportTracker.sevicer';
 import { CallCommand } from './asterisk-commands/commands/call/call.command';
 import { WhereCommand } from './asterisk-commands/commands/where/where.command';
+import { PollCommand } from './asterisk-commands/commands/poll/poll.command';
+import { PollService } from './services/poll.service';
+import { PollSchedulerService } from './scheduler/poll-scheduler.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -167,6 +171,7 @@ import { WhereCommand } from './asterisk-commands/commands/where/where.command';
       Dynamic,
       QuizMsg,
       ChannelDMMezon,
+      MezonBotMessage,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -230,6 +235,9 @@ import { WhereCommand } from './asterisk-commands/commands/where/where.command';
     ReportTrackerService,
     CallCommand,
     WhereCommand,
+    PollCommand,
+    PollService,
+    PollSchedulerService
   ],
   controllers: [KomubotrestController],
 })

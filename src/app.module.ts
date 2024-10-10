@@ -31,11 +31,11 @@ import path from 'path';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
         autoLoadEntities: true,
-        synchronize: false,
-        migrations: [path.join(__dirname, 'src', 'migration', '*.js')],
-        cli: {
-          migrationsDir: __dirname + '/migration',
-        },
+        synchronize: true,
+        // migrations: [path.join(__dirname, 'src', 'migration', '*.js')],
+        // cli: {
+        //   migrationsDir: __dirname + '/migration',
+        // },
       }),
     }),
     MezonModule.forRootAsync({

@@ -172,7 +172,7 @@ export class EventListenerChannelMessage {
             ? replyMessage
             : [replyMessage];
           for (const mess of replyMessageArray) {
-            this.messageQueue.addMessage(mess); // add to queue, send every 0.2s
+            this.messageQueue.addMessage({ ...mess, sender_id: msg.sender_id }); // add to queue, send every 0.2s
             // await this.clientService.sendMessage(mess);
           }
         }
