@@ -5,18 +5,18 @@ import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { AxiosClientService } from 'src/bot/services/axiosClient.services';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { FFmpegService } from 'src/bot/services/ffmpeg.service';
-import { Uploadfile } from 'src/bot/models';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { FileType } from 'src/bot/constants/configs';
+import { Uploadfile } from 'src/bot/models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { FFmpegImagePath } from 'src/bot/constants/configs';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-@Command('ncc8')
-export class Ncc8Command extends CommandMessage {
+@Command('audiobook')
+export class AudiobookCommand extends CommandMessage {
   private client: MezonClient;
   constructor(
     private clientConfigService: ClientConfigService,
@@ -30,12 +30,25 @@ export class Ncc8Command extends CommandMessage {
     this.client = this.clientService.getClient();
   }
 
+  removeFileNameExtension(fileName: string, isSubtitle?: boolean) {
+    const withoutFirstFiveChars = fileName.substring(isSubtitle ? 0 : 5);
+    const lastDotIndex = withoutFirstFiveChars.lastIndexOf('.');
+    const finalFileName = withoutFirstFiveChars.substring(0, lastDotIndex);
+    return finalFileName;
+  }
+
+  generateFileSubtitlePath(filePath: string) {
+    const lastDotIndex = filePath.lastIndexOf('.');
+    const fileSubtitlePath = filePath.substring(0, lastDotIndex);
+    return fileSubtitlePath.replace('audiobook_', '');
+  }
+
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
-      'Command: *ncc8 play ID' +
+      'Command: *audiobook play ID' +
       '\n' +
-      'Example: *ncc8 play 180' +
+      'Example: *audiobook play 1' +
       '```';
     if (args[0] === 'play') {
       if (!args[1])
@@ -48,7 +61,7 @@ export class Ncc8Command extends CommandMessage {
         );
 
       const textContent = `Go to `;
-      const channel_id = this.clientConfigService.ncc8ChannelId;
+      const channel_id = this.clientConfigService.audiobookChannelId;
       try {
         // call api in sdk
         const channel = await this.client.registerStreamingChannel({
@@ -59,7 +72,7 @@ export class Ncc8Command extends CommandMessage {
         if (!channel) return;
 
         const res = await this.axiosClientService.get(
-          `${process.env.NCC8_API}/ncc8/episode/${args[1]}`,
+          `${process.env.NCC8_API}/ncc8/audio-book/${args[1]}`,
         );
         if (!res) return;
 
@@ -68,7 +81,7 @@ export class Ncc8Command extends CommandMessage {
         if (channel?.streaming_url !== '') {
           this.ffmpegService
             .transcodeMp3ToRtmp(
-              FFmpegImagePath.NCC8,
+              FFmpegImagePath.AUDIOBOOK,
               res?.data?.url,
               channel?.streaming_url,
             )
@@ -94,7 +107,7 @@ export class Ncc8Command extends CommandMessage {
         console.log('error', message.clan_id, channel_id, error);
         return this.replyMessageGenerate(
           {
-            messageContent: 'Ncc8 not found',
+            messageContent: 'Audiobook not found',
           },
           message,
         );
@@ -102,9 +115,10 @@ export class Ncc8Command extends CommandMessage {
     }
 
     if (args[0] === 'playlist') {
+      console.log('playlist');
       const dataMp3 = await this.uploadFileData.find({
         where: {
-          file_type: FileType.NCC8,
+          file_type: FileType.AUDIOBOOK,
         },
         order: {
           episode: 'DESC',
@@ -113,7 +127,7 @@ export class Ncc8Command extends CommandMessage {
       if (!dataMp3) {
         return;
       } else if (Array.isArray(dataMp3) && dataMp3.length === 0) {
-        const mess = '```' + 'Không có NCC nào' + '```';
+        const mess = '```' + 'Không có audiobook nào' + '```';
         return this.replyMessageGenerate(
           {
             messageContent: mess,
@@ -126,11 +140,14 @@ export class Ncc8Command extends CommandMessage {
         for (let i = 0; i <= Math.ceil(dataMp3.length / 50); i += 1) {
           if (dataMp3.slice(i * 50, (i + 1) * 50).length === 0) break;
           const mess =
-            '```Danh sách NCC8\n' +
+            '```Danh sách audiobook\n' +
             dataMp3
               .slice(i * 50, (i + 1) * 50)
               .filter((item) => item.episode)
-              .map((list) => `NCC8 số ${list.episode}`)
+              .map(
+                (list) =>
+                  `Id: ${list.episode}, name: ${this.removeFileNameExtension(list.fileName)}`,
+              )
               .join('\n') +
             '```';
           listReplyMessage.push(mess);
@@ -146,7 +163,6 @@ export class Ncc8Command extends CommandMessage {
         });
       }
     }
-
     return this.replyMessageGenerate(
       {
         messageContent: messageContent,

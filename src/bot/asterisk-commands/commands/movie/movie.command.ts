@@ -115,7 +115,7 @@ export class MovieCommand extends CommandMessage {
 
     if (args[0] === 'playlist') {
       console.log('playlist');
-      let dataMp3 = await this.uploadFileData.find({
+      const dataMp3 = await this.uploadFileData.find({
         where: {
           file_type: FileType.FILM,
         },
@@ -126,7 +126,7 @@ export class MovieCommand extends CommandMessage {
       if (!dataMp3) {
         return;
       } else if (Array.isArray(dataMp3) && dataMp3.length === 0) {
-        let mess = '```' + 'Không có movie nào' + '```';
+        const mess = '```' + 'Không có movie nào' + '```';
         return this.replyMessageGenerate(
           {
             messageContent: mess,
@@ -138,7 +138,7 @@ export class MovieCommand extends CommandMessage {
         const listReplyMessage = [];
         for (let i = 0; i <= Math.ceil(dataMp3.length / 50); i += 1) {
           if (dataMp3.slice(i * 50, (i + 1) * 50).length === 0) break;
-          let mess =
+          const mess =
             '```Danh sách movie\n' +
             dataMp3
               .slice(i * 50, (i + 1) * 50)
