@@ -227,4 +227,25 @@ export class KomubotrestController {
       res.status(500).send({ message: 'Server error' });
     }
   }
+
+  @Get("/ncc8/audio-book/:episode")
+  async getNcc8AudioBook(
+    @Param('episode') episode: string,
+    @Res() res: Response
+  ) {
+    try {
+      const file = await this.komubotrestService.getNcc8Episode(episode, FileType.AUDIO_BOOK);
+      if (!file?.length) {
+        res.status(404).send({ message: 'Not found' });
+        return;
+      }
+
+      const nccPath = "/home/nccsoft/projects/uploads/";
+
+      res.status(200).json({ url: join(nccPath + file[0].fileName) })
+    } catch (error) {
+      console.error('getNcc8Episode error', error);
+      res.status(500).send({ message: 'Server error' });
+    }
+  }
 }
