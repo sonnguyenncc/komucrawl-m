@@ -312,14 +312,14 @@ export class KomubotrestService {
               if (isNewAudioBook) {
                 // find current episode audioBook
                 const episodeBook = await this.findMaxEpisodeFilm(
-                  FileType.AUDIO_BOOK,
+                  FileType.AUDIOBOOK,
                 );
                 await this.uploadFileData.insert({
                   filePath: this.folderPath,
                   fileName: `${filename}`,
                   createTimestamp: Date.now(),
                   episode: episodeBook + 1,
-                  file_type: FileType.AUDIO_BOOK,
+                  file_type: FileType.AUDIOBOOK,
                 });
               }
             }
