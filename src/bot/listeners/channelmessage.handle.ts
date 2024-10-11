@@ -283,7 +283,7 @@ export class EventListenerChannelMessage {
           mess_id: msg.references[0].message_ref_id,
         });
         const userQuiz = await query.getRawOne();
-        if (userQuiz) {
+        if (userQuiz && userQuiz['userId']) {
           let mess = '';
           const messOptions = {};
           if (userQuiz['answer']) {
@@ -332,7 +332,7 @@ export class EventListenerChannelMessage {
             }
           }
           const messageToUser: ReplyMezonMessage = {
-            userId: userQuiz.userId,
+            userId: userQuiz['userId'],
             textContent: mess,
             messOptions: messOptions,
             attachments: [],

@@ -26,15 +26,15 @@ export class KomuService {
   }
   sendMessageKomuToUser = async (
     msg,
-    username,
+    userId,
     botPing = false,
     isSendQuiz = false,
   ) => {
     try {
       const userdb = await this.userRepository
         .createQueryBuilder()
-        .where('("email" = :username or "username" = :username)', {
-          username: username,
+        .where('"userId" = :userId', {
+          userId,
         })
         .andWhere('"user_type" = :userType', {
           userType: EUserType.MEZON.toString(),
@@ -129,11 +129,8 @@ export class KomuService {
     } catch (error) {
       const userDb = await this.userRepository
         .createQueryBuilder()
-        .where('"email" = :username and deactive IS NOT True ', {
-          username: username,
-        })
-        .orWhere('"username" = :username and deactive IS NOT True ', {
-          username: username,
+        .where('"userId" = :userId and deactive IS NOT True ', {
+          userId,
         })
         .select('*')
         .getRawOne()
