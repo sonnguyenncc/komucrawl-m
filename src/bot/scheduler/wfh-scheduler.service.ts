@@ -30,7 +30,7 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  // @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
