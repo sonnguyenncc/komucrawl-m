@@ -90,7 +90,7 @@ export class QuizService {
     if (!q) return;
 
     let mess = this.generateQuestion(q);
-    mess = `${mess}\n (Bạn vui lòng trả lời bằng cách reply câu hỏi và trả lời đáp án bạn lựa chọn)`;
+    mess = `${mess}\n(Bạn vui lòng trả lời bằng cách reply câu hỏi và trả lời đáp án bạn lựa chọn)`;
     const sendMess = await this.komubotrestService.sendMessageKomuToUser(
       mess,
       username,
