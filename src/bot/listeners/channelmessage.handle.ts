@@ -267,83 +267,87 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleAnswerBotQuiz(msg: ChannelMessage) {
-    if (
-      msg.mode == EMessageMode.DM_MESSAGE &&
-      msg.references &&
-      Array.isArray(msg.references) &&
-      msg.references.length > 0
-    ) {
-      const userQuiz = await this.userQuizRepository
+    if (msg.mode == EMessageMode.DM_MESSAGE) {
+      const query = this.userQuizRepository
         .createQueryBuilder()
-        .where('"message_id" = :mess_id', {
-          mess_id: msg.references[0].message_ref_id,
+        .andWhere('"userId" = :userId', {
+          userId: msg.sender_id,
         })
-        .select('*')
-        .getRawOne();
-
-      if (userQuiz) {
-        let mess = '';
-        const messOptions = {};
-        if (userQuiz['answer']) {
-          mess = `Bạn đã trả lời câu hỏi này rồi`;
-        } else {
-          const question = await this.quizRepository
-            .createQueryBuilder()
-            .where('id = :quizId', { quizId: userQuiz['quizId'] })
-            .select('*')
-            .getRawOne();
-          if (question) {
-            const answer = msg.content.t;
-            if (!checkAnswerFormat(answer, question['options'].length)) {
-              mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
-            } else {
-              await this.userRepository.update(
-                { userId: userQuiz['userId'] as string },
-                {
-                  botPing: false,
-                },
-              );
-              if (Number(answer) === Number(question['correct'])) {
-                const newUser = await this.quizService.addScores(
-                  userQuiz['userId'],
-                );
-                if (!newUser) return;
-                mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
-                await this.quizService.saveQuestionCorrect(
-                  userQuiz['userId'],
-                  userQuiz['quizId'],
-                  Number(answer),
-                );
+        .select('*');
+      if (
+        msg.references &&
+        Array.isArray(msg.references) &&
+        msg.references.length > 0
+      ) {
+        query.where('"message_id" = :mess_id', {
+          mess_id: msg.references[0].message_ref_id,
+        });
+        const userQuiz = await query.getRawOne();
+        if (userQuiz) {
+          let mess = '';
+          const messOptions = {};
+          if (userQuiz['answer']) {
+            mess = `Bạn đã trả lời câu hỏi này rồi`;
+          } else {
+            const question = await this.quizRepository
+              .createQueryBuilder()
+              .where('id = :quizId', { quizId: userQuiz['quizId'] })
+              .select('*')
+              .getRawOne();
+            if (question) {
+              const answer = msg.content.t;
+              if (!checkAnswerFormat(answer, question['options'].length)) {
+                mess = `Bạn vui lòng trả lời đúng số thứ tự các đáp án câu hỏi`;
               } else {
-                mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
-                await this.quizService.saveQuestionInCorrect(
-                  userQuiz['userId'],
-                  userQuiz['quizId'],
-                  Number(answer),
-                );
-              }
+                if (Number(answer) === Number(question['correct'])) {
+                  const newUser = await this.quizService.addScores(
+                    userQuiz['userId'],
+                  );
+                  if (!newUser) return;
+                  mess = `Correct!!!, you have ${newUser[0].scores_quiz} points`;
+                  await this.quizService.saveQuestionCorrect(
+                    userQuiz['userId'],
+                    userQuiz['quizId'],
+                    Number(answer),
+                  );
+                } else {
+                  mess = `Incorrect!!!, The correct answer is ${question['correct']}`;
+                  await this.quizService.saveQuestionInCorrect(
+                    userQuiz['userId'],
+                    userQuiz['quizId'],
+                    Number(answer),
+                  );
+                }
 
-              mess = `${mess}\nClick on the following link if you want to complain `;
-              const link = `https://quiz.nccsoft.vn/question/update/${userQuiz['quizId']}`;
-              messOptions['lk'] = [
-                {
-                  s: mess.length,
-                  e: mess.length + link.length,
-                },
-              ];
-              mess = mess + link;
+                mess = `${mess}\nClick on the following link if you want to complain `;
+                const link = `https://quiz.nccsoft.vn/question/update/${userQuiz['quizId']}`;
+                messOptions['lk'] = [
+                  {
+                    s: mess.length,
+                    e: mess.length + link.length,
+                  },
+                ];
+                mess = mess + link;
+              }
             }
           }
+          const messageToUser: ReplyMezonMessage = {
+            userId: userQuiz.userId,
+            textContent: mess,
+            messOptions: messOptions,
+            attachments: [],
+            refs: refGenerate(msg),
+          };
+          this.messageQueue.addMessage(messageToUser);
         }
-        const messageToUser: ReplyMezonMessage = {
-          userId: userQuiz.userId,
-          textContent: mess,
-          messOptions: messOptions,
-          attachments: [],
-          refs: refGenerate(msg),
-        };
-        this.messageQueue.addMessage(messageToUser);
       }
+      const userQuiz = await query.getRawOne();
+      await this.userRepository.update(
+        { userId: userQuiz['userId'] as string },
+        {
+          botPing: false,
+        },
+      );
     }
   }
 }
