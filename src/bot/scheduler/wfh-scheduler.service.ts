@@ -38,14 +38,8 @@ export class WFHSchedulerService {
 
       // find user wfh
       const wfhResult = await this.timeSheetService.findWFHUser();
-
-      const currentHours = new Date().getHours();
-      const dateTypeNames =
-        currentHours < 11 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
-
       // user wfh email array
       const wfhUserEmail = wfhResult
-        .filter((item) => dateTypeNames.includes(item.dateTypeName))
         .map((item) => {
           return getUserNameByEmail(item.emailAddress);
         });
