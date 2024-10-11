@@ -30,13 +30,28 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  // @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
       if (this.utilsService.checkTime(new Date())) return;
+
+      // find user wfh
+      const wfhResult = await this.timeSheetService.findWFHUser();
+
+      const currentHours = new Date().getHours();
+      const dateTypeNames =
+        currentHours < 11 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
+
+      // user wfh email array
+      const wfhUserEmail = wfhResult
+        .filter((item) => dateTypeNames.includes(item.dateTypeName))
+        .map((item) => {
+          return getUserNameByEmail(item.emailAddress);
+        });
       const { notSendUser: userOff } =
         await this.timeSheetService.getUserOffWork(null);
+
       const userClans = await this.client.listChannelVoiceUsers(
         process.env.KOMUBOTREST_CLAN_NCC_ID,
         '',
@@ -66,7 +81,7 @@ export class WFHSchedulerService {
         .leftJoin(
           'komu_userQuiz',
           'm_bot',
-          'user.last_bot_message_id = "m_bot"."message_id"',
+          'user.last_bot_message_id = "m_bot"."message_id" AND user.userId = "m_bot"."userId"',
         )
         .where(
           userOff && userOff.length > 0
@@ -112,6 +127,14 @@ export class WFHSchedulerService {
           userType: EUserType.MEZON.toString(),
         })
         .andWhere(
+          wfhUserEmail && wfhUserEmail.length > 0
+            ? 'user.email IN (:...wfhUserEmail)'
+            : 'true',
+          {
+            wfhUserEmail: wfhUserEmail,
+          },
+        )
+        .andWhere(
           '(last_message_time <= :thirtyMinutesAgo OR last_message_time is null)',
           { thirtyMinutesAgo },
         )
@@ -142,7 +165,7 @@ export class WFHSchedulerService {
 
     const currentHours = new Date().getHours();
     const dateTypeNames =
-      currentHours < 13 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
+      currentHours < 11 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
     const wfhUserEmail = wfhResult
       .filter((item) => dateTypeNames.includes(item.dateTypeName))
       .map((item) => {
@@ -155,7 +178,7 @@ export class WFHSchedulerService {
         .innerJoin(
           'komu_userQuiz',
           'm_bot',
-          'user.last_bot_message_id = "m_bot"."message_id"',
+          'user.last_bot_message_id = "m_bot"."message_id" AND user.userId = "m_bot"."userId"',
         )
         .where(
           wfhUserEmail && wfhUserEmail.length > 0
@@ -209,13 +232,13 @@ export class WFHSchedulerService {
           },
           mentions: [
             {
-              user_id: user.userId,
+              user_id: user?.userId,
               s: 0,
               e: user.username.length + 1,
             },
           ],
         };
-        // this.messageQueue.addMessage(replyMessage);
+        this.messageQueue.addMessage(replyMessage);
 
         await this.userRepository
           .createQueryBuilder('user')
@@ -227,6 +250,111 @@ export class WFHSchedulerService {
           .andWhere(`"deactive" IS NOT TRUE`)
           .execute();
       });
+    }
+  }
+
+  @Cron('*/30 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  async handlePingQuiz() {
+    try {
+      if (await this.utilsService.checkHoliday()) return;
+      if (this.utilsService.checkTime(new Date())) return;
+      const wfhResult = await this.timeSheetService.findWFHUser();
+      const wfhUserEmail = wfhResult.map((item) => {
+        return getUserNameByEmail(item.emailAddress);
+      });
+      const { notSendUser: userOff } =
+        await this.timeSheetService.getUserOffWork(null);
+      const userClans = await this.client.listChannelVoiceUsers(
+        process.env.KOMUBOTREST_CLAN_NCC_ID,
+        '',
+        ChannelType.CHANNEL_TYPE_VOICE,
+      );
+      const displayNames = new Set();
+      if ('voice_channel_users' in userClans) {
+        userClans.voice_channel_users.forEach((user) =>
+          displayNames.add(user.participant),
+        );
+      }
+
+      let useridJoining = [];
+      if (displayNames.size > 0) {
+        const userIds = await this.userRepository
+          .createQueryBuilder()
+          .where('display_name IN (:...names)', {
+            names: Array.from(displayNames),
+          })
+          .getMany();
+        useridJoining = userIds.map((user) => user.userId);
+      }
+      const thirtyMinutesAgo = Date.now() - 1 * 60 * 1000;
+
+      const userLastSend = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin(
+          'komu_userQuiz',
+          'm_bot',
+          'user.last_bot_message_id = "m_bot"."message_id" AND user.userId = "m_bot"."userId"',
+        )
+        .where(
+          userOff && userOff.length > 0
+            ? 'user.username NOT IN (:...userOff)'
+            : 'true',
+          {
+            userOff: userOff,
+          },
+        )
+        .andWhere(
+          useridJoining && useridJoining.length > 0
+            ? 'user.userId NOT IN (:...useridJoining)'
+            : 'true',
+          {
+            useridJoining: useridJoining,
+          },
+        )
+        .andWhere('user.user_type = :userType', {
+          userType: EUserType.MEZON.toString(),
+        })
+        .andWhere('user.deactive IS NOT True')
+        .andWhere('user.last_message_id IS Not Null')
+        .andWhere(
+          '(m_bot.createAt <= :thirtyMinutesAgo or m_bot.createAt is null)',
+          {
+            thirtyMinutesAgo: thirtyMinutesAgo,
+          },
+        )
+        .select('DISTINCT user.userId, user.username')
+        .execute();
+      const userLastSendIds = userLastSend.map((user) => user.userId);
+      const userSend = await this.userRepository
+        .createQueryBuilder('user')
+        .where(
+          userLastSendIds && userLastSendIds.length > 0
+            ? '"userId" IN (:...userIds)'
+            : 'true',
+          {
+            userIds: userLastSendIds,
+          },
+        )
+        .andWhere('user.user_type = :userType', {
+          userType: EUserType.MEZON.toString(),
+        })
+        .andWhere(
+          wfhUserEmail && wfhUserEmail.length > 0
+            ? 'user.email NOT IN (:...wfhUserEmail)'
+            : 'true',
+          {
+            wfhUserEmail: wfhUserEmail,
+          },
+        )
+        .andWhere(
+          '(last_message_time <= :thirtyMinutesAgo OR last_message_time is null)',
+          { thirtyMinutesAgo },
+        )
+        .select('*')
+        .execute();
+      await this.sendQuizzesWithLimit(userSend);
+    } catch (error) {
+      console.log(error);
     }
   }
 }

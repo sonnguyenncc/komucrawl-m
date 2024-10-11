@@ -33,7 +33,7 @@ export class ExtendersService {
       findUser.last_message_id = message.message_id;
       findUser.last_message_time = Date.now();
       findUser.deactive = false;
-      findUser.botPing = false;
+      findUser.botPing = findUser.botPing;
       findUser.scores_workout = 0;
       findUser.not_workout = 0;
       await this.userRepository.save(findUser);
