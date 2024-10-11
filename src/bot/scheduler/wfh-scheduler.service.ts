@@ -72,7 +72,7 @@ export class WFHSchedulerService {
             names: Array.from(displayNames),
           })
           .getMany();
-        useridJoining = userIds.map((user) => user.userId);
+        useridJoining = userIds.map((user) => user?.userId);
       }
       const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
 
@@ -112,7 +112,7 @@ export class WFHSchedulerService {
         )
         .select('DISTINCT user.userId, user.username')
         .execute();
-      const userLastSendIds = userLastSend.map((user) => user.userId);
+      const userLastSendIds = userLastSend.map((user) => user?.userId);
       const userSend = await this.userRepository
         .createQueryBuilder('user')
         .where(
