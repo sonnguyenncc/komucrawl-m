@@ -332,7 +332,7 @@ export class EventListenerChannelMessage {
             }
           }
           const messageToUser: ReplyMezonMessage = {
-            userId: userQuiz['userId'],
+            userId: msg.sender_id,
             textContent: mess,
             messOptions: messOptions,
             attachments: [],

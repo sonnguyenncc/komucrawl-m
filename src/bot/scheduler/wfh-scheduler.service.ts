@@ -38,14 +38,8 @@ export class WFHSchedulerService {
 
       // find user wfh
       const wfhResult = await this.timeSheetService.findWFHUser();
-
-      const currentHours = new Date().getHours();
-      const dateTypeNames =
-        currentHours < 11 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
-
       // user wfh email array
       const wfhUserEmail = wfhResult
-        .filter((item) => dateTypeNames.includes(item.dateTypeName))
         .map((item) => {
           return getUserNameByEmail(item.emailAddress);
         });
@@ -72,7 +66,7 @@ export class WFHSchedulerService {
             names: Array.from(displayNames),
           })
           .getMany();
-        useridJoining = userIds.map((user) => user.userId);
+        useridJoining = userIds.map((user) => user?.userId);
       }
       const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
 
@@ -112,7 +106,7 @@ export class WFHSchedulerService {
         )
         .select('DISTINCT user.userId, user.username')
         .execute();
-      const userLastSendIds = userLastSend.map((user) => user.userId);
+      const userLastSendIds = userLastSend.map((user) => user?.userId);
       const userSend = await this.userRepository
         .createQueryBuilder('user')
         .where(
