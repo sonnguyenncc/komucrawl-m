@@ -30,7 +30,7 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  // @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
@@ -238,7 +238,7 @@ export class WFHSchedulerService {
             },
           ],
         };
-        this.messageQueue.addMessage(replyMessage);
+        // this.messageQueue.addMessage(replyMessage);
 
         await this.userRepository
           .createQueryBuilder('user')
@@ -253,7 +253,7 @@ export class WFHSchedulerService {
     }
   }
 
-  @Cron('*/30 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  @Cron('*/2 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingQuiz() {
     try {
       if (await this.utilsService.checkHoliday()) return;
@@ -284,7 +284,7 @@ export class WFHSchedulerService {
             names: Array.from(displayNames),
           })
           .getMany();
-        useridJoining = userIds.map((user) => user.userId);
+        useridJoining = userIds.map((user) => user?.userId);
       }
       const thirtyMinutesAgo = Date.now() - 1 * 60 * 1000;
 
@@ -324,7 +324,7 @@ export class WFHSchedulerService {
         )
         .select('DISTINCT user.userId, user.username')
         .execute();
-      const userLastSendIds = userLastSend.map((user) => user.userId);
+      const userLastSendIds = userLastSend.map((user) => user?.userId);
       const userSend = await this.userRepository
         .createQueryBuilder('user')
         .where(

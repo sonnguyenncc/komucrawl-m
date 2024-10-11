@@ -82,7 +82,7 @@ export class QuizService {
 
   async sendQuizToSingleUser(userInput, botPing = false, roleSelect = null) {
     if (!userInput) return;
-    const userid = userInput.userId;
+    const userId = userInput.userId;
     const username = userInput.username;
 
     const q = await this.randomQuiz(userInput, roleSelect);
@@ -93,13 +93,13 @@ export class QuizService {
     mess = `${mess}\n(Bạn vui lòng trả lời bằng cách reply câu hỏi và trả lời đáp án bạn lựa chọn)`;
     const sendMess = await this.komubotrestService.sendMessageKomuToUser(
       mess,
-      username,
+      userId,
       botPing,
       true,
     );
 
     if (sendMess) {
-      await this.saveQuestion(userid, q.id, sendMess.message_id);
+      await this.saveQuestion(userId, q.id, sendMess.message_id);
     }
   }
 
