@@ -13,6 +13,11 @@ import { KomubotrestService } from './bot/komubot-rest/komubot-rest.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  });
+
   setupSwagger(app);
   const bot = app.get(BotGateway);
   bot.initEvent();
@@ -26,7 +31,7 @@ async function bootstrap() {
   await sendMessageSchedulerService.startCronJobs();
 
   const komubotrestService = app.get(KomubotrestService);
-  await komubotrestService.startWatchingFolder();
+  // await komubotrestService.startWatchingFolder();
 
   await app.listen(3000);
 }
