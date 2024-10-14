@@ -232,7 +232,7 @@ export class WFHSchedulerService {
             },
           ],
         };
-        this.messageQueue.addMessage(replyMessage);
+        // this.messageQueue.addMessage(replyMessage);
 
         await this.userRepository
           .createQueryBuilder('user')
