@@ -30,19 +30,28 @@ export class WFHSchedulerService {
     this.client = clientService.getClient();
   }
 
-  // @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  async getUserByDateTypeNames() {
+    const currentUTCDate = new Date();
+    const currentHoursUTC = currentUTCDate.getUTCHours();
+    const currentHoursUTC7 = (currentHoursUTC + 7) % 24;
+    const dateTypeNames =
+      currentHoursUTC7 < 12 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
+    const wfhResult = await this.timeSheetService.findWFHUser();
+    const wfhUserEmail = wfhResult
+      .filter((item) => dateTypeNames.includes(item.dateTypeName))
+      .map((item) => {
+        return getUserNameByEmail(item.emailAddress);
+      });
+    return wfhUserEmail;
+  }
+
+  @Cron('*/5 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingWFH() {
     try {
       if (await this.utilsService.checkHoliday()) return;
       if (this.utilsService.checkTime(new Date())) return;
 
-      // find user wfh
-      const wfhResult = await this.timeSheetService.findWFHUser();
-      // user wfh email array
-      const wfhUserEmail = wfhResult
-        .map((item) => {
-          return getUserNameByEmail(item.emailAddress);
-        });
+      const wfhUserEmail = await this.getUserByDateTypeNames();
       const { notSendUser: userOff } =
         await this.timeSheetService.getUserOffWork(null);
 
@@ -155,16 +164,7 @@ export class WFHSchedulerService {
   async punish() {
     if (await this.utilsService.checkHoliday()) return;
     if (this.utilsService.checkTime(new Date())) return;
-    const wfhResult = await this.timeSheetService.findWFHUser();
-
-    const currentHours = new Date().getHours();
-    const dateTypeNames =
-      currentHours < 11 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
-    const wfhUserEmail = wfhResult
-      .filter((item) => dateTypeNames.includes(item.dateTypeName))
-      .map((item) => {
-        return getUserNameByEmail(item.emailAddress);
-      });
+    const wfhUserEmail = await this.getUserByDateTypeNames();
     const thirtyMinutes = Date.now() - 30 * 60 * 1000;
     if (wfhUserEmail.length > 0) {
       const users = await this.userRepository
@@ -232,7 +232,7 @@ export class WFHSchedulerService {
             },
           ],
         };
-        // this.messageQueue.addMessage(replyMessage);
+        this.messageQueue.addMessage(replyMessage);
 
         await this.userRepository
           .createQueryBuilder('user')
@@ -247,7 +247,7 @@ export class WFHSchedulerService {
     }
   }
 
-  // @Cron('*/30 9-11,13-17 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
+  @Cron('0 9,11,14,16 * * 1-5', { timeZone: 'Asia/Ho_Chi_Minh' })
   async handlePingQuiz() {
     try {
       if (await this.utilsService.checkHoliday()) return;
