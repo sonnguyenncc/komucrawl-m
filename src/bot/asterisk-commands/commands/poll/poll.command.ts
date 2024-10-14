@@ -2,7 +2,7 @@ import { ChannelMessage } from 'mezon-sdk';
 import { Command } from 'src/bot/base/commandRegister.decorator';
 import { CommandMessage } from '../../abstracts/command.abstract';
 
-// @Command('poll')
+@Command('poll')
 export class PollCommand extends CommandMessage {
   constructor() {
     super();

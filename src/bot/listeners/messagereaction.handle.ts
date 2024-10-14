@@ -347,13 +347,10 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       where: { messageId: messageReaction.message_id, deleted: false },
     });
     if (!findMessagePoll) return;
-    if (!this.pollService.hasPollManagerKey(findMessagePoll.messageId)) {
-      this.pollService.addPoll(findMessagePoll.messageId, []);
-    }
 
-    let userReactMessageId = this.pollService.getPollManagerByKey(
-      findMessagePoll.messageId,
-    );
+    let userReactMessageId = findMessagePoll.pollResult?.map((item) =>
+      JSON.parse(item),
+    ) || [];
     const options = this.pollService.getOptionPoll(findMessagePoll.content);
     let checkExist = false;
     if (
@@ -385,7 +382,11 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
           );
         });
       }
-      this.pollService.addPoll(findMessagePoll.messageId, userReactMessageId);
+
+      this.mezonBotMessageRepository.update(
+        { messageId: findMessagePoll.messageId },
+        { pollResult: userReactMessageId },
+      );
     }
   }
 
@@ -395,16 +396,13 @@ export class EventListenerMessageReaction extends BaseHandleEvent {
       where: { messageId: messageReaction?.message_id, deleted: false },
     });
     if (!findMessagePoll) return;
-    let userReactMessageId = this.pollService.getPollManagerByKey(
-      findMessagePoll.messageId,
-    );
 
     if (
       messageReaction?.sender_id === findMessagePoll.userId &&
       messageReaction?.emoji === 'checked' &&
       !messageReaction?.action
     ) {
-      this.pollService.handleResultPoll(findMessagePoll, userReactMessageId);
+      this.pollService.handleResultPoll(findMessagePoll);
     }
   }
 }

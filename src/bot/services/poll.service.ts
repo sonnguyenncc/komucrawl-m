@@ -5,12 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EMessageMode, EUserType } from '../constants/configs';
 import { ClientConfigService } from '../config/client-config.service';
 import { MessageQueue } from './messageQueue.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
-
-interface pollManagerData {
-  username: string;
-  emoji: string;
-}
 
 export class PollService {
   constructor(
@@ -22,7 +16,6 @@ export class PollService {
     private clientConfig: ClientConfigService,
     private messageQueue: MessageQueue,
   ) {}
-  private pollManager = new Map();
   private emojiIdDefauly = {
     '1': '7249623295590321017',
     '2': '7249624251732854443',
@@ -39,26 +32,6 @@ export class PollService {
 
   getEmojiDefault() {
     return this.emojiIdDefauly;
-  }
-
-  getPollManager() {
-    return this.pollManager;
-  }
-
-  hasPollManagerKey(key: string) {
-    return this.pollManager.has(key);
-  }
-
-  addPoll(key: string, data: pollManagerData[]) {
-    this.pollManager.set(key, data);
-  }
-
-  getPollManagerByKey(key: string) {
-    return this.pollManager.get(key);
-  }
-
-  deletePollManagerByKey(key: string) {
-    return this.pollManager.delete(key);
   }
 
   getOptionPoll(pollString: string) {
@@ -92,74 +65,75 @@ export class PollService {
   //   return chunks;
   // };
 
-  async handleResultPoll(
-    findMessagePoll: MezonBotMessage,
-    userReactMessageId: [],
-  ) {
-    const options = this.getOptionPoll(findMessagePoll.content);
-    const pollTitle = this.getPollTitle(findMessagePoll.content);
-    let messageContent =
-      '```' +
-      `[Poll result] - ${pollTitle}` +
-      '\n' +
-      `Ding! Ding! Ding! Time's up! Results are`;
-    if (userReactMessageId?.length) {
-      const groupedByEmoji: { [key: string]: any[] } =
-        userReactMessageId.reduce((acc: any, item) => {
-          const { emoji } = item;
-          if (!acc[emoji]) {
-            acc[emoji] = [];
-          }
-          acc[emoji].push(item);
-          return acc;
-        }, {});
+  async handleResultPoll(findMessagePoll: MezonBotMessage) {
+    try {
+      let userReactMessageId =
+        findMessagePoll.pollResult?.map((item) => JSON.parse(item)) || [];
+      const options = this.getOptionPoll(findMessagePoll.content);
+      const pollTitle = this.getPollTitle(findMessagePoll.content);
+      let messageContent =
+        '```' +
+        `[Poll result] - ${pollTitle}` +
+        '\n' +
+        `Ding! Ding! Ding! Time's up! Results are`;
+      if (userReactMessageId?.length) {
+        const groupedByEmoji: { [key: string]: any[] } =
+          userReactMessageId.reduce((acc: any, item) => {
+            const { emoji } = item;
+            if (!acc[emoji]) {
+              acc[emoji] = [];
+            }
+            acc[emoji].push(item);
+            return acc;
+          }, {});
 
-      for (const [emoji, users] of Object.entries(groupedByEmoji)) {
-        const formattedUser = users
-          .map((user) => `+ ${user.username}`)
-          .join('\n\t');
-        const optionByEmoji = options[+emoji];
-        messageContent += `\n${optionByEmoji} (${users.length}):\n\t${formattedUser}`;
+        for (const [emoji, users] of Object.entries(groupedByEmoji)) {
+          const formattedUser = users
+            .map((user) => `+ ${user.username}`)
+            .join('\n\t');
+          const optionByEmoji = options[+emoji];
+          messageContent += `\n${optionByEmoji} (${users.length}):\n\t${formattedUser}`;
+        }
+      } else {
+        messageContent += '\n\n(no one participated in the poll)';
       }
-      this.deletePollManagerByKey(findMessagePoll.messageId);
-    } else {
-      messageContent += '\n\n(no one participated in the poll)';
+
+      await this.mezonBotMessageRepository.update(
+        {
+          messageId: findMessagePoll.messageId,
+        },
+        { deleted: true },
+      );
+
+      const findChannel = await this.channelRepository.findOne({
+        where: { channel_id: findMessagePoll.channelId },
+      });
+      const findUser = await this.userRepository.findOne({
+        where: { userId: findMessagePoll.userId, user_type: EUserType.MEZON },
+      });
+      const textCreated =
+        `\n\nPoll created by ${findUser?.username ?? ''}` + '```';
+      const replyMessage = {
+        clan_id: this.clientConfig.clandNccId,
+        channel_id: findMessagePoll.channelId,
+        is_public: findChannel ? !findChannel?.channel_private : false,
+        is_parent_public: findChannel ? findChannel?.is_parent_public : true,
+        parent_id: '0',
+        mode: EMessageMode.CHANNEL_MESSAGE,
+        msg: {
+          t: messageContent + textCreated,
+          mk: [
+            {
+              type: EMarkdownType.TRIPLE,
+              s: 0,
+              e: messageContent.length + textCreated.length,
+            },
+          ],
+        },
+      };
+      this.messageQueue.addMessage(replyMessage);
+    } catch (error) {
+      console.log('handleResultPoll', error);
     }
-
-    await this.mezonBotMessageRepository.update(
-      {
-        messageId: findMessagePoll.messageId,
-      },
-      { deleted: true },
-    );
-
-    const findChannel = await this.channelRepository.findOne({
-      where: { channel_id: findMessagePoll.channelId },
-    });
-    const findUser = await this.userRepository.findOne({
-      where: { userId: findMessagePoll.userId, user_type: EUserType.MEZON },
-    });
-
-    const textCreated =
-      `\n\nPoll created by ${findUser?.username ?? ''}` + '```';
-    const replyMessage = {
-      clan_id: this.clientConfig.clandNccId,
-      channel_id: findMessagePoll.channelId,
-      is_public: findChannel ? !findChannel?.channel_private : false,
-      is_parent_public: findChannel ? findChannel?.is_parent_public : true,
-      parent_id: '0',
-      mode: EMessageMode.CHANNEL_MESSAGE,
-      msg: {
-        t: messageContent + textCreated,
-        mk: [
-          {
-            type: EMarkdownType.TRIPLE,
-            s: 0,
-            e: messageContent.length + textCreated.length,
-          },
-        ],
-      },
-    };
-    this.messageQueue.addMessage(replyMessage);
   }
 }
