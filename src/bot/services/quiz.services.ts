@@ -124,7 +124,7 @@ export class QuizService {
 
       if (!user) return;
 
-      if (user[0].scores_quiz) {
+      if (user[0]?.scores_quiz) {
         await this.userRepository
           .createQueryBuilder()
           .update(User)

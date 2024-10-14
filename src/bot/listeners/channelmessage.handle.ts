@@ -270,7 +270,7 @@ export class EventListenerChannelMessage {
     if (msg.mode == EMessageMode.DM_MESSAGE) {
       const query = this.userQuizRepository
         .createQueryBuilder()
-        .andWhere('"userId" = :userId', {
+        .where('"userId" = :userId', {
           userId: msg.sender_id,
         })
         .select('*');
@@ -279,11 +279,11 @@ export class EventListenerChannelMessage {
         Array.isArray(msg.references) &&
         msg.references.length > 0
       ) {
-        query.where('"message_id" = :mess_id', {
+        query.andWhere('"message_id" = :mess_id', {
           mess_id: msg.references[0].message_ref_id,
         });
         const userQuiz = await query.getRawOne();
-        if (userQuiz && userQuiz['userId']) {
+        if (userQuiz && userQuiz?.['userId']) {
           let mess = '';
           const messOptions = {};
           if (userQuiz['answer']) {
