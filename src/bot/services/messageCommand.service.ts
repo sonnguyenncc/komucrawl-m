@@ -74,8 +74,8 @@ export class MessageCommand {
                   channelId: message.channel_id,
                   content: message.msg.t + '',
                   createAt: Date.now(),
+                  pollResult: [],
                 };
-                this.pollService.addPoll(messageSent.message_id, []);
                 await this.mezonBotMessageRepository.insert(
                   dataMezonBotMessage,
                 );

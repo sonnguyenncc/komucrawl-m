@@ -28,9 +28,6 @@ export class PollSchedulerService {
       where: { createAt: LessThan(+timestampMinus12Hours), deleted: false },
     });
     if (!findMessagePoll) return;
-    let userReactMessageId = this.pollService.getPollManagerByKey(
-      findMessagePoll.messageId,
-    );
-    this.pollService.handleResultPoll(findMessagePoll, userReactMessageId);
+    this.pollService.handleResultPoll(findMessagePoll);
   }
 }

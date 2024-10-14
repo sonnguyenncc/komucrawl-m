@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ChannelUpdatedEvent, Events } from 'mezon-sdk';
+import { ChannelCreatedEvent, Events } from 'mezon-sdk';
 import { Repository } from 'typeorm';
 import { BaseHandleEvent } from './base.handle';
 import { MezonClientService } from 'src/mezon/services/client.service';
@@ -18,7 +18,7 @@ export class EventListenerChannelUpdated extends BaseHandleEvent {
   }
 
   @OnEvent(Events.ChannelUpdated)
-  async handleChannelUpdated(channelInput: ChannelUpdatedEvent) {
+  async handleChannelUpdated(channelInput: ChannelCreatedEvent) {
     const channelId = channelInput.channel_id;
     // Find the channel by channel_id
     const channel = await this.channelRepository.findOne({
@@ -28,8 +28,10 @@ export class EventListenerChannelUpdated extends BaseHandleEvent {
       throw new NotFoundException(`Not found channal id ${channelId}`);
     }
     //TODO handle channel_private
-    const channelDb = this.channelRepository.merge(channel, channelInput);
-
+    const channelDb = this.channelRepository.merge(channel, {
+      ...channelInput,
+      channel_private: channelInput.channel_private ? 1 : 0,
+    });
     // Save the updated channel back to the database
     return this.channelRepository.save(channelDb);
   }

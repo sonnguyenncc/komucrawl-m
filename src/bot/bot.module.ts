@@ -117,6 +117,8 @@ import { WhereCommand } from './asterisk-commands/commands/where/where.command';
 import { PollCommand } from './asterisk-commands/commands/poll/poll.command';
 import { PollService } from './services/poll.service';
 import { PollSchedulerService } from './scheduler/poll-scheduler.service';
+import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkprivatechannel.command';
+import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updateprivatechannel.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -240,6 +242,8 @@ import { PollSchedulerService } from './scheduler/poll-scheduler.service';
     PollCommand,
     PollService,
     PollSchedulerService,
+    CheckChannelCommand,
+    TogglePrivateCheckChannelCommand
   ],
   controllers: [KomubotrestController],
 })

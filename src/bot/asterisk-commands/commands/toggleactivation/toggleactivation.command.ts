@@ -6,7 +6,6 @@ import { User } from 'src/bot/models/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-// TODO: canot get user data from MEZON
 @Command('toggleactive')
 export class ToggleActiveCommand extends CommandMessage {
   constructor(
@@ -38,17 +37,22 @@ export class ToggleActiveCommand extends CommandMessage {
       let i = 0;
       let mess = findUser
         .slice(i * 50, (i + 1) * 50)
-        .map((user) => `${user.email}(${user.userId}) toggle: ${user.deactive}`)
+        .map((user) => `${user.email}(${user.userId}) deactive: ${user.deactive}`)
         .join('\n');
       return this.replyMessageGenerate({ messageContent: mess }, message);
     } else {
       let authorId = args[0];
-      const checkRole = await this.toggleActiveService.checkrole(
-        message.sender_id,
-      );
       const userIdValid = ['1827994776956309504', '1779815181480628224'];
       if (userIdValid.includes(message.sender_id)) {
         const findUserId = await this.toggleActiveService.findAcc(authorId);
+        if (!findUserId) {
+          return this.replyMessageGenerate(
+            {
+              messageContent: 'User not found!',
+            },
+            message,
+          );
+        }
         if (!findUserId.deactive) {
           await this.toggleActiveService.deactiveAcc(findUserId.userId);
           return this.replyMessageGenerate(

@@ -11,7 +11,13 @@ export class HelpCommand extends CommandMessage {
 
   execute(args: string[], message: ChannelMessage) {
     const allCommands = CommandStorage.getAllCommands();
-    const hidenCommandList = ['holiday', 'register', 'toggleactive'];
+    const hidenCommandList = [
+      'holiday',
+      'register',
+      'toggleactive',
+      'checkchannel',
+      'toggleprivatechannel',
+    ];
     const allCommandKeys = Array.from(allCommands.keys()).filter(
       (item) => !hidenCommandList.includes(item),
     );

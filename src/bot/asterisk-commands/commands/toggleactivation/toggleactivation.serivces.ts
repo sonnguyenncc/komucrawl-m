@@ -13,7 +13,7 @@ export class ToggleActiveService {
 
   async findAcc(authorId) {
     return await this.userRepository.findOne({
-      where: [{ userId: authorId }, { username: authorId }, { user_type: EUserType.MEZON }],
+      where: [{ userId: authorId }, { username: authorId }],
     });
   }
 

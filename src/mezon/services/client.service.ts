@@ -34,11 +34,9 @@ export class MezonClientService {
     try {
       return await this.client.sendMessage(
         replyMessage.clan_id,
-        '0',
         replyMessage.channel_id,
         replyMessage.mode,
         replyMessage.is_public,
-        true,
         replyMessage.msg,
         replyMessage.mentions,
         replyMessage.attachments,
@@ -76,11 +74,9 @@ export class MezonClientService {
       return await this.client.reactionMessage(
         '',
         dataReact.clan_id,
-        '0',
         dataReact.channel_id,
         EMessageMode.CHANNEL_MESSAGE,
         dataReact.is_public,
-        dataReact.is_parent_public ?? true,
         dataReact.message_id,
         dataReact.emoji_id,
         dataReact.emoji,

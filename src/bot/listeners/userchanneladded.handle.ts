@@ -43,6 +43,11 @@ export class EventListenerUserChannelAdded extends BaseHandleEvent {
         status: Number(status),
         parrent_id: parent_id,
       });
+    } else {
+      this.channelRepository.update(
+        { channel_id: channelId },
+        { channel_private: input.is_public ? 0 : 1 },
+      );
     }
 
     // Save the updated channel back to the database
