@@ -64,7 +64,7 @@ export class DailyCommand extends CommandMessage {
       .andWhere(`"deactive" IS NOT true`)
       .select('*')
       .getRawOne();
-
+    if (!findUser) return;
     const authorUsername = findUser.email;
     const emailAddress = generateEmail(authorUsername);
 

@@ -38,7 +38,7 @@ export class WFHSchedulerService {
       currentHoursUTC7 < 12 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
     const wfhResult = await this.timeSheetService.findWFHUser();
     const wfhUserEmail = wfhResult
-      .filter((item) => dateTypeNames.includes(item.dateTypeName))
+      // .filter((item) => dateTypeNames.includes(item.dateTypeName))
       .map((item) => {
         return getUserNameByEmail(item.emailAddress);
       });
@@ -187,7 +187,7 @@ export class WFHSchedulerService {
         .andWhere('user.botPing = :botPing', {
           botPing: true,
         })
-        .andWhere('"last_bot_message_id" IS NOT Null')
+        .andWhere('user.last_bot_message_id IS NOT Null')
         .andWhere(
           '(m_bot.createAt <= :thirtyMinutesAgo and m_bot.createAt >= :firstTime and m_bot.createAt <= :lastTime)',
           {
@@ -199,51 +199,54 @@ export class WFHSchedulerService {
         .select('*')
         .execute();
 
-      users.forEach(async (user) => {
-        const content = `@${user.username} không trả lời tin nhắn WFH lúc ${moment(
-          parseInt(user.createAt.toString()),
-        )
-          .utcOffset(420)
-          .format('YYYY-MM-DD HH:mm:ss')} !\n`;
-        // await this.wfhRepository.save({
-        //   userId: user.userId,
-        //   wfhMsg: content,
-        //   complain: false,
-        //   pmconfirm: false,
-        //   status: 'ACTIVE',
-        //   type: 'wfh',
-        //   createdAt: Date.now(),
-        // });
-        const replyMessage = {
-          clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
-          channel_id: process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
-          is_public: false,
-          is_parent_public: true,
-          parent_id: '0',
-          mode: EMessageMode.CHANNEL_MESSAGE,
-          msg: {
-            t: content,
-          },
-          mentions: [
-            {
-              user_id: user?.userId,
-              s: 0,
-              e: user.username.length + 1,
-            },
-          ],
-        };
-        this.messageQueue.addMessage(replyMessage);
+      for (const user of users) {
+        try {
+          await this.userRepository.update(
+            { userId: user?.userId },
+            { botPing: false },
+          );
 
-        await this.userRepository
-          .createQueryBuilder('user')
-          .update(User)
-          .set({
-            botPing: false,
-          })
-          .where(`"userId" = :userId`, { userId: user.userId })
-          .andWhere(`"deactive" IS NOT TRUE`)
-          .execute();
-      });
+          const content = `@${user?.username} không trả lời tin nhắn WFH lúc ${moment(
+            parseInt(user.createAt.toString()),
+          )
+            .utcOffset(420)
+            .format('YYYY-MM-DD HH:mm:ss')} !\n`;
+
+          // Uncomment and modify this if needed
+          // await this.wfhRepository.save({
+          //   userId: user.userId,
+          //   wfhMsg: content,
+          //   complain: false,
+          //   pmconfirm: false,
+          //   status: 'ACTIVE',
+          //   type: 'wfh',
+          //   createdAt: Date.now(),
+          // });
+
+          const replyMessage = {
+            clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
+            channel_id: process.env.KOMUBOTREST_MACHLEO_CHANNEL_ID,
+            is_public: false,
+            is_parent_public: true,
+            parent_id: '0',
+            mode: EMessageMode.CHANNEL_MESSAGE,
+            msg: {
+              t: content,
+            },
+            mentions: [
+              {
+                user_id: user?.userId,
+                s: 0,
+                e: user.username.length + 1,
+              },
+            ],
+          };
+
+          this.messageQueue.addMessage(replyMessage);
+        } catch (error) {
+          console.log('botPing error', error);
+        }
+      }
     }
   }
 

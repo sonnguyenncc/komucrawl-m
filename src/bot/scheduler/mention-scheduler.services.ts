@@ -150,7 +150,7 @@ export class MentionSchedulerService {
         .utcOffset(420)
         .format('YYYY-MM-DD HH:mm:ss');
 
-      const content = `${userName} không trả lời tin nhắn mention của ${authorName} lúc ${timestamp} tại ${thread ? 'thread' : 'channel'} `;
+      const content = `@${userName} không trả lời tin nhắn mention của @${authorName} lúc ${timestamp} tại ${thread ? 'thread' : 'channel'} `;
       // const textConfirm = '`React ❌ to Complain or ✅ to Accept`';
 
       const messageReply = {
@@ -192,11 +192,11 @@ export class MentionSchedulerService {
         mode: EMessageMode.CHANNEL_MESSAGE,
         msg: messageReply,
         mentions: [
-          { user_id: user.mentionUserId, s: 0, e: userName.length },
+          { user_id: user.mentionUserId, s: 0, e: userName.length + 1 },
           {
             user_id: user.authorId,
-            s: userName.length + 36,
-            e: userName.length + 36 + authorName.length,
+            s: userName.length + 37,
+            e: userName.length + 37 + authorName.length + 1,
           },
         ],
       };

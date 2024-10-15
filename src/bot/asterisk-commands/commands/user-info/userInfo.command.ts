@@ -38,7 +38,7 @@ export class UserInfoCommand extends CommandMessage {
             user_type: EUserType.MEZON,
           },
         });
-        userQuery = findUser.userId;
+        userQuery = findUser?.userId;
       } else {
         userQuery = args.length ? args[0] : message.sender_id;
       }

@@ -16,6 +16,9 @@ export class UserQuiz {
   @Column({ type: 'text', nullable: true })
   message_id: string;
 
+  @Column({ type: 'text', nullable: true, default: null })
+  channel_id: string;
+
   @Column({ nullable: true })
   correct: boolean;
 

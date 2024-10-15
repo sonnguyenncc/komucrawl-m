@@ -267,11 +267,11 @@ export class EventListenerChannelMessage {
 
   @OnEvent(Events.ChannelMessage)
   async handleAnswerBotQuiz(msg: ChannelMessage) {
-    if (msg.mode == EMessageMode.DM_MESSAGE || msg.sender_id !== BOT_ID) {
+    if (msg.mode == EMessageMode.DM_MESSAGE && msg.sender_id !== BOT_ID) {
       const query = this.userQuizRepository
         .createQueryBuilder()
-        .where('"userId" = :userId', {
-          userId: msg.sender_id,
+        .where('"channel_id" = :channel_id', {
+          channel_id: msg.channel_id,
         })
         .select('*');
       if (

@@ -99,7 +99,12 @@ export class QuizService {
     );
 
     if (sendMess) {
-      await this.saveQuestion(userId, q.id, sendMess.message_id);
+      await this.saveQuestion(
+        userId,
+        q.id,
+        sendMess.message_id,
+        sendMess.channel_id,
+      );
     }
   }
 
@@ -184,11 +189,12 @@ export class QuizService {
       console.log(error);
     }
   }
-  saveQuestion(userId, questionid, message_id) {
+  saveQuestion(userId, questionid, message_id, channel_id) {
     return this.userQuizRepository.insert({
       userId,
       quizId: questionid,
       message_id,
+      channel_id,
       createAt: Date.now(),
     });
   }
