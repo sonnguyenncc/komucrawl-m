@@ -17,7 +17,7 @@ export class ReportCommand extends CommandMessage {
     private reportOrderService: ReportOrderService,
     private reportMentionService: ReportMentionService,
     private reportTrackerService: ReportTrackerService,
-    private reportWFHService: ReportWFHService
+    private reportWFHService: ReportWFHService,
   ) {
     super();
   }
@@ -113,9 +113,11 @@ export class ReportCommand extends CommandMessage {
           });
         }
         break;
-        case 'wfh':
-      const textContentWfh =
-          await this.reportWFHService.reportWfh(message, args);
+      case 'wfh':
+        const textContentWfh = await this.reportWFHService.reportWfh(
+          message,
+          args,
+        );
         if (textContentWfh.length) {
           return textContentWfh.map((m) => {
             return this.replyMessageGenerate(

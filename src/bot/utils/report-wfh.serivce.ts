@@ -1,66 +1,63 @@
-import { InjectRepository } from "@nestjs/typeorm";
-import { TABLE } from "src/bot/constants/table";
-import { WorkFromHome } from "src/bot/models/wfh.entity";
-import { Repository } from "typeorm";
-import { Injectable } from "@nestjs/common";
-import { UtilsService } from "../services/utils.services";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { WorkFromHome } from 'src/bot/models/wfh.entity';
+import { Repository } from 'typeorm';
+import { UtilsService } from '../services/utils.services';
 
 @Injectable()
 export class ReportWFHService {
   constructor(
     @InjectRepository(WorkFromHome)
     private wfhRepository: Repository<WorkFromHome>,
-    // private komubotrestService: KomubotrestService,
-    private utilsService: UtilsService
+    private utilsService: UtilsService,
   ) {}
 
   async reportWfh(message, args) {
-    // let authorId = message.author.id;
-    let fomatDate;
+    let formatDate;
     if (args[1]) {
       const day = args[1].slice(0, 2);
       const month = args[1].slice(3, 5);
       const year = args[1].slice(6);
 
-      fomatDate = `${month}/${day}/${year}`;
+      formatDate = `${month}/${day}/${year}`;
     } else {
-      fomatDate = new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+      formatDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
       });
     }
 
     const wfhFullday = await this.wfhRepository
-      .createQueryBuilder("wfh")
-      .innerJoinAndSelect("komu_user", "m", "wfh.userId = m.userId")
+      .createQueryBuilder('wfh')
+      .innerJoinAndSelect('komu_user', 'm', 'wfh.userId = m.userId')
       .where(
         '("status" = :statusACCEPT AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay) OR ("status" = :statusACTIVE AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay) OR ("status" = :statusAPPROVED AND pmconfirm = :pmconfirm AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay)',
         {
-          type: "wfh",
-          statusACCEPT: "ACCEPT",
-          statusACTIVE: "ACTIVE",
-          statusAPPROVED: "APPROVED",
+          type: 'wfh',
+          statusACCEPT: 'ACCEPT',
+          statusACTIVE: 'ACTIVE',
+          statusAPPROVED: 'APPROVED',
           pmconfirm: false,
           firstDay: this.utilsService
-            .getTimeToDayMention(fomatDate)
+            .getTimeToDayMention(formatDate)
             .firstDay.getTime(),
           lastDay: this.utilsService
-            .getTimeToDayMention(fomatDate)
+            .getTimeToDayMention(formatDate)
             .lastDay.getTime(),
-        }
+        },
       )
-      .groupBy("m.username")
-      .addGroupBy("wfh.userId")
-      .select("wfh.userId, COUNT(wfh.userId) as total, m.username")
-      .orderBy("total", "DESC")
+      .groupBy('m.username')
+      .addGroupBy('wfh.userId')
+      .select('wfh.userId, COUNT(wfh.userId) as total, m.username')
+      .orderBy('total', 'DESC')
       .execute();
 
     let mess;
     if (!wfhFullday) {
       return;
     } else if (Array.isArray(wfhFullday) && wfhFullday.length === 0) {
-      mess = ["```" + "Không có ai vi phạm trong ngày" + "```"];
+      mess = ['```' + 'Không có ai vi phạm trong ngày' + '```'];
       return mess;
     } else {
       const listMessage = [];
@@ -69,12 +66,16 @@ export class ReportWFHService {
         mess = wfhFullday
           .slice(i * 50, (i + 1) * 50)
           .map((wfh) => `${wfh.username} - (${wfh.total})`)
-          .join("\n");
-        listMessage.push("Những người bị phạt vì không trả lời wfh trong ngày hôm nay" + '\n' +`${mess}`); 
-        };
-        return listMessage;
+          .join('\n');
+        listMessage.push(
+          'Những người bị phạt vì không trả lời wfh trong ngày hôm nay' +
+            '\n' +
+            `${mess}`,
+        );
       }
+      return listMessage;
     }
+  }
 
   // async reportCompalinWfh(message, args, client) {
   //   let authorId = message.author.id;
@@ -137,21 +138,21 @@ export class ReportWFHService {
   // }
 
   async reportMachleo(date: Date) {
-    const formatDate = date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
+    const formatDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     });
     const result = await this.wfhRepository
-      .createQueryBuilder("wfh")
-      .innerJoinAndSelect("komu_user", "m", "wfh.userId = m.userId")
+      .createQueryBuilder('wfh')
+      .innerJoinAndSelect('komu_user', 'm', 'wfh.userId = m.userId')
       .where(
         '("status" = :statusACCEPT AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay) OR ("status" = :statusACTIVE AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay) OR ("status" = :statusAPPROVED AND pmconfirm = :pmconfirm AND "type" = :type AND wfh.createdAt >= :firstDay AND wfh.createdAt <= :lastDay)',
         {
-          type: "mention",
-          statusACCEPT: "ACCEPT",
-          statusACTIVE: "ACTIVE",
-          statusAPPROVED: "APPROVED",
+          type: 'mention',
+          statusACCEPT: 'ACCEPT',
+          statusACTIVE: 'ACTIVE',
+          statusAPPROVED: 'APPROVED',
           pmconfirm: false,
           firstDay: this.utilsService
             .getTimeToDayMention(formatDate)
@@ -159,12 +160,12 @@ export class ReportWFHService {
           lastDay: this.utilsService
             .getTimeToDayMention(formatDate)
             .lastDay.getTime(),
-        }
+        },
       )
-      .groupBy("m.email")
-      .addGroupBy("wfh.userId")
-      .select("m.email, COUNT(wfh.userId) as count")
-      .orderBy("count", "DESC")
+      .groupBy('m.email')
+      .addGroupBy('wfh.userId')
+      .select('m.email, COUNT(wfh.userId) as count')
+      .orderBy('count', 'DESC')
       .execute();
     return result;
   }
