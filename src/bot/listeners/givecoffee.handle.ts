@@ -14,7 +14,7 @@ export class EventGiveCoffee extends BaseHandleEvent {
     clientService: MezonClientService,
     private mentionSchedulerService: MentionSchedulerService,
     private clientConfig: ClientConfigService,
-    private messageQueue: MessageQueue
+    private messageQueue: MessageQueue,
   ) {
     super(clientService);
   }
@@ -31,8 +31,8 @@ export class EventGiveCoffee extends BaseHandleEvent {
 
       if (!userName || !authorName) return;
 
-      const firstText = `${authorName} just sent a coffee to `;
-      const messageContent = firstText + `${userName}`;
+      const firstText = `@${authorName} just sent a coffee to `;
+      const messageContent = firstText + `@${userName}`;
       const replyMessage = {
         clan_id: data.clan_id,
         channel_id: this.clientConfig.welcomeChannelId,
@@ -44,15 +44,15 @@ export class EventGiveCoffee extends BaseHandleEvent {
           t: messageContent,
         },
         mentions: [
-          { user_id: data.sender_id, s: 0, e: authorName.length },
+          { user_id: data.sender_id, s: 0, e: authorName.length + 1 },
           {
             user_id: data.receiver_id,
             s: firstText.length,
-            e: firstText.length + userName.length,
+            e: firstText.length + userName.length + 1,
           },
         ],
       };
-      this.messageQueue.addMessage(replyMessage)
+      this.messageQueue.addMessage(replyMessage);
     } catch (error) {
       console.log('give coffee', error);
     }

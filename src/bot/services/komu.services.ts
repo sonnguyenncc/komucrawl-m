@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MezonClient } from 'mezon-sdk';
+import { ChannelMessageAck, MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ChannelMezon, User } from '../models';
 import { Repository } from 'typeorm';
@@ -56,7 +56,7 @@ export class KomuService {
       //   return null;
       // }
       // if (username == 'son.nguyenhoai') {
-      let sent;
+      let sent: ChannelMessageAck;
       try {
         const findDMChannel = await this.channelDmMezonRepository.findOne({
           where: { user_id: userdb.userId },
@@ -91,11 +91,9 @@ export class KomuService {
           sent = await this.clientService.sendMessageToUser(newMessage);
         }
       } catch (error) {
-        setTimeout(() => {
-          this.sendErrorToDev(
-            `send wfh error: ${error}, username: ${userdb.username}`,
-          );
-        }, 3000);
+        this.sendErrorToDev(
+          `send wfh error: ${error}, username: ${userdb.username}`,
+        );
       }
 
       // msg = '```' + msg + '```';
