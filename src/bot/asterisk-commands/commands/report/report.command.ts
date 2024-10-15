@@ -1,3 +1,4 @@
+import { ReportWFHService } from './../../../utils/report-wfh.serivce';
 import { Command } from 'src/bot/base/commandRegister.decorator';
 import { CommandMessage } from '../../abstracts/command.abstract';
 import { ChannelMessage } from 'mezon-sdk';
@@ -16,6 +17,7 @@ export class ReportCommand extends CommandMessage {
     private reportOrderService: ReportOrderService,
     private reportMentionService: ReportMentionService,
     private reportTrackerService: ReportTrackerService,
+    private reportWFHService: ReportWFHService
   ) {
     super();
   }
@@ -101,6 +103,21 @@ export class ReportCommand extends CommandMessage {
           await this.reportMentionService.reportMention(message, args);
         if (textContentMention.length) {
           return textContentMention.map((m) => {
+            return this.replyMessageGenerate(
+              {
+                messageContent: '```' + m + '```',
+                mk: [{ type: 't', s: 0, e: m.length + 6 }],
+              },
+              message,
+            );
+          });
+        }
+        break;
+        case 'wfh':
+      const textContentWfh =
+          await this.reportWFHService.reportWfh(message, args);
+        if (textContentWfh.length) {
+          return textContentWfh.map((m) => {
             return this.replyMessageGenerate(
               {
                 messageContent: '```' + m + '```',
