@@ -26,10 +26,13 @@ export class EventAddClanUser extends BaseHandleEvent {
 
   @OnEvent(Events.AddClanUser)
   async handleAddClanUser(data) {
-    console.log('data', data);
     try {
       const DMchannel = await this.client.createDMchannel(data?.user?.user_id);
       if (!DMchannel) return;
+      await this.client.sendDMChannelMessage(
+        DMchannel.channel_id,
+        'Welcome to KOMU clan. Have a great experience!',
+      );
       const dataInsert = {
         user_id: data?.user?.user_id,
         channel_id: DMchannel.channel_id,

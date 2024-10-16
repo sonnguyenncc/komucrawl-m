@@ -38,7 +38,7 @@ export class WFHSchedulerService {
       currentHoursUTC7 < 12 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
     const wfhResult = await this.timeSheetService.findWFHUser();
     const wfhUserEmail = wfhResult
-      // .filter((item) => dateTypeNames.includes(item.dateTypeName))
+      .filter((item) => dateTypeNames.includes(item.dateTypeName))
       .map((item) => {
         return getUserNameByEmail(item.emailAddress);
       });
@@ -202,7 +202,7 @@ export class WFHSchedulerService {
       for (const user of users) {
         try {
           await this.userRepository.update(
-            { userId: user?.userId },
+            { userId: user.userId },
             { botPing: false },
           );
 

@@ -74,7 +74,6 @@ export class ReportCommand extends CommandMessage {
       case 'holiday':
         const textContentHoliday =
           await this.reportHolidayService.reportHoliday();
-        console.log('textContent', textContentHoliday);
         return this.replyMessageGenerate(
           {
             messageContent: '```' + textContentHoliday + '```',
