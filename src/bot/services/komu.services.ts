@@ -105,7 +105,7 @@ export class KomuService {
 
       // botPing : work when bot send quiz wfh user
       //* isSendQuiz : work when bot send quiz
-      if (isSendQuiz) {
+      if (isSendQuiz && sent?.message_id) {
         if (botPing) {
           userdb.last_bot_message_id = sent?.message_id;
           userdb.botPing = true;
