@@ -8,6 +8,7 @@ import { MezonBotMessage, User } from '../models';
 import { KomuService } from './komu.services';
 import { PollService } from './poll.service';
 import { ReactMessageChannel } from '../asterisk-commands/dto/replyMessage.dto';
+import { ErrorSocketType } from '../constants/configs';
 @Injectable()
 export class MessageCommand {
   constructor(
@@ -103,9 +104,17 @@ export class MessageCommand {
               }
             }
           } catch (error) {
-            this.komuService.sendErrorToDev(
-              `send message error: ${JSON.stringify(message)}`,
-            );
+            switch (error) {
+              case ErrorSocketType.TIME_OUT:
+                console.log('Message get error', message);
+                break;
+              case ErrorSocketType.NOT_ESTABLISHED:
+                this.messageQueue.addMessage(message);
+                break;
+              default:
+                console.log('error send', error);
+                break;
+            }
           }
         }
       }

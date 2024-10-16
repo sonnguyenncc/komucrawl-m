@@ -114,7 +114,6 @@ export class MovieCommand extends CommandMessage {
     }
 
     if (args[0] === 'playlist') {
-      console.log('playlist');
       const dataMp3 = await this.uploadFileData.find({
         where: {
           file_type: FileType.FILM,
