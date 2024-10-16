@@ -20,7 +20,6 @@ export class EventListenerChannelDeleted extends BaseHandleEvent {
   @OnEvent(Events.ChannelDeleted)
   async handleChannelDeleted(channelInput: ChannelDeletedEvent) {
     const { channel_id } = channelInput;
-    console.log(channel_id);
     await this.channelRepository.delete({ channel_id });
   }
 }

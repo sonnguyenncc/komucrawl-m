@@ -4,7 +4,7 @@ import { ChannelMessageAck, MezonClient } from 'mezon-sdk';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ChannelMezon, User } from '../models';
 import { Repository } from 'typeorm';
-import { EMessageMode, EUserType } from '../constants/configs';
+import { EMessageMode, ErrorSocketType, EUserType } from '../constants/configs';
 import { MessageQueue } from './messageQueue.service';
 import { ReplyMezonMessage } from '../asterisk-commands/dto/replyMessage.dto';
 import { ChannelDMMezon } from '../models/channelDmMezon.entity';
@@ -57,6 +57,7 @@ export class KomuService {
       // }
       // if (username == 'son.nguyenhoai') {
       let sent: ChannelMessageAck;
+      let newMessage;
       try {
         const findDMChannel = await this.channelDmMezonRepository.findOne({
           where: { user_id: userdb.userId },
@@ -72,7 +73,7 @@ export class KomuService {
             username: userdb?.username,
           };
           await this.channelDmMezonRepository.insert(dataInsert);
-          const newMessage = {
+          newMessage = {
             textContent: '```' + msg + '```',
             messOptions: {
               mk: [{ type: 't', s: 0, e: msg.length + 6 }],
@@ -81,7 +82,7 @@ export class KomuService {
           };
           sent = await this.clientService.sendMessageToUser(newMessage);
         } else {
-          const newMessage = {
+          newMessage = {
             textContent: '```' + msg + '```',
             messOptions: {
               mk: [{ type: 't', s: 0, e: msg.length + 6 }],
@@ -91,9 +92,17 @@ export class KomuService {
           sent = await this.clientService.sendMessageToUser(newMessage);
         }
       } catch (error) {
-        this.sendErrorToDev(
-          `send wfh error: ${error}, username: ${userdb.username}`,
-        );
+        switch (error) {
+          case ErrorSocketType.TIME_OUT:
+            console.log('Message wfh get error', newMessage);
+            break;
+          // case ErrorSocketType.NOT_ESTABLISHED:
+          //   this.messageQueue.addMessage(newMessage);
+          //   break;
+          default:
+            console.log('error send wfh', error, newMessage);
+            break;
+        }
       }
 
       // msg = '```' + msg + '```';
