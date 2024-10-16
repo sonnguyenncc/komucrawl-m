@@ -119,6 +119,9 @@ import { PollService } from './services/poll.service';
 import { PollSchedulerService } from './scheduler/poll-scheduler.service';
 import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkprivatechannel.command';
 import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updateprivatechannel.command';
+import { EventCommand } from './asterisk-commands/commands/event/event.command';
+import { EventService } from './asterisk-commands/commands/event/event.service';
+import { EventSchedulerService } from './scheduler/event-scheduler.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -243,7 +246,10 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
     PollService,
     PollSchedulerService,
     CheckChannelCommand,
-    TogglePrivateCheckChannelCommand
+    TogglePrivateCheckChannelCommand,
+    EventCommand,
+    EventService,
+    EventSchedulerService
   ],
   controllers: [KomubotrestController],
 })
