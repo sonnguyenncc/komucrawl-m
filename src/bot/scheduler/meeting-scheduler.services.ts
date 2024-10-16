@@ -49,7 +49,10 @@ export class MeetingSchedulerService {
     }
 
     const listVoiceChannel = await this.channelRepository.find({
-      where: { channel_type: ChannelType.CHANNEL_TYPE_VOICE },
+      where: {
+        channel_type: ChannelType.CHANNEL_TYPE_VOICE,
+        clan_id: this.clientConfig.clandNccId,
+      },
     });
     const listVoiceChannelIdUsed = [];
     listChannelVoiceUsers.forEach((item) => {
