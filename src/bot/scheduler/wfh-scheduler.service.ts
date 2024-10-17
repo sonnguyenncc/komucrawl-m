@@ -212,16 +212,15 @@ export class WFHSchedulerService {
             .utcOffset(420)
             .format('YYYY-MM-DD HH:mm:ss')} !\n`;
 
-          // Uncomment and modify this if needed
-          // await this.wfhRepository.save({
-          //   userId: user.userId,
-          //   wfhMsg: content,
-          //   complain: false,
-          //   pmconfirm: false,
-          //   status: 'ACTIVE',
-          //   type: 'wfh',
-          //   createdAt: Date.now(),
-          // });
+          await this.wfhRepository.save({
+            userId: user.userId,
+            wfhMsg: content,
+            complain: false,
+            pmconfirm: false,
+            status: 'ACTIVE',
+            type: 'wfh',
+            createdAt: Date.now(),
+          });
 
           const replyMessage = {
             clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
