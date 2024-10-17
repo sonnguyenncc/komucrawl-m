@@ -357,7 +357,7 @@ export class EventListenerChannelMessage {
         );
       }
     } catch (error) {
-      console.log('answer bot error', error);
+      console.log('answer bot error', error, msg);
     }
   }
 }
