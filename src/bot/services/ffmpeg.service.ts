@@ -8,7 +8,7 @@ import { FFmpegImagePath } from 'src/bot/constants/configs';
 @Injectable()
 export class FFmpegService {
   constructor() {
-    ffmpeg.setFfmpegPath(ffmpegPath);
+    ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
     ffmpeg.setFfprobePath(ffprobePath.path);
   }
 
@@ -43,7 +43,7 @@ export class FFmpegService {
           console.error('transcodeMp3ToRtmp Error:', err);
           reject(err);
         })
-        .run();
+        .run()
     });
   }
 
