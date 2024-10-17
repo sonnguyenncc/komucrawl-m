@@ -122,6 +122,7 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
 import { EventCommand } from './asterisk-commands/commands/event/event.command';
 import { EventService } from './asterisk-commands/commands/event/event.service';
 import { EventSchedulerService } from './scheduler/event-scheduler.service';
+import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -249,7 +250,8 @@ import { EventSchedulerService } from './scheduler/event-scheduler.service';
     TogglePrivateCheckChannelCommand,
     EventCommand,
     EventService,
-    EventSchedulerService
+    EventSchedulerService,
+    Ncc8SchedulerService
   ],
   controllers: [KomubotrestController],
 })
