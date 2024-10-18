@@ -8,7 +8,7 @@ import { FFmpegService } from 'src/bot/services/ffmpeg.service';
 import { FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FFmpegImagePath } from 'src/bot/constants/configs';
 
 async function sleep(ms: number) {
@@ -59,7 +59,6 @@ export class AudiobookCommand extends CommandMessage {
           },
           message,
         );
-
       const textContent = `Go to `;
       const channel_id = this.clientConfigService.audiobookChannelId;
       try {
@@ -75,19 +74,18 @@ export class AudiobookCommand extends CommandMessage {
           `${process.env.NCC8_API}/ncc8/audio-book/${args[1]}`,
         );
         if (!res) return;
-
         // check channel is not streaming
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           this.ffmpegService
             .transcodeMp3ToRtmp(
               FFmpegImagePath.AUDIOBOOK,
-              res?.data?.url,
+              // res?.data?.url,
+              'D:/ncc/komucrawl-m/uploads/book_SieuNhanCuongPhong-Takeshi.mp3',
               channel?.streaming_url,
             )
             .catch((error) => console.log('error mp3', error));
         }
-
         await sleep(1000);
 
         return this.replyMessageGenerate(
@@ -114,8 +112,80 @@ export class AudiobookCommand extends CommandMessage {
       }
     }
 
+    if (args[0] === 'playWaiting') {
+      if (!args[1])
+        return this.replyMessageGenerate(
+          {
+            messageContent: messageContent,
+            mk: [{ type: 't', s: 0, e: messageContent.length }],
+          },
+          message,
+        );
+      const channel_id = this.clientConfigService.audiobookChannelId;
+      const textContent = `Go to `;
+      // call api in sdk
+      const channel = await this.client.registerStreamingChannel({
+        clan_id: message.clan_id,
+        channel_id: channel_id,
+      });
+      try {
+        if (!channel) return;
+        const numbers = args
+          .filter((item) => !isNaN(parseInt(item)))
+          .map((item) => parseInt(item));
+        const res = await this.uploadFileData.find({
+          where: { episode: In(numbers), file_type: FileType.AUDIOBOOK },
+        });
+        if (!res) return;
+
+        const filePaths = res.map((file) => file.filePath + file.fileName);
+        const playNextFile = async () => {
+          if (filePaths.length === 0) {
+            return;
+          }
+          const filePath = filePaths.shift();
+          if (channel?.streaming_url !== '') {
+            try {
+              await this.ffmpegService.transcodeMp3ToRtmp(
+                FFmpegImagePath.AUDIOBOOK,
+                filePath,
+                channel?.streaming_url,
+              );
+              await sleep(1000);
+              await playNextFile();
+            } catch (error) {
+              console.log(`list file mp3 error: ${filePath}`, error);
+              await playNextFile();
+            }
+          }
+        };
+        await playNextFile();
+
+        return this.replyMessageGenerate(
+          {
+            messageContent: textContent,
+            hg: [
+              {
+                channelid: channel_id,
+                s: textContent.length,
+                e: textContent.length + 1,
+              },
+            ],
+          },
+          message,
+        );
+      } catch (error) {
+        console.log('error', message.clan_id, channel_id, error);
+        return this.replyMessageGenerate(
+          {
+            messageContent: 'Audiobook not found',
+          },
+          message,
+        );
+      }
+    }
+
     if (args[0] === 'playlist') {
-      console.log('playlist');
       const dataMp3 = await this.uploadFileData.find({
         where: {
           file_type: FileType.AUDIOBOOK,
