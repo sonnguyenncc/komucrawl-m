@@ -181,6 +181,15 @@ export class DynamicCommand extends CommandMessage {
           message,
         );
       }
-    } catch (error) {}
+    } catch (error) {
+      const messageContent = "```Getting an error when trying to process this attachment!```";
+      return this.replyMessageGenerate(
+        {
+          messageContent: messageContent,
+          mk: [{ type: 't', s: 0, e: messageContent.length }],
+        },
+        message,
+      );
+    }
   }
 }
