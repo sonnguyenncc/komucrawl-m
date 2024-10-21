@@ -126,6 +126,7 @@ import { EventSchedulerService } from './scheduler/event-scheduler.service';
 import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
 import { EventRole } from './listeners/role.handle';
 import { EventRoleAsign } from './listeners/roleasign.handle';
+import { WeatherCommand } from './asterisk-commands/commands/weather/weather.command';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -257,7 +258,8 @@ import { EventRoleAsign } from './listeners/roleasign.handle';
     EventCommand,
     EventService,
     EventSchedulerService,
-    Ncc8SchedulerService
+    Ncc8SchedulerService,
+    WeatherCommand
   ],
   controllers: [KomubotrestController],
 })
