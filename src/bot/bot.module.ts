@@ -49,6 +49,7 @@ import {
   QuizMsg,
   MezonBotMessage,
   RoleMezon,
+  DynamicMezon,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -98,7 +99,6 @@ import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.com
 import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services';
 import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
 import { KomubotrestService } from './komubot-rest/komubot-rest.service';
-import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
 import { EventGiveCoffee } from './listeners/givecoffee.handle';
 import { ReportHolidayService } from './asterisk-commands/commands/report/reportHoliday.service';
 import { ReportOrderService } from './asterisk-commands/commands/report/reportOrder.service';
@@ -127,6 +127,9 @@ import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
 import { EventRole } from './listeners/role.handle';
 import { EventRoleAsign } from './listeners/roleasign.handle';
 import { WeatherCommand } from './asterisk-commands/commands/weather/weather.command';
+import { DynamicCommand } from './asterisk-commands/commands/register/register.command';
+import { DynamicExcuteCommand } from './asterisk-commands/commands/dynamic/dynamic.command';
+import { DynamicCommandService } from './services/dynamic.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -183,7 +186,8 @@ import { WeatherCommand } from './asterisk-commands/commands/weather/weather.com
       QuizMsg,
       ChannelDMMezon,
       MezonBotMessage,
-      RoleMezon
+      RoleMezon,
+      DynamicMezon,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -238,7 +242,8 @@ import { WeatherCommand } from './asterisk-commands/commands/weather/weather.com
     KomubotrestService,
     ReportHolidayService,
     ReportOrderService,
-    RegisterCommand,
+    DynamicCommand,
+    DynamicExcuteCommand,
     KomuService,
     MessageQueue,
     MessageCommand,
@@ -259,7 +264,8 @@ import { WeatherCommand } from './asterisk-commands/commands/weather/weather.com
     EventService,
     EventSchedulerService,
     Ncc8SchedulerService,
-    WeatherCommand
+    WeatherCommand,
+    DynamicCommandService
   ],
   controllers: [KomubotrestController],
 })

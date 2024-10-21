@@ -27,3 +27,9 @@ export enum ErrorSocketType {
   TIME_OUT = 'The socket timed out while waiting for a response.',
   NOT_ESTABLISHED = 'Socket connection has not been established yet.',
 }
+
+export enum DynamicCommandType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  VIDEO = 'video',
+}
