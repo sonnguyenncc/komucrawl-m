@@ -1,4 +1,4 @@
-import { ChannelMessage } from 'mezon-sdk';
+import { ApiMessageRef, ChannelMessage } from 'mezon-sdk';
 import { ReplyMezonMessage } from '../dto/replyMessage.dto';
 import { replyMessageGenerate } from 'src/bot/utils/generateReplyMessage';
 
@@ -13,7 +13,8 @@ export abstract class CommandMessage {
     replayConent: { [x: string]: any },
     message: ChannelMessage,
     hasRef: boolean = true,
+    newRef?: ApiMessageRef[],
   ): ReplyMezonMessage {
-    return replyMessageGenerate(replayConent, message, hasRef);
+    return replyMessageGenerate(replayConent, message, hasRef, newRef);
   }
 }

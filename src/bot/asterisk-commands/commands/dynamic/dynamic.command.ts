@@ -59,6 +59,8 @@ export class DynamicExcuteCommand extends CommandMessage {
           ],
         },
         message,
+        true,
+        message.references,
       );
     } catch (error) {
       console.log('error', error);
