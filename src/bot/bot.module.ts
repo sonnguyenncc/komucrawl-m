@@ -48,6 +48,7 @@ import {
   MentionedPmConfirm,
   QuizMsg,
   MezonBotMessage,
+  RoleMezon,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -123,6 +124,8 @@ import { EventCommand } from './asterisk-commands/commands/event/event.command';
 import { EventService } from './asterisk-commands/commands/event/event.service';
 import { EventSchedulerService } from './scheduler/event-scheduler.service';
 import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
+import { EventRole } from './listeners/role.handle';
+import { EventRoleAsign } from './listeners/roleasign.handle';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -179,6 +182,7 @@ import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
       QuizMsg,
       ChannelDMMezon,
       MezonBotMessage,
+      RoleMezon
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -224,6 +228,8 @@ import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
     EventListenerUserChannelRemoved,
     EventGiveCoffee,
     EventAddClanUser,
+    EventRole,
+    EventRoleAsign,
     QuizService,
     WFHSchedulerService,
     MeetingSchedulerService,
