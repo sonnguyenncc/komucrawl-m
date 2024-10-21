@@ -295,10 +295,6 @@ export class SendMessageSchedulerService {
               textContent: 'Đừng quên checkout trước khi ra về nhé!!!',
             };
             this.messageQueue.addMessage(messageToUser);
-            // await this.client.sendMessageUser(
-            //   checkUser.userId,
-            //   'Đừng quên checkout trước khi ra về nhé!!!',
-            // );
           }
         }),
       );

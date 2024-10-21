@@ -49,4 +49,5 @@ export const TABLE = {
   CHANNEL_MEZON: 'komu_channelmezon',
   QUIZ_MSG: 'komu_quizmsg',
   MEZON_BOT_MESSAGE: 'komu_mezonBotMessage',
+  ROLE_MEZON: 'komu_roleMezon'
 };

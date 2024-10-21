@@ -55,13 +55,13 @@ export class BotGateway {
     this.eventEmitter.emit(Events.UserClanRemoved, user);
   }
 
-  private async handlerole(msg) {
-    console.log('role event', msg);
-  }
+  handlerole = (data) => {
+    this.eventEmitter.emit(Events.RoleEvent, data);
+  };
 
-  private async handleroleassign(msg) {
-    console.log('role event assign', msg);
-  }
+  handleroleassign = (data) => {
+    this.eventEmitter.emit(Events.RoleAssign, data);
+  };
 
   handleuserchanneladded = async (user: UserChannelAddedEvent) => {
     this.eventEmitter.emit(Events.UserChannelAdded, user);

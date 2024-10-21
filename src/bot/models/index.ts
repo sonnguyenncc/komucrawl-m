@@ -42,3 +42,4 @@ export { ChannelMezon } from './mezonChannel.entity';
 export { MentionedPmConfirm } from './metionPmConfirm.entity';
 export { QuizMsg } from './quizMsg.entity';
 export { MezonBotMessage } from './mezonBotMessage.entity';
+export { RoleMezon } from './roleMezon.entity';
