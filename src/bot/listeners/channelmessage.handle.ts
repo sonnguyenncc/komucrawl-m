@@ -348,9 +348,8 @@ export class EventListenerChannelMessage {
             this.messageQueue.addMessage(messageToUser);
           }
         }
-        const userQuiz = await query.getRawOne();
         await this.userRepository.update(
-          { userId: userQuiz['userId'] as string },
+          { userId: msg.sender_id },
           {
             botPing: false,
           },
