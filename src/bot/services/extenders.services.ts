@@ -380,13 +380,14 @@ export class ExtendersService {
         '1839134269025292288',
       ];
 
-      // channels.map(async (channel) => {
-      //   try {
-      //     await this.client.joinChat('0', channel.channel_id, 3, false);
-      //   } catch (error) {
-      //     console.log('error channels', error);
-      //   }
-      // });
+      channels.map(async (channel) => {
+        console.log('channel', channel)
+        try {
+          await this.client.joinChat('0', channel.channel_id, 3, false);
+        } catch (error) {
+          console.log('error channels', channel);
+        }
+      });
       privateChannelArrayTemp.map(async (channelId) => {
         console.log('channelId', channelId)
         try {
