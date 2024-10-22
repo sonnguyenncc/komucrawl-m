@@ -38,7 +38,7 @@ export class WFHSchedulerService {
       currentHoursUTC7 < 12 ? ['Morning', 'Fullday'] : ['Afternoon', 'Fullday'];
     const wfhResult = await this.timeSheetService.findWFHUser();
     const wfhUserEmail = wfhResult
-      // .filter((item) => dateTypeNames.includes(item.dateTypeName))
+      .filter((item) => dateTypeNames.includes(item.dateTypeName))
       .map((item) => {
         return getUserNameByEmail(item.emailAddress);
       });
@@ -202,7 +202,7 @@ export class WFHSchedulerService {
       for (const user of users) {
         try {
           await this.userRepository.update(
-            { userId: user?.userId },
+            { userId: user.userId },
             { botPing: false },
           );
 
@@ -212,16 +212,15 @@ export class WFHSchedulerService {
             .utcOffset(420)
             .format('YYYY-MM-DD HH:mm:ss')} !\n`;
 
-          // Uncomment and modify this if needed
-          // await this.wfhRepository.save({
-          //   userId: user.userId,
-          //   wfhMsg: content,
-          //   complain: false,
-          //   pmconfirm: false,
-          //   status: 'ACTIVE',
-          //   type: 'wfh',
-          //   createdAt: Date.now(),
-          // });
+          await this.wfhRepository.save({
+            userId: user.userId,
+            wfhMsg: content,
+            complain: false,
+            pmconfirm: false,
+            status: 'ACTIVE',
+            type: 'wfh',
+            createdAt: Date.now(),
+          });
 
           const replyMessage = {
             clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,

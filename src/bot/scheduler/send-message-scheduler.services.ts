@@ -102,7 +102,7 @@ export class SendMessageSchedulerService {
             .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
             .select('*')
             .execute();
-          if (!checkUser) return;
+          if (!checkUser || checkUser.user_type !== EUserType.MEZON) return;
           await Promise.all(
             checkUser.map(async (user) => {
               try {
@@ -112,10 +112,6 @@ export class SendMessageSchedulerService {
                     'Nhớ submit timesheet cuối tuần tránh bị phạt bạn nhé!!! Nếu bạn có tham gia opentalk bạn hãy log timesheet vào project company activities nhé.',
                 };
                 this.messageQueue.addMessage(messageToUser);
-                // await this.client.sendMessageUser(
-                //   user.userId,
-                //   'Nhớ submit timesheet cuối tuần tránh bị phạt bạn nhé!!! Nếu bạn có tham gia opentalk bạn hãy log timesheet vào project company activities nhé.',
-                // );
               } catch (error) {
                 console.log('checkUser', error);
               }
@@ -154,7 +150,7 @@ export class SendMessageSchedulerService {
           .andWhere('"user_type" = :userType', { userType: EUserType.MEZON })
           .select('*')
           .getRawOne();
-        if (!birthday) return;
+        if (!birthday || birthday.user_type !== EUserType.MEZON) return;
         const resultBirthday = await this.birthdayRepository.find();
         const items = resultBirthday.map((item) => item.title);
         let wishes = items;
@@ -185,13 +181,14 @@ export class SendMessageSchedulerService {
           parent_id: '0',
           mode: EMessageMode.CHANNEL_MESSAGE,
           msg: {
-            t: item.wish + ' ' + userName + ' +1 trà sữa full topping nhé b iu',
+            t:
+              item.wish + ' @' + userName + ' +1 trà sữa full topping nhé b iu',
           },
           mentions: [
             {
               user_id: item?.user?.userId,
               s: item.wish?.length + 1,
-              e: item.wish?.length + 1 + userName?.length,
+              e: item.wish?.length + 1 + userName?.length + 1,
             },
           ],
         };
@@ -231,7 +228,11 @@ export class SendMessageSchedulerService {
           }
 
           const checkUser = await query.select('*').getRawOne();
-          if (checkUser && checkUser.userId) {
+          if (
+            checkUser &&
+            checkUser.userId &&
+            checkUser.user_type === EUserType.MEZON
+          ) {
             const messageToUser: ReplyMezonMessage = {
               userId: checkUser.userId,
               textContent:
@@ -288,16 +289,12 @@ export class SendMessageSchedulerService {
           }
 
           const checkUser = await query.select('user').getOne();
-          if (checkUser?.userId) {
+          if (checkUser?.userId && checkUser.user_type === EUserType.MEZON) {
             const messageToUser: ReplyMezonMessage = {
               userId: checkUser.userId,
               textContent: 'Đừng quên checkout trước khi ra về nhé!!!',
             };
             this.messageQueue.addMessage(messageToUser);
-            // await this.client.sendMessageUser(
-            //   checkUser.userId,
-            //   'Đừng quên checkout trước khi ra về nhé!!!',
-            // );
           }
         }),
       );
@@ -332,7 +329,7 @@ export class SendMessageSchedulerService {
               )
               .getOne();
 
-            if (userdb) {
+            if (userdb && userdb.user_type === EUserType.MEZON) {
               const messageToUser: ReplyMezonMessage = {
                 userId: userdb.userId,
                 textContent:

@@ -5,7 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EMessageMode, EUserType } from '../constants/configs';
 import { ClientConfigService } from '../config/client-config.service';
 import { MessageQueue } from './messageQueue.service';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class PollService {
   constructor(
     @InjectRepository(ChannelMezon)

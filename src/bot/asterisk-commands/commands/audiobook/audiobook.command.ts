@@ -83,6 +83,7 @@ export class AudiobookCommand extends CommandMessage {
               // res?.data?.url,
               'D:/ncc/komucrawl-m/uploads/book_SieuNhanCuongPhong-Takeshi.mp3',
               channel?.streaming_url,
+              FileType.AUDIOBOOK,
             )
             .catch((error) => console.log('error mp3', error));
         }
@@ -233,6 +234,21 @@ export class AudiobookCommand extends CommandMessage {
         });
       }
     }
+
+    // TODO: stop stream
+    // if (args[0] === 'stop') {
+    //   this.ffmpegService.killCurrentStream(FileType.AUDIOBOOK);
+    //   await sleep(1000);
+    //   const messageEply = '```Stop audio book successful!```';
+    //   return this.replyMessageGenerate(
+    //     {
+    //       messageContent: messageEply,
+    //       mk: [{ type: 't', s: 0, e: messageEply.length }],
+    //     },
+    //     message,
+    //   );
+    // }
+
     return this.replyMessageGenerate(
       {
         messageContent: messageContent,

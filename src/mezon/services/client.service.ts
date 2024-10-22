@@ -31,34 +31,26 @@ export class MezonClientService {
   }
 
   async sendMessage(replyMessage: ReplyMezonMessage) {
-    try {
-      return await this.client.sendMessage(
-        replyMessage.clan_id,
-        replyMessage.channel_id,
-        replyMessage.mode,
-        replyMessage.is_public,
-        replyMessage.msg,
-        replyMessage.mentions,
-        replyMessage.attachments,
-        replyMessage.ref,
-      );
-    } catch (error) {
-      console.log('sendMessage', error);
-    }
+    return await this.client.sendMessage(
+      replyMessage.clan_id,
+      replyMessage.channel_id,
+      replyMessage.mode,
+      replyMessage.is_public,
+      replyMessage.msg,
+      replyMessage.mentions,
+      replyMessage.attachments,
+      replyMessage.ref,
+    );
   }
 
   async sendMessageToUser(messageToUser: ReplyMezonMessage) {
-    try {
-      return await this.client.sendDMChannelMessage(
-        messageToUser.channelDmId,
-        messageToUser.textContent ?? '',
-        messageToUser.messOptions ?? {},
-        messageToUser.attachments ?? [],
-        messageToUser.refs ?? [],
-      );
-    } catch (error) {
-      console.log('sendMessageToUser', error);
-    }
+    return await this.client.sendDMChannelMessage(
+      messageToUser.channelDmId,
+      messageToUser.textContent ?? '',
+      messageToUser.messOptions ?? {},
+      messageToUser.attachments ?? [],
+      messageToUser.refs ?? [],
+    );
   }
 
   async createDMchannel(userId: string) {
@@ -86,6 +78,7 @@ export class MezonClientService {
       );
     } catch (error) {
       console.log('reactMessageChannel', error);
+      return null;
     }
   }
 }

@@ -48,6 +48,8 @@ import {
   MentionedPmConfirm,
   QuizMsg,
   MezonBotMessage,
+  RoleMezon,
+  DynamicMezon,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -97,7 +99,6 @@ import { HolidayCommand } from './asterisk-commands/commands/holiday/holiday.com
 import { MeetingSchedulerService } from './scheduler/meeting-scheduler.services';
 import { KomubotrestController } from './komubot-rest/komubot-rest.controller';
 import { KomubotrestService } from './komubot-rest/komubot-rest.service';
-import { RegisterCommand } from './asterisk-commands/commands/register/register.command';
 import { EventGiveCoffee } from './listeners/givecoffee.handle';
 import { ReportHolidayService } from './asterisk-commands/commands/report/reportHoliday.service';
 import { ReportOrderService } from './asterisk-commands/commands/report/reportOrder.service';
@@ -119,6 +120,16 @@ import { PollService } from './services/poll.service';
 import { PollSchedulerService } from './scheduler/poll-scheduler.service';
 import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkprivatechannel.command';
 import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updateprivatechannel.command';
+import { EventCommand } from './asterisk-commands/commands/event/event.command';
+import { EventService } from './asterisk-commands/commands/event/event.service';
+import { EventSchedulerService } from './scheduler/event-scheduler.service';
+import { Ncc8SchedulerService } from './scheduler/ncc8.scheduler.service';
+import { EventRole } from './listeners/role.handle';
+import { EventRoleAsign } from './listeners/roleasign.handle';
+import { WeatherCommand } from './asterisk-commands/commands/weather/weather.command';
+import { DynamicCommand } from './asterisk-commands/commands/register/register.command';
+import { DynamicExcuteCommand } from './asterisk-commands/commands/dynamic/dynamic.command';
+import { DynamicCommandService } from './services/dynamic.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -175,6 +186,8 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
       QuizMsg,
       ChannelDMMezon,
       MezonBotMessage,
+      RoleMezon,
+      DynamicMezon,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -220,6 +233,8 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
     EventListenerUserChannelRemoved,
     EventGiveCoffee,
     EventAddClanUser,
+    EventRole,
+    EventRoleAsign,
     QuizService,
     WFHSchedulerService,
     MeetingSchedulerService,
@@ -227,7 +242,8 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
     KomubotrestService,
     ReportHolidayService,
     ReportOrderService,
-    RegisterCommand,
+    DynamicCommand,
+    DynamicExcuteCommand,
     KomuService,
     MessageQueue,
     MessageCommand,
@@ -243,7 +259,13 @@ import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/c
     PollService,
     PollSchedulerService,
     CheckChannelCommand,
-    TogglePrivateCheckChannelCommand
+    TogglePrivateCheckChannelCommand,
+    EventCommand,
+    EventService,
+    EventSchedulerService,
+    Ncc8SchedulerService,
+    WeatherCommand,
+    DynamicCommandService
   ],
   controllers: [KomubotrestController],
 })

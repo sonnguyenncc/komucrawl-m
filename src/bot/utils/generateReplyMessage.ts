@@ -5,6 +5,7 @@ export function replyMessageGenerate(
   replayConent: { [x: string]: any },
   message: ChannelMessage,
   hasRef: boolean = true,
+  newRef?: ApiMessageRef[],
 ): ReplyMezonMessage {
   const replayMessage: ReplyMezonMessage = {} as ReplyMezonMessage;
   const defaultValue = {
@@ -40,7 +41,7 @@ export function replyMessageGenerate(
 
   replayMessage['msg'] = { ...messageContent };
 
-  replayMessage['ref'] = hasRef ? refGenerate(message) : [];
+  replayMessage['ref'] = hasRef ? (newRef?.length ? newRef : refGenerate(message)) : [];
 
   return replayMessage;
 }
