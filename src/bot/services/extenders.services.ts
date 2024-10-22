@@ -35,14 +35,25 @@ export class ExtendersService {
           channel_label: Not(IsNull()) && Not(''),
         },
       });
-      await Promise.all([
-        ...channels.map(async (channel) =>
-          await this.client.joinChat('0', channel.channel_id, 3, false),
-        ),
-        // ...privateChannels.map(async (channel) =>
-        //   await this.client.joinChat(channel.clan_id, channel.channel_id, 1, false),
-        // ),
-      ]);
+      channels.map(async (channel) => {
+        try {
+          await this.client.joinChat('0', channel.channel_id, 3, false);
+        } catch (error) {
+          console.log('error channels', error);
+        }
+      });
+      privateChannels.map(async (channel) => {
+        try {
+          await this.client.joinChat(
+            channel.clan_id,
+            channel.channel_id,
+            1,
+            false,
+          );
+        } catch (error) {
+          console.log('error privateChannels', error);
+        }
+      });
     } catch (error) {
       console.log('initializeChannelDm error', error);
     }
