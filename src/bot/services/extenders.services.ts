@@ -1,16 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../models/user.entity';
-import { ChannelMessage } from 'mezon-sdk';
+import { ChannelMessage, MezonClient } from 'mezon-sdk';
 import { EUserType } from '../constants/configs';
+import { MezonClientService } from 'src/mezon/services/client.service';
+import { ChannelDMMezon } from '../models/channelDmMezon.entity';
+import { ChannelMezon } from '../models';
 
 @Injectable()
 export class ExtendersService {
+  private client: MezonClient;
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+    private clientService: MezonClientService,
+    @InjectRepository(ChannelDMMezon)
+    private channelDmMezonRepository: Repository<ChannelDMMezon>,
+    @InjectRepository(ChannelMezon)
+    private mezonChannelRepository: Repository<ChannelMezon>,
+  ) {
+    this.client = this.clientService.getClient();
+    this.initializeChannelDm();
+  }
+
+  async initializeChannelDm() {
+    try {
+      const channels = await this.channelDmMezonRepository.find();
+      const privateChannels = await this.mezonChannelRepository.find({
+        where: {
+          channel_private: 1,
+          clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
+          channel_label: Not(IsNull()) && Not(''),
+        },
+      });
+      await Promise.all([
+        ...channels.map((channel) =>
+          this.client.joinChat('0', channel.channel_id, 3, false),
+        ),
+        ...privateChannels.map((channel) =>
+          this.client.joinChat(channel.clan_id, channel.channel_id, 1, false),
+        ),
+      ]);
+    } catch (error) {
+      console.log('initializeChannelDm error', error);
+    }
+  }
 
   async addDBUser(message: ChannelMessage) {
     if (message.sender_id === '1767478432163172999') return; // ignored anonymous user
