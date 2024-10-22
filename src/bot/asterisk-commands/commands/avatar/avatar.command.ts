@@ -22,33 +22,6 @@ export class AvatarCommand extends CommandMessage {
   }
 
   async execute(args: string[], message: ChannelMessage) {
-    if (args[0] === 'test') {
-      const array = [
-        '1833315823393968128',
-        '1841671940910092288',
-        '1833316598400684032',
-        '1831543728112668672',
-        '1840934248442236928',
-        '1831558245743857664',
-        '1838399152342437888',
-        '1833152700116635648',
-        '1834122395858767872',
-      ];
-      array.map(async (channelId) => {
-        console.log('channelId', channelId);
-        try {
-          await this.client.joinChat(
-            process.env.KOMUBOTREST_CLAN_NCC_ID,
-            channelId,
-            1,
-            false,
-          );
-        } catch (error) {
-          console.log('error privateChannelArrayTemp', channelId);
-        }
-      });
-      return [];
-    }
     let messageContent: string;
     let userQuery: string;
 
