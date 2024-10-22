@@ -32,16 +32,18 @@ export class ExtendersService {
         where: {
           channel_private: 1,
           clan_id: process.env.KOMUBOTREST_CLAN_NCC_ID,
-          channel_label: Not(IsNull()) && Not(''),
+          channel_label: Not(null) && Not(''),
         },
       });
-      channels.map(async (channel) => {
-        try {
-          await this.client.joinChat('0', channel.channel_id, 3, false);
-        } catch (error) {
-          console.log('error channels', error);
-        }
-      });
+
+      console.log('privateChannels', privateChannels)
+      // channels.map(async (channel) => {
+      //   try {
+      //     await this.client.joinChat('0', channel.channel_id, 3, false);
+      //   } catch (error) {
+      //     console.log('error channels', error, channel);
+      //   }
+      // });
       privateChannels.map(async (channel) => {
         try {
           await this.client.joinChat(
@@ -51,7 +53,7 @@ export class ExtendersService {
             false,
           );
         } catch (error) {
-          console.log('error privateChannels', error);
+          console.log('error privateChannels', error, channel);
         }
       });
     } catch (error) {
