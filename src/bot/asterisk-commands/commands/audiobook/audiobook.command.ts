@@ -66,33 +66,6 @@ export class AudiobookCommand extends CommandMessage {
           this.ffmpegService.setClanId(message.clan_id);
           this.audiobookService.processQueue(message.clan_id);
         }
-        // call api in sdk
-        // const channel = await this.client.registerStreamingChannel({
-        //   clan_id: message.clan_id,
-        //   channel_id: channel_id,
-        // });
-
-        // if (!channel) return;
-
-        // const res = await this.axiosClientService.get(
-        //   `${process.env.NCC8_API}/ncc8/audio-book/${args[1]}`,
-        // );
-        // if (!res) return;
-        // // check channel is not streaming
-        // // ffmpeg mp3 to streaming url
-        // if (channel?.streaming_url !== '') {
-        //   this.ffmpegService
-        //     .transcodeMp3ToRtmp(
-        //       FFmpegImagePath.AUDIOBOOK,
-        //       res?.data?.url,
-        //       channel?.streaming_url,
-        //     )
-        //     .then(() => {
-        //       this.ffmpegService.getUrl(message);
-        //     })
-        //     .catch((error) => console.log('error mp3', error));
-        // }
-        // await sleep(1000);
         return this.replyMessageGenerate(
           {
             messageContent: textContent,

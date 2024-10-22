@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MezonClient } from 'mezon-sdk';
@@ -24,17 +24,16 @@ export class AudiobookService {
     private uploadFileData: Repository<Uploadfile>,
     private clientService: MezonClientService,
     private clientConfigService: ClientConfigService,
+    @Inject(forwardRef(() => FFmpegService))
     private ffmpegService: FFmpegService,
   ) {
     this.client = this.clientService.getClient();
   }
 
   addQueue(episode: string) {
-    console.log('episode: ', episode);
     this.playQueue.push(episode);
   }
 
-  @OnEvent('audiobook.playing')
   async processQueue(clanId: string) {
     if (this.ffmpegService.getPlayingStatus()) {
       return;
@@ -65,6 +64,7 @@ export class AudiobookService {
             FFmpegImagePath.AUDIOBOOK,
             url,
             channel?.streaming_url,
+            FileType.AUDIOBOOK,
           )
           .catch((error) => console.log('error mp3', error));
       }

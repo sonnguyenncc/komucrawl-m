@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FFmpegImagePath, FileType } from 'src/bot/constants/configs';
+import { AudiobookService } from '../asterisk-commands/commands/audiobook/audiobook.service';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,7 +18,10 @@ export class FFmpegService {
   private streamFilm;
   private isPlaying = false;
   private clanId;
-  constructor(private eventEmitter: EventEmitter2) {
+  constructor(
+    @Inject(forwardRef(() => AudiobookService))
+    private audiobookService: AudiobookService,
+  ) {
     // ffmpeg.setFfmpegPath(ffmpegPath);
     ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
     ffmpeg.setFfprobePath(ffprobePath.path);
@@ -60,8 +63,7 @@ export class FFmpegService {
         imagePath = FFmpegImagePath.NCC8;
       }
       const imagePathJoined = path.join(process.cwd(), imagePath);
-      const ffmpegStream = ffmpeg();
-      ffmpeg()
+      const ffmpegStream = ffmpeg()
         .input(imagePathJoined)
         .inputOptions('-re')
         .loop()
@@ -77,8 +79,7 @@ export class FFmpegService {
         .on('end', async () => {
           this.isPlaying = false;
           await sleep(1000);
-          this.eventEmitter.emit('audiobook.playing', this.clanId);
-          // this.audiobookService.processQueue(this.clanId);
+          this.audiobookService.processQueue(this.clanId);
           console.error('transcodeMp3ToRtmp success');
           resolve();
         })
