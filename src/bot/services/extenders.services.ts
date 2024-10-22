@@ -7,7 +7,9 @@ import { EUserType } from '../constants/configs';
 import { MezonClientService } from 'src/mezon/services/client.service';
 import { ChannelDMMezon } from '../models/channelDmMezon.entity';
 import { ChannelMezon } from '../models';
-
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 @Injectable()
 export class ExtendersService {
   private client: MezonClient;
@@ -395,7 +397,8 @@ export class ExtendersService {
             false,
           );
         } catch (error) {
-          console.log('error privateChannelArrayTemp', process.env.KOMUBOTREST_CLAN_NCC_ID);
+          console.log('error privateChannelArrayTemp', channelId);
+          await sleep(10000);
         }
       });
     } catch (error) {
