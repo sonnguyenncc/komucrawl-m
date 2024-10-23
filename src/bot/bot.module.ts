@@ -118,8 +118,8 @@ import { WhereCommand } from './asterisk-commands/commands/where/where.command';
 import { PollCommand } from './asterisk-commands/commands/poll/poll.command';
 import { PollService } from './services/poll.service';
 import { PollSchedulerService } from './scheduler/poll-scheduler.service';
-import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkprivatechannel.command';
-import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updateprivatechannel.command';
+import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkchannel.command';
+import { ToggleCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updatechannel.command';
 import { EventCommand } from './asterisk-commands/commands/event/event.command';
 import { EventService } from './asterisk-commands/commands/event/event.service';
 import { EventSchedulerService } from './scheduler/event-scheduler.service';
@@ -259,7 +259,7 @@ import { DynamicCommandService } from './services/dynamic.service';
     PollService,
     PollSchedulerService,
     CheckChannelCommand,
-    TogglePrivateCheckChannelCommand,
+    ToggleCheckChannelCommand,
     EventCommand,
     EventService,
     EventSchedulerService,
