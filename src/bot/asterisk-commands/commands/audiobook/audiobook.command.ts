@@ -58,13 +58,13 @@ export class AudiobookCommand extends CommandMessage {
           },
           message,
         );
-      this.audiobookService.addQueue(args[1]);
-      const textContent = `Go to `;
       const channel_id = this.clientConfigService.audiobookChannelId;
       try {
+        let textContent;
+        textContent = await this.audiobookService.addQueue(args[1]);
         if (!this.ffmpegService.getPlayingStatus()) {
           this.ffmpegService.setClanId(message.clan_id);
-          this.audiobookService.processQueue(message.clan_id);
+          textContent = await this.audiobookService.processQueue(message);
         }
         return this.replyMessageGenerate(
           {

@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MezonClient } from 'mezon-sdk';
+import { ChannelMessage, MezonClient } from 'mezon-sdk';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
 import { FFmpegImagePath, FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
@@ -30,15 +30,31 @@ export class AudiobookService {
     this.client = this.clientService.getClient();
   }
 
-  addQueue(episode: string) {
-    this.playQueue.push(episode);
+  async addQueue(episode: string) {
+    try {
+      const res = await this.uploadFileData.findOne({
+        where: {
+          episode: +episode,
+          file_type: FileType.AUDIOBOOK,
+        },
+      });
+      if (!res) return;
+      const url = res.filePath + res.fileName;
+      if (this.playQueue.includes(url)) {
+        return `Audio book ${res.fileName} already exists in the queue. `;
+      }
+      this.playQueue.push(url);
+      return `Audio book ${res.fileName} has been added to the queue. `;
+    } catch (error) {
+      console.log('Error add queue', error);
+    }
   }
 
-  async processQueue(clanId: string) {
+  async processQueue(message: ChannelMessage) {
     if (this.ffmpegService.getPlayingStatus()) {
       return;
     }
-    this.clanId = clanId;
+    this.clanId = message.clan_id;
     if (this.playQueue.length > 0) {
       const channel_id = this.clientConfigService.audiobookChannelId;
       const channel = await this.client.registerStreamingChannel({
@@ -47,28 +63,24 @@ export class AudiobookService {
       });
 
       if (!channel) return;
-
-      const res = await this.uploadFileData.findOne({
-        where: {
-          episode: this.playQueue.shift(),
-          file_type: FileType.AUDIOBOOK,
-        },
-      });
-      if (!res) return;
-      const url = res.filePath + res.fileName;
       // check channel is not streaming
       // ffmpeg mp3 to streaming url
-      if (channel?.streaming_url !== '') {
-        this.ffmpegService
-          .transcodeMp3ToRtmp(
-            FFmpegImagePath.AUDIOBOOK,
-            url,
-            channel?.streaming_url,
-            FileType.AUDIOBOOK,
-          )
-          .catch((error) => console.log('error mp3', error));
+      try {
+        if (channel?.streaming_url !== '') {
+          const resultFfmpeg = await this.ffmpegService
+            .transcodeMp3ToRtmp(
+              FFmpegImagePath.AUDIOBOOK,
+              this.playQueue.shift(),
+              channel?.streaming_url,
+              FileType.AUDIOBOOK,
+            )
+            .catch((error) => console.log('error mp3', error));
+          return resultFfmpeg;
+        }
+        await sleep(1000);
+      } catch (error) {
+        console.log('error process queue: ', error);
       }
-      await sleep(1000);
     }
   }
 }

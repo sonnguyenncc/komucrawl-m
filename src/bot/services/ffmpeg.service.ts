@@ -57,7 +57,7 @@ export class FFmpegService {
     inputPath: string,
     rtmpUrl: string,
     type: FileType,
-  ): Promise<void> {
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       if (imagePath === '') {
         imagePath = FFmpegImagePath.NCC8;
@@ -74,14 +74,14 @@ export class FFmpegService {
         .outputOptions(['-f flv', '-shortest'])
         .on('start', (commandLine) => {
           this.isPlaying = true;
+          resolve(`Playing audio book ${path.basename(inputPath)} `);
           console.log('transcodeMp3ToRtmp FFmpeg command: ' + commandLine);
         })
         .on('end', async () => {
           this.isPlaying = false;
           await sleep(1000);
           this.audiobookService.processQueue(this.clanId);
-          console.error('transcodeMp3ToRtmp success');
-          resolve();
+          console.log('transcodeMp3ToRtmp success');
         })
         .on('error', (err) => {
           console.error('transcodeMp3ToRtmp Error:', err);
