@@ -1,16 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import ffmpeg from 'fluent-ffmpeg';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import ffmpegPath from 'ffmpeg-static';
 import ffprobePath from 'ffprobe-static';
-import * as path from 'path';
+import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
+import * as path from 'path';
 import { FFmpegImagePath, FileType } from 'src/bot/constants/configs';
+import { AudiobookService } from '../asterisk-commands/commands/audiobook/audiobook.service';
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class FFmpegService {
   private streamNcc8;
   private streamAudioBook;
   private streamFilm;
-  constructor() {
+  private isPlaying = false;
+  private clanId;
+  constructor(
+    @Inject(forwardRef(() => AudiobookService))
+    private audiobookService: AudiobookService,
+  ) {
     // ffmpeg.setFfmpegPath(ffmpegPath);
     ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
     ffmpeg.setFfprobePath(ffprobePath.path);
@@ -33,18 +44,25 @@ export class FFmpegService {
     }
   }
 
+  getPlayingStatus() {
+    return this.isPlaying;
+  }
+
+  setClanId(clanId: string) {
+    this.clanId = clanId;
+  }
+
   transcodeMp3ToRtmp(
     imagePath: string,
     inputPath: string,
     rtmpUrl: string,
     type: FileType,
-  ): Promise<void> {
+  ): Promise<string> {
     return new Promise((resolve, reject) => {
       if (imagePath === '') {
         imagePath = FFmpegImagePath.NCC8;
       }
       const imagePathJoined = path.join(process.cwd(), imagePath);
-
       const ffmpegStream = ffmpeg()
         .input(imagePathJoined)
         .inputOptions('-re')
@@ -55,11 +73,15 @@ export class FFmpegService {
         .output(rtmpUrl)
         .outputOptions(['-f flv', '-shortest'])
         .on('start', (commandLine) => {
+          this.isPlaying = true;
+          resolve(`Playing audio book ${path.basename(inputPath)} `);
           console.log('transcodeMp3ToRtmp FFmpeg command: ' + commandLine);
         })
-        .on('end', () => {
-          console.error('transcodeMp3ToRtmp success');
-          resolve();
+        .on('end', async () => {
+          this.isPlaying = false;
+          await sleep(1000);
+          this.audiobookService.processQueue(this.clanId);
+          console.log('transcodeMp3ToRtmp success');
         })
         .on('error', (err) => {
           console.error('transcodeMp3ToRtmp Error:', err);

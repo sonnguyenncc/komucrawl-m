@@ -8,12 +8,10 @@ import { FFmpegService } from 'src/bot/services/ffmpeg.service';
 import { FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FFmpegImagePath } from 'src/bot/constants/configs';
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { isThisSecond } from 'date-fns';
+import { AudiobookService } from './audiobook.service';
 
 @Command('audiobook')
 export class AudiobookCommand extends CommandMessage {
@@ -23,6 +21,7 @@ export class AudiobookCommand extends CommandMessage {
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
     private ffmpegService: FFmpegService,
+    private audiobookService: AudiobookService,
     @InjectRepository(Uploadfile)
     private uploadFileData: Repository<Uploadfile>,
   ) {
@@ -59,38 +58,14 @@ export class AudiobookCommand extends CommandMessage {
           },
           message,
         );
-
-      const textContent = `Go to `;
       const channel_id = this.clientConfigService.audiobookChannelId;
       try {
-        // call api in sdk
-        const channel = await this.client.registerStreamingChannel({
-          clan_id: message.clan_id,
-          channel_id: channel_id,
-        });
-
-        if (!channel) return;
-
-        const res = await this.axiosClientService.get(
-          `${process.env.NCC8_API}/ncc8/audio-book/${args[1]}`,
-        );
-        if (!res) return;
-
-        // check channel is not streaming
-        // ffmpeg mp3 to streaming url
-        if (channel?.streaming_url !== '') {
-          this.ffmpegService
-            .transcodeMp3ToRtmp(
-              FFmpegImagePath.AUDIOBOOK,
-              res?.data?.url,
-              channel?.streaming_url,
-              FileType.AUDIOBOOK,
-            )
-            .catch((error) => console.log('error mp3', error));
+        let textContent;
+        textContent = await this.audiobookService.addQueue(args[1]);
+        if (!this.ffmpegService.getPlayingStatus()) {
+          this.ffmpegService.setClanId(message.clan_id);
+          textContent = await this.audiobookService.processQueue(message);
         }
-
-        await sleep(1000);
-
         return this.replyMessageGenerate(
           {
             messageContent: textContent,

@@ -130,6 +130,7 @@ import { WeatherCommand } from './asterisk-commands/commands/weather/weather.com
 import { DynamicCommand } from './asterisk-commands/commands/register/register.command';
 import { DynamicExcuteCommand } from './asterisk-commands/commands/dynamic/dynamic.command';
 import { DynamicCommandService } from './services/dynamic.service';
+import { AudiobookService } from './asterisk-commands/commands/audiobook/audiobook.service';
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -222,6 +223,7 @@ import { DynamicCommandService } from './services/dynamic.service';
     ToggleActiveService,
     Ncc8Command,
     AudiobookCommand,
+    AudiobookService,
     ReportDailyService,
     HolidayCommand,
     EventListenerChannelMessage,
