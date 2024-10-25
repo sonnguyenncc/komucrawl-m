@@ -150,7 +150,7 @@ export class WFHSchedulerService {
   }
 
   async sendQuizzesWithLimit(userSend, botPing: boolean = true) {
-    const delay = 50;
+    const delay = 200;
     for (let i = 0; i < userSend.length; i++) {
       const user = userSend[i];
       await this.quizeService.sendQuizToSingleUser(user, botPing);
