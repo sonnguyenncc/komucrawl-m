@@ -62,42 +62,45 @@ export class FFmpegService {
       if (imagePath === '') {
         imagePath = FFmpegImagePath.NCC8;
       }
-      const imagePathJoined = path.join(process.cwd(), imagePath);
-      const ffmpegStream = ffmpeg()
-        .input(imagePathJoined)
-        .inputOptions('-re')
-        .loop()
-        .input(inputPath)
-        .audioCodec('aac')
-        .videoCodec('libx264')
-        .output(rtmpUrl)
-        .outputOptions(['-f flv', '-shortest'])
-        .on('start', (commandLine) => {
-          this.isPlaying = true;
-          resolve(`Playing audio book ${path.basename(inputPath)} `);
-          console.log('transcodeMp3ToRtmp FFmpeg command: ' + commandLine);
-        })
-        .on('end', async () => {
-          this.isPlaying = false;
-          await sleep(1000);
-          this.audiobookService.processQueue(this.clanId);
-          console.log('transcodeMp3ToRtmp success');
-        })
-        .on('error', (err) => {
-          console.error('transcodeMp3ToRtmp Error:', err);
-          reject(err);
-        })
-        .run();
-
-      switch (type) {
-        case FileType.NCC8:
-          this.streamNcc8 = ffmpegStream;
-          break;
-        case FileType.AUDIOBOOK:
-          this.streamAudioBook = ffmpegStream;
-          break;
-        default:
-          break;
+      try {
+        const imagePathJoined = path.join(process.cwd(), imagePath);
+        const ffmpegStream = ffmpeg()
+          .input(imagePathJoined)
+          .inputOptions('-re')
+          .loop()
+          .input(inputPath)
+          .audioCodec('aac')
+          .videoCodec('libx264')
+          .output(rtmpUrl)
+          .outputOptions(['-f flv', '-shortest'])
+          .on('start', (commandLine) => {
+            this.isPlaying = true;
+            resolve(`Playing audio book ${path.basename(inputPath)} `);
+            console.log('transcodeMp3ToRtmp FFmpeg command: ' + commandLine);
+          })
+          .on('end', async () => {
+            this.isPlaying = false;
+            await sleep(1000);
+            this.audiobookService.processQueue(this.clanId);
+            console.log('transcodeMp3ToRtmp success');
+          })
+          .on('error', (err) => {
+            console.error('transcodeMp3ToRtmp Error:', err);
+            reject(err);
+          })
+          .run();
+        switch (type) {
+          case FileType.NCC8:
+            this.streamNcc8 = ffmpegStream;
+            break;
+          case FileType.AUDIOBOOK:
+            this.streamAudioBook = ffmpegStream;
+            break;
+          default:
+            break;
+        }
+      } catch (error) {
+        console.log('error: ', error);
       }
     });
   }

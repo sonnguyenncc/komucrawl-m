@@ -64,7 +64,9 @@ export class AudiobookCommand extends CommandMessage {
         textContent = await this.audiobookService.addQueue(args[1]);
         if (!this.ffmpegService.getPlayingStatus()) {
           this.ffmpegService.setClanId(message.clan_id);
-          textContent = await this.audiobookService.processQueue(message);
+          textContent = await this.audiobookService.processQueue(
+            message.clan_id,
+          );
         }
         return this.replyMessageGenerate(
           {

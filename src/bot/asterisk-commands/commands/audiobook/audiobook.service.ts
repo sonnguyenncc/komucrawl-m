@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChannelMessage, MezonClient } from 'mezon-sdk';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
@@ -18,7 +17,6 @@ export class AudiobookService {
   private playQueue = [];
   private client: MezonClient;
   private clanId: string;
-  // private isPlaying = false;
   constructor(
     @InjectRepository(Uploadfile)
     private uploadFileData: Repository<Uploadfile>,
@@ -50,22 +48,22 @@ export class AudiobookService {
     }
   }
 
-  async processQueue(message: ChannelMessage) {
-    if (this.ffmpegService.getPlayingStatus()) {
-      return;
-    }
-    this.clanId = message.clan_id;
-    if (this.playQueue.length > 0) {
-      const channel_id = this.clientConfigService.audiobookChannelId;
-      const channel = await this.client.registerStreamingChannel({
-        clan_id: this.clanId,
-        channel_id: channel_id,
-      });
+  async processQueue(clanId: string) {
+    try {
+      if (this.ffmpegService.getPlayingStatus()) {
+        return;
+      }
+      this.clanId = clanId;
+      if (this.playQueue.length > 0) {
+        const channel_id = this.clientConfigService.audiobookChannelId;
+        const channel = await this.client.registerStreamingChannel({
+          clan_id: this.clanId,
+          channel_id: channel_id,
+        });
 
-      if (!channel) return;
-      // check channel is not streaming
-      // ffmpeg mp3 to streaming url
-      try {
+        if (!channel) return;
+        // check channel is not streaming
+        // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           const resultFfmpeg = await this.ffmpegService
             .transcodeMp3ToRtmp(
@@ -75,12 +73,13 @@ export class AudiobookService {
               FileType.AUDIOBOOK,
             )
             .catch((error) => console.log('error mp3', error));
+          await sleep(1000);
+
           return resultFfmpeg;
         }
-        await sleep(1000);
-      } catch (error) {
-        console.log('error process queue: ', error);
       }
+    } catch (error) {
+      console.log('error process queue: ', error);
     }
   }
 }
