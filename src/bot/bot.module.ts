@@ -50,6 +50,7 @@ import {
   MezonBotMessage,
   RoleMezon,
   DynamicMezon,
+  News,
 } from './models';
 import { BotGateway } from './events/bot.gateway';
 import { DailyCommand } from './asterisk-commands/commands/daily/daily.command';
@@ -118,8 +119,8 @@ import { WhereCommand } from './asterisk-commands/commands/where/where.command';
 import { PollCommand } from './asterisk-commands/commands/poll/poll.command';
 import { PollService } from './services/poll.service';
 import { PollSchedulerService } from './scheduler/poll-scheduler.service';
-import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkprivatechannel.command';
-import { TogglePrivateCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updateprivatechannel.command';
+import { CheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/checkchannel.command';
+import { ToggleCheckChannelCommand } from './asterisk-commands/commands/checkprivatechannel/updatechannel.command';
 import { EventCommand } from './asterisk-commands/commands/event/event.command';
 import { EventService } from './asterisk-commands/commands/event/event.service';
 import { EventSchedulerService } from './scheduler/event-scheduler.service';
@@ -131,6 +132,8 @@ import { DynamicCommand } from './asterisk-commands/commands/register/register.c
 import { DynamicExcuteCommand } from './asterisk-commands/commands/dynamic/dynamic.command';
 import { DynamicCommandService } from './services/dynamic.service';
 import { AudiobookService } from './asterisk-commands/commands/audiobook/audiobook.service';
+import { NewsScheduler } from './scheduler/news-scheduler.service';
+
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -189,6 +192,7 @@ import { AudiobookService } from './asterisk-commands/commands/audiobook/audiobo
       MezonBotMessage,
       RoleMezon,
       DynamicMezon,
+      News,
     ]),
     HttpModule,
     ScheduleModule.forRoot(),
@@ -261,13 +265,14 @@ import { AudiobookService } from './asterisk-commands/commands/audiobook/audiobo
     PollService,
     PollSchedulerService,
     CheckChannelCommand,
-    TogglePrivateCheckChannelCommand,
+    ToggleCheckChannelCommand,
     EventCommand,
     EventService,
     EventSchedulerService,
     Ncc8SchedulerService,
     WeatherCommand,
-    DynamicCommandService
+    DynamicCommandService,
+    NewsScheduler,
   ],
   controllers: [KomubotrestController],
 })
