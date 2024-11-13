@@ -1,4 +1,4 @@
-import { ChannelMessage } from 'mezon-sdk';
+import { ChannelMessage, MezonClient } from 'mezon-sdk';
 import { Command } from 'src/bot/base/commandRegister.decorator';
 import { CommandMessage } from '../../abstracts/command.abstract';
 import { UserStatusService } from '../user-status/userStatus.service';
@@ -7,14 +7,18 @@ import { User } from 'src/bot/models';
 import { Repository } from 'typeorm';
 import { EUserType } from 'src/bot/constants/configs';
 import { EUserError } from 'src/bot/constants/error';
+import { MezonClientService } from 'src/mezon/services/client.service';
 
 @Command('avatar')
 export class AvatarCommand extends CommandMessage {
+  private client: MezonClient;
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private clientService: MezonClientService,
   ) {
     super();
+    this.client = this.clientService.getClient();
   }
 
   async execute(args: string[], message: ChannelMessage) {
