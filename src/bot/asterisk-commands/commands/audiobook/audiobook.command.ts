@@ -45,6 +45,10 @@ export class AudiobookCommand extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
+      'Command: *audiobook playlist' +
+      '\n' +
+      'Command: *audiobook queue' +
+      '\n' +
       'Command: *audiobook play ID' +
       '\n' +
       'Example: *audiobook play 1' +
@@ -61,13 +65,19 @@ export class AudiobookCommand extends CommandMessage {
       const channel_id = this.clientConfigService.audiobookChannelId;
       try {
         let textContent;
-        textContent = await this.audiobookService.addQueue(args[1]);
+
+        if (!this.ffmpegService.getPlayingStatus()) {
+          textContent = 'Go to ';
+          await this.audiobookService.addQueue(args[1]);
+        } else {
+          textContent = await this.audiobookService.addQueue(args[1]);
+        }
+
         if (!this.ffmpegService.getPlayingStatus()) {
           this.ffmpegService.setClanId(message.clan_id);
-          textContent = await this.audiobookService.processQueue(
-            message.clan_id,
-          );
+          await this.audiobookService.processQueue(message.clan_id);
         }
+
         return this.replyMessageGenerate(
           {
             messageContent: textContent,
@@ -90,6 +100,46 @@ export class AudiobookCommand extends CommandMessage {
           message,
         );
       }
+    }
+
+    if (args[0] === 'queue') {
+      const queueAudio = await this.audiobookService.getQueue();
+      if (queueAudio.length < 0) {
+        const mess = '```' + 'Không có audiobook nào' + '```';
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      }
+
+      const listReplyMessage = [];
+      for (let i = 0; i <= Math.ceil(queueAudio.length / 50); i += 1) {
+        if (queueAudio.slice(i * 50, (i + 1) * 50).length === 0) break;
+        const mess =
+          '```Danh sách hàng chờ audiobook\n' +
+          queueAudio
+            .slice(i * 50, (i + 1) * 50)
+            .filter((item) => item.episode)
+            .map(
+              (list) =>
+                `Id: ${list.episode}, name: ${this.removeFileNameExtension(list.fileName)}`,
+            )
+            .join('\n') +
+          '```';
+        listReplyMessage.push(mess);
+      }
+      return listReplyMessage.map((mess) => {
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      });
     }
 
     if (args[0] === 'playlist') {

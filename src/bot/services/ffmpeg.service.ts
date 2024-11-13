@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { FFmpegImagePath, FileType } from 'src/bot/constants/configs';
 import { AudiobookService } from '../asterisk-commands/commands/audiobook/audiobook.service';
+import { MovieService } from '../asterisk-commands/commands/movie/movie.service';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -21,9 +22,11 @@ export class FFmpegService {
   constructor(
     @Inject(forwardRef(() => AudiobookService))
     private audiobookService: AudiobookService,
+    @Inject(forwardRef(() => MovieService))
+    private movieService: MovieService,
   ) {
-    // ffmpeg.setFfmpegPath(ffmpegPath);
-    ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
+    ffmpeg.setFfmpegPath(ffmpegPath);
+    // ffmpeg.setFfmpegPath('/usr/bin/ffmpeg');
     ffmpeg.setFfprobePath(ffprobePath.path);
   }
 
@@ -44,6 +47,10 @@ export class FFmpegService {
     }
   }
 
+  setPlayingStatus(status: boolean) {
+    this.isPlaying = status;
+  }
+
   getPlayingStatus() {
     return this.isPlaying;
   }
@@ -57,7 +64,7 @@ export class FFmpegService {
     inputPath: string,
     rtmpUrl: string,
     type: FileType,
-  ): Promise<string> {
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (imagePath === '') {
         imagePath = FFmpegImagePath.NCC8;
@@ -75,7 +82,8 @@ export class FFmpegService {
           .outputOptions(['-f flv', '-shortest'])
           .on('start', (commandLine) => {
             this.isPlaying = true;
-            resolve(`Playing audio book ${path.basename(inputPath)} `);
+            // resolve(`Playing audio book ${path.basename(inputPath)} `);
+            resolve();
             console.log('transcodeMp3ToRtmp FFmpeg command: ' + commandLine);
           })
           .on('end', async () => {
@@ -209,11 +217,16 @@ export class FFmpegService {
           .outputOptions(outputOptions)
           .output(rtmpUrl)
           .on('start', (commandLine) => {
-            console.log('FFmpeg command: ' + commandLine);
-          })
-          .on('end', () => {
-            console.log('transcodeVideoToRtmp success');
+            this.isPlaying = true;
+            // resolve(`Playing audio book ${path.basename(inputPath)} `);
             resolve();
+            console.log('transcodeVideoToRtmp FFmpeg command: ' + commandLine);
+          })
+          .on('end', async () => {
+            this.isPlaying = false;
+            await sleep(1000);
+            this.audiobookService.processQueue(this.clanId);
+            console.log('transcodeVideoToRtmp success');
           })
           .on('error', (err) => {
             console.error('transcodeVideoToRtmp Error:', err);

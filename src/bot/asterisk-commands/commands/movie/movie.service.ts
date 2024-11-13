@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MezonClient } from 'mezon-sdk';
 import { ClientConfigService } from 'src/bot/config/client-config.service';
-import { FFmpegImagePath, FileType } from 'src/bot/constants/configs';
+import { FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
 import { FFmpegService } from 'src/bot/services/ffmpeg.service';
 import { MezonClientService } from 'src/mezon/services/client.service';
@@ -13,7 +13,7 @@ async function sleep(ms: number) {
 }
 
 @Injectable()
-export class AudiobookService {
+export class MovieService {
   private playQueue = [];
   private client: MezonClient;
   private clanId: string;
@@ -26,6 +26,12 @@ export class AudiobookService {
     private ffmpegService: FFmpegService,
   ) {
     this.client = this.clientService.getClient();
+  }
+
+  generateFileSubtitlePath(filePath: string) {
+    const lastDotIndex = filePath.lastIndexOf('.');
+    const fileSubtitlePath = filePath.substring(0, lastDotIndex);
+    return fileSubtitlePath.replace('film_', '');
   }
 
   async getQueue() {
@@ -44,16 +50,16 @@ export class AudiobookService {
       const res = await this.uploadFileData.findOne({
         where: {
           episode: +episode,
-          file_type: FileType.AUDIOBOOK,
+          file_type: FileType.FILM,
         },
       });
       if (!res) return;
       const url = res.filePath + res.fileName;
       if (this.playQueue.includes(url)) {
-        return `Audio book ${res.fileName} already exists in the queue. `;
+        return `Video ${res.fileName} already exists in the queue. `;
       }
       this.playQueue.push(url);
-      return `Audio book ${res.fileName} has been added to the queue. `;
+      return `Video ${res.fileName} has been added to the queue. `;
     } catch (error) {
       console.log('Error add queue', error);
     }
@@ -73,17 +79,17 @@ export class AudiobookService {
         });
 
         if (!channel) return;
+        const url = this.playQueue.shift();
         // check channel is not streaming
         // ffmpeg mp3 to streaming url
         if (channel?.streaming_url !== '') {
           const resultFfmpeg = await this.ffmpegService
-            .transcodeMp3ToRtmp(
-              FFmpegImagePath.AUDIOBOOK,
-              this.playQueue.shift(),
+            .transcodeVideoToRtmp(
+              url,
               channel?.streaming_url,
-              FileType.AUDIOBOOK,
+              this.generateFileSubtitlePath(url),
             )
-            .catch((error) => console.log('error mp3', error));
+            .catch((error) => console.log('error video', error));
           await sleep(1000);
 
           return resultFfmpeg;
