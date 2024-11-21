@@ -9,6 +9,7 @@ import { FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { MovieService } from './movie.service';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,6 +23,7 @@ export class MovieCommand extends CommandMessage {
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
     private ffmpegService: FFmpegService,
+    private movieService: MovieService,
     @InjectRepository(Uploadfile)
     private uploadFileData: Repository<Uploadfile>,
   ) {
@@ -45,6 +47,10 @@ export class MovieCommand extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
+      'Command: *movie playlist' +
+      '\n' +
+      'Command: *movie queue' +
+      '\n' +
       'Command: *movie play ID' +
       '\n' +
       'Example: *movie play 1' +
@@ -59,34 +65,21 @@ export class MovieCommand extends CommandMessage {
           message,
         );
 
-      const textContent = `Go to `;
       const channel_id = this.clientConfigService.movieChannelId;
       try {
-        // call api in sdk
-        const channel = await this.client.registerStreamingChannel({
-          clan_id: message.clan_id,
-          channel_id: channel_id,
-        });
+        let textContent;
 
-        if (!channel) return;
-
-        const res = await this.axiosClientService.get(
-          `${process.env.NCC8_API}/ncc8/film/${args[1]}`,
-        );
-        if (!res) return;
-
-        // check channel is not streaming
-        // ffmpeg mp3 to streaming url
-        if (channel?.streaming_url !== '') {
-          this.ffmpegService
-            .transcodeVideoToRtmp(
-              res?.data?.url,
-              channel?.streaming_url,
-              this.generateFileSubtitlePath(res?.data?.url),
-            )
-            .catch((error) => console.log('error video', error));
+        if (!this.ffmpegService.getPlayingStatus()) {
+          textContent = 'Go to';
+          await this.movieService.addQueue(args[1]);
+        } else {
+          textContent = await this.movieService.addQueue(args[1]);
         }
-
+        // call api in sdk
+        if (!this.ffmpegService.getPlayingStatus()) {
+          this.ffmpegService.setClanId(message.clan_id);
+          this.movieService.processQueue(message.clan_id);
+        }
         await sleep(1000);
 
         return this.replyMessageGenerate(
@@ -110,6 +103,48 @@ export class MovieCommand extends CommandMessage {
           },
           message,
         );
+      }
+    }
+
+    if (args[0] === 'queue') {
+      const data = await this.movieService.getQueue();
+      if (!data) {
+        return;
+      } else if (Array.isArray(data) && data.length === 0) {
+        const mess = '```' + 'Không có movie nào' + '```';
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      } else {
+        const listReplyMessage = [];
+        for (let i = 0; i <= Math.ceil(data.length / 50); i += 1) {
+          if (data.slice(i * 50, (i + 1) * 50).length === 0) break;
+          const mess =
+            '```Danh sách hàng chờ movie\n' +
+            data
+              .slice(i * 50, (i + 1) * 50)
+              .filter((item) => item.episode)
+              .map(
+                (list) =>
+                  `Id: ${list.episode}, name: ${this.removeFileNameExtension(list.fileName)}`,
+              )
+              .join('\n') +
+            '```';
+          listReplyMessage.push(mess);
+        }
+        return listReplyMessage.map((mess) => {
+          return this.replyMessageGenerate(
+            {
+              messageContent: mess,
+              mk: [{ type: 't', s: 0, e: mess.length }],
+            },
+            message,
+          );
+        });
       }
     }
 

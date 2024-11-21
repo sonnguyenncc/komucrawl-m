@@ -8,12 +8,10 @@ import { FFmpegService } from 'src/bot/services/ffmpeg.service';
 import { FileType } from 'src/bot/constants/configs';
 import { Uploadfile } from 'src/bot/models';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { FFmpegImagePath } from 'src/bot/constants/configs';
-
-async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { isThisSecond } from 'date-fns';
+import { AudiobookService } from './audiobook.service';
 
 @Command('audiobook')
 export class AudiobookCommand extends CommandMessage {
@@ -23,6 +21,7 @@ export class AudiobookCommand extends CommandMessage {
     private axiosClientService: AxiosClientService,
     private clientService: MezonClientService,
     private ffmpegService: FFmpegService,
+    private audiobookService: AudiobookService,
     @InjectRepository(Uploadfile)
     private uploadFileData: Repository<Uploadfile>,
   ) {
@@ -46,6 +45,10 @@ export class AudiobookCommand extends CommandMessage {
   async execute(args: string[], message: ChannelMessage) {
     const messageContent =
       '```' +
+      'Command: *audiobook playlist' +
+      '\n' +
+      'Command: *audiobook queue' +
+      '\n' +
       'Command: *audiobook play ID' +
       '\n' +
       'Example: *audiobook play 1' +
@@ -59,37 +62,21 @@ export class AudiobookCommand extends CommandMessage {
           },
           message,
         );
-
-      const textContent = `Go to `;
       const channel_id = this.clientConfigService.audiobookChannelId;
       try {
-        // call api in sdk
-        const channel = await this.client.registerStreamingChannel({
-          clan_id: message.clan_id,
-          channel_id: channel_id,
-        });
+        let textContent;
 
-        if (!channel) return;
-
-        const res = await this.axiosClientService.get(
-          `${process.env.NCC8_API}/ncc8/audio-book/${args[1]}`,
-        );
-        if (!res) return;
-
-        // check channel is not streaming
-        // ffmpeg mp3 to streaming url
-        if (channel?.streaming_url !== '') {
-          this.ffmpegService
-            .transcodeMp3ToRtmp(
-              FFmpegImagePath.AUDIOBOOK,
-              res?.data?.url,
-              channel?.streaming_url,
-              FileType.AUDIOBOOK,
-            )
-            .catch((error) => console.log('error mp3', error));
+        if (!this.ffmpegService.getPlayingStatus()) {
+          textContent = 'Go to ';
+          await this.audiobookService.addQueue(args[1]);
+        } else {
+          textContent = await this.audiobookService.addQueue(args[1]);
         }
 
-        await sleep(1000);
+        if (!this.ffmpegService.getPlayingStatus()) {
+          this.ffmpegService.setClanId(message.clan_id);
+          await this.audiobookService.processQueue(message.clan_id);
+        }
 
         return this.replyMessageGenerate(
           {
@@ -113,6 +100,46 @@ export class AudiobookCommand extends CommandMessage {
           message,
         );
       }
+    }
+
+    if (args[0] === 'queue') {
+      const queueAudio = await this.audiobookService.getQueue();
+      if (queueAudio.length < 0) {
+        const mess = '```' + 'Không có audiobook nào' + '```';
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      }
+
+      const listReplyMessage = [];
+      for (let i = 0; i <= Math.ceil(queueAudio.length / 50); i += 1) {
+        if (queueAudio.slice(i * 50, (i + 1) * 50).length === 0) break;
+        const mess =
+          '```Danh sách hàng chờ audiobook\n' +
+          queueAudio
+            .slice(i * 50, (i + 1) * 50)
+            .filter((item) => item.episode)
+            .map(
+              (list) =>
+                `Id: ${list.episode}, name: ${this.removeFileNameExtension(list.fileName)}`,
+            )
+            .join('\n') +
+          '```';
+        listReplyMessage.push(mess);
+      }
+      return listReplyMessage.map((mess) => {
+        return this.replyMessageGenerate(
+          {
+            messageContent: mess,
+            mk: [{ type: 't', s: 0, e: mess.length }],
+          },
+          message,
+        );
+      });
     }
 
     if (args[0] === 'playlist') {

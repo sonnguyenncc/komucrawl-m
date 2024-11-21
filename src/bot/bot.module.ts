@@ -134,6 +134,7 @@ import { WeatherCommand } from './asterisk-commands/commands/weather/weather.com
 import { DynamicCommand } from './asterisk-commands/commands/register/register.command';
 import { DynamicExcuteCommand } from './asterisk-commands/commands/dynamic/dynamic.command';
 import { DynamicCommandService } from './services/dynamic.service';
+import { AudiobookService } from './asterisk-commands/commands/audiobook/audiobook.service';
 import { NewsScheduler } from './scheduler/news-scheduler.service';
 import { EventClanEventCreated } from './listeners/claneventcreated.handle';
 import { BetCommand } from './asterisk-commands/commands/bet/bet.command';
@@ -141,6 +142,7 @@ import { EventTokenSend } from './listeners/tokensend.handle';
 import { QRCodeCommand } from './asterisk-commands/commands/qrcode/qrcode.command';
 import { MessageButtonClickedEvent } from './listeners/messagebuttonclick.handle';
 import { StreamingEvent } from './listeners/streamingevent.handle';
+
 
 // import { CronjobSlashCommand } from "./slash-commands/cronjob.slashcommand";
 
@@ -237,6 +239,7 @@ import { StreamingEvent } from './listeners/streamingevent.handle';
     ToggleActiveService,
     Ncc8Command,
     AudiobookCommand,
+    AudiobookService,
     ReportDailyService,
     HolidayCommand,
     EventListenerChannelMessage,
