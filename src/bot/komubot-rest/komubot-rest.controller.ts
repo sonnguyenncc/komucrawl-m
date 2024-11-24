@@ -1,44 +1,42 @@
 import {
   Body,
   Controller,
-  Injectable,
-  Post,
+  Get,
   Headers,
-  Res,
-  Req,
-  UseInterceptors,
-  UsePipes,
   HttpException,
   HttpStatus,
-  Get,
-  StreamableFile,
+  Injectable,
   Param,
+  Post,
   Query,
+  Req,
+  Res,
+  StreamableFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { GetUserIdByUsernameDTO } from '../dto/getUserIdByUsername';
-import { KomubotrestService } from './komubot-rest.service';
-import { SendMessageToUserDTO } from '../dto/sendMessageToUser';
-import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { SendMessageToChannelDTO } from '../dto/sendMessageToChannel';
-import { fileFilter, fileName, imageName } from '../utils/helper';
-import { RegexEmailPipe } from '../middleware/regex-email';
-import { Request, Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
+import { parse } from 'date-fns';
+import { Request, Response } from 'express';
 import { createReadStream } from 'fs';
+import { google } from 'googleapis';
+import { diskStorage } from 'multer';
 import { join } from 'path';
 import { Repository } from 'typeorm';
-import { FileType } from '../constants/configs';
-import { Uploadfile } from '../models';
-import { ClientConfigService } from '../config/client-config.service';
-import { google } from 'googleapis';
-import { parse } from 'date-fns';
 import { ReportDailyService } from '../asterisk-commands/commands/report/reportDaily.service';
-import { ReportWFHService } from '../utils/report-wfh.serivce';
-import { ReportDailyDTO } from '../dto/reportDaily';
+import { ClientConfigService } from '../config/client-config.service';
+import { FileType } from '../constants/configs';
 import { GetUserIdByEmailDTO } from '../dto/getUserIdByEmail';
-
+import { GetUserIdByUsernameDTO } from '../dto/getUserIdByUsername';
+import { ReportDailyDTO } from '../dto/reportDaily';
+import { SendMessageToChannelDTO } from '../dto/sendMessageToChannel';
+import { SendMessageToUserDTO } from '../dto/sendMessageToUser';
+import { Uploadfile } from '../models';
+import { ReportTrackerService } from '../services/reportTracker.sevicer';
+import { fileFilter, fileName } from '../utils/helper';
+import { ReportWFHService } from '../utils/report-wfh.serivce';
+import { KomubotrestService } from './komubot-rest.service';
 @ApiTags('Komu')
 @Controller()
 @Injectable()
@@ -179,6 +177,38 @@ export class KomubotrestController {
       console.log(error.message);
     }
     res.send(file);
+  }
+
+  @Get('sheets/oauth2callback')
+  async handleGoogleOAuthCallback(
+    @Query('code') code: string,
+    @Res() res: Response,
+  ) {
+    const oauth2Client = new google.auth.OAuth2(
+      this.clientConfigService.driverClientId,
+      this.clientConfigService.driverClientSecret,
+      this.clientConfigService.sheetRedirectURI,
+    );
+    const { tokens } = await oauth2Client.getToken(code);
+
+    res.json(tokens).status(200);
+  }
+
+  @Get('sheets/authorize')
+  async configSheet(@Res() res: Response) {
+    const oauth2Client = new google.auth.OAuth2(
+      this.clientConfigService.driverClientId,
+      this.clientConfigService.driverClientSecret,
+      this.clientConfigService.sheetRedirectURI,
+    );
+
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    res.redirect(authUrl);
   }
 
   @Get('/ncc8/download')

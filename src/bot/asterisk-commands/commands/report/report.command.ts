@@ -114,7 +114,6 @@ export class ReportCommand extends CommandMessage {
         break;
       case 'wfh':
         const textContentWfh = await this.reportWFHService.reportWfh(
-          message,
           args,
         );
         if (textContentWfh.length) {
